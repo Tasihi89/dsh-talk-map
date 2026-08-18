@@ -41,7 +41,9 @@ export const cardSchema = z.object({
 export type Card = z.infer<typeof cardSchema>
 
 export const edgeInjectionSchema = z.object({
-  kind: z.enum(['digest', 'full', 'selection', 'none']),
+  /** 'link' = a plain association drawn between two EXISTING cards (no
+   * spawn, no text); 'none' = a fork edge whose child inherited nothing. */
+  kind: z.enum(['digest', 'full', 'selection', 'none', 'link']),
   /** What was actually injected (post-edit), kept for provenance display. */
   injectedText: z.string().optional(),
 })
@@ -50,6 +52,15 @@ export const edgeSchema = z.object({
   fromCardId: z.string(),
   toCardId: z.string(),
   injection: edgeInjectionSchema,
+  /** Handle sides ('t'|'r'|'b'|'l') the edge attaches to; absent = legacy r→l. */
+  fromHandle: z.string().optional(),
+  toHandle: z.string().optional(),
+  /** Pipe mode: every substantive digest change of the source session is
+   * pushed along this edge into the target session automatically. */
+  autoSync: z.boolean().optional(),
+  /** Source-session title snapshot (the host cannot resolve titles; the
+   * client stamps it so auto-sync pushes can name their origin). */
+  fromTitle: z.string().optional(),
   createdAt: z.number(),
 })
 export type MapEdge = z.infer<typeof edgeSchema>

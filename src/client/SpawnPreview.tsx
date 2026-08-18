@@ -10,9 +10,10 @@
 import { useEffect, useState } from 'react'
 import { talkMapApi } from './api.ts'
 import { canvas, INBOX_BOARD_ID, newCardId } from './canvas-store.ts'
+import { buildInjectionText } from './digest-text.ts'
 import { getServices, mapUi } from './map-state.ts'
 import { t } from './i18n.ts'
-import type { Card, Digest, EdgeInjection } from '../shared/model.ts'
+import type { Card, EdgeInjection } from '../shared/model.ts'
 import styles from './talk-map.module.css'
 
 export interface PendingSpawn {
@@ -25,22 +26,6 @@ export interface PendingSpawn {
 }
 
 type SpawnMode = 'none' | 'digest' | 'full'
-
-export function buildInjectionText(title: string, digest: Digest | undefined): string {
-  const header = `${t('inject.header')}「${title}」`
-  if (digest === undefined || (digest.summary === '' && digest.nextStep === '' && (digest.todoNext ?? '') === '')) {
-    return `${header}\n${t('spawn.noDigest')}`
-  }
-  const parts = [header]
-  if (digest.summary !== '') parts.push(`${t('inject.summary')}${digest.summary}`)
-  if (digest.keyFindings.length > 0) {
-    parts.push(t('inject.findings'))
-    for (const finding of digest.keyFindings) parts.push(`- ${finding}`)
-  }
-  const next = digest.nextStep !== '' ? digest.nextStep : digest.todoNext ?? ''
-  if (next !== '') parts.push(`${t('inject.next')}${next}`)
-  return parts.join('\n')
-}
 
 function unwrap<T>(response: { result: { ok: true; value: T } | { ok: false; error: { code?: string; message?: string } } }, what: string): T {
   const { result } = response

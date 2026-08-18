@@ -74,7 +74,12 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
         ? { borderColor: color.border, backgroundImage: `linear-gradient(${color.fill}, ${color.fill})` }
         : {}}
     >
-      <Handle type="target" position={Position.Left} className={styles['cardHandle'] ?? ''} />
+      {/* Four connection points, one per side. All type "source" — the
+        * canvas runs ConnectionMode.Loose, so each also accepts incoming
+        * edges. Hidden until the card is hovered or a drag is in flight
+        * (CSS); legacy edges without stored handles anchor r→l. */}
+      <Handle id="t" type="source" position={Position.Top} className={styles['cardHandle'] ?? ''} />
+      <Handle id="l" type="source" position={Position.Left} className={styles['cardHandle'] ?? ''} />
       <div className={styles['cardTop']}>
         <span className={styles['cardTitle']}>{data.ghost ? t('card.ghostTitle') : data.title}</span>
         {data.ghost
@@ -130,7 +135,8 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
               ? <span className={styles['cardBadgeDone']}>{t('card.done')}</span>
               : null}
       </div>
-      <Handle type="source" position={Position.Right} className={styles['cardHandle'] ?? ''} />
+      <Handle id="r" type="source" position={Position.Right} className={styles['cardHandle'] ?? ''} />
+      <Handle id="b" type="source" position={Position.Bottom} className={styles['cardHandle'] ?? ''} />
     </div>
   )
 }

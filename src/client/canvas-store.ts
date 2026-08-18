@@ -202,6 +202,22 @@ export const canvas = {
     })
   },
 
+  removeEdges(ids: readonly string[]): void {
+    pushUndo()
+    const edges = { ...state.edges }
+    let changed = false
+    for (const id of ids) {
+      if (edges[id] === undefined) continue
+      delete edges[id]
+      changed = true
+    }
+    if (!changed) return
+    setState({ edges })
+    void talkMapApi.deleteEdges(ids).catch((error) => {
+      console.error('[dsh-talk-map] edge delete failed:', error)
+    })
+  },
+
   /** Background re-sync with the server (missed SSE while the map was
    * closed or the server restarted). Skipped while local writes are
    * still in flight. */

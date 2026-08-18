@@ -32,6 +32,10 @@ export class DigestPipeline {
     private readonly services: DigestHostServices,
     private readonly storeReady: Promise<TalkMapStore>,
     private readonly config: DigestConfig = DIGEST_DEFAULTS,
+    /** Fired when a digest was regenerated from CHANGED input (new
+     * inputHash) — the auto-sync fan-out hangs off this. Never fired for
+     * hash-identical refreshes, so sync edges cannot flood their targets. */
+    private readonly onFresh?: (sessionId: string, digest: Digest) => void,
   ) {}
 
   /** Wire the turn/end trigger; returns the disposer. */
@@ -140,6 +144,7 @@ export class DigestPipeline {
         inputHash,
       }
       await store.digests.put(sessionId, digest)
+      if (previous?.inputHash !== inputHash) this.onFresh?.(sessionId, digest)
       return digest
     } catch (error) {
       const digest: Digest = {

@@ -25,7 +25,9 @@ export interface Board {
 }
 
 export interface EdgeInjection {
-  kind: 'digest' | 'full' | 'selection' | 'none'
+  /** 'link' = plain association between existing cards; 'none' = fork edge
+   * whose child inherited nothing. */
+  kind: 'digest' | 'full' | 'selection' | 'none' | 'link'
   injectedText?: string
 }
 
@@ -34,6 +36,13 @@ export interface MapEdgeData {
   fromCardId: string
   toCardId: string
   injection: EdgeInjection
+  /** Handle sides ('t'|'r'|'b'|'l'); absent = legacy r→l. */
+  fromHandle?: string
+  toHandle?: string
+  /** Pipe mode: source digest changes auto-push along this edge. */
+  autoSync?: boolean
+  /** Source-session title snapshot for host-side auto-sync headers. */
+  fromTitle?: string
   createdAt: number
 }
 

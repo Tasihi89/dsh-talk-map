@@ -14,14 +14,16 @@
  */
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import {
-  Background, BackgroundVariant, ControlButton, Controls, ReactFlow, ReactFlowProvider,
-  SelectionMode, useReactFlow, type Edge, type FinalConnectionState, type NodeChange, type Viewport,
+  Background, BackgroundVariant, ConnectionMode, ControlButton, Controls, ReactFlow, ReactFlowProvider,
+  SelectionMode, useReactFlow, type Connection, type Edge, type EdgeChange, type FinalConnectionState,
+  type NodeChange, type Viewport,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import type { RootSlotStandardProps, SessionListState, WorkspaceListState } from './dsh.ts'
 import type { Card, FrameGeometry } from '../shared/model.ts'
 import { canvas, INBOX_BOARD_ID, newCardId, type CanvasState } from './canvas-store.ts'
 import { COLOR_TAGS } from './colors.ts'
+import { buildPushText, digestIsEmpty } from './digest-text.ts'
 import { getServices, mapUi } from './map-state.ts'
 import { ContextMenu, type MenuItem, type MenuState } from './ContextMenu.tsx'
 import { DraftCardNode, type DraftCardNodeType } from './DraftCard.tsx'
@@ -103,8 +105,11 @@ interface MenuContext {
   top: number
   flowX: number
   flowY: number
-  kind: 'pane' | 'card' | 'frame'
+  kind: 'pane' | 'card' | 'frame' | 'edge'
   targetId?: string
+  /** Edge menus: endpoint card ids (set for stored AND lineage edges). */
+  edgeFrom?: string
+  edgeTo?: string
   view: 'root' | 'import-ws' | 'import-session' | 'new-ws'
 }
 
@@ -115,6 +120,12 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   const workspaces = props.useWorkspaces(state => state)
   const { screenToFlowPosition, zoomTo } = useReactFlow()
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set())
+  const [selectedEdgeIds, setSelectedEdgeIds] = useState<ReadonlySet<string>>(new Set())
+  // Connection drag in flight → every card shows its (otherwise hidden)
+  // connection points, so drop targets are visible.
+  const [connecting, setConnecting] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [pendingSpawn, setPendingSpawn] = useState<PendingSpawn | null>(null)
   const [draft, setDraft] = useState<DraftState | null>(null)
   const [menu, setMenu] = useState<MenuContext | null>(null)
@@ -219,7 +230,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   // Backspace/Delete removes selected FRAMES (React Flow no longer owns
   // frame selection, so its deleteKeyCode cannot reach them; cards stay on
   // the React Flow path).
-  const hasSelection = selectedIds.size > 0
+  const hasSelection = selectedIds.size > 0 || selectedEdgeIds.size > 0
   useEffect(() => {
     if (!hasSelection) return
     const release = mapUi.claimEscape('selection')
@@ -227,6 +238,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       if (event.key === 'Escape') {
         event.stopPropagation()
         setSelectedIds(new Set())
+        setSelectedEdgeIds(new Set())
         return
       }
       if (event.key === 'Backspace' || event.key === 'Delete') {
@@ -340,17 +352,32 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     for (const [edgeId, edge] of Object.entries(canvasState.edges)) {
       injectionPairs.add(`${edge.fromCardId}->${edge.toCardId}`)
       if (!present.has(edge.fromCardId) || !present.has(edge.toCardId)) continue
+      const kind = edge.injection.kind
       out.push({
         id: edgeId,
         source: edge.fromCardId,
         target: edge.toCardId,
+        // Handles stored per edge; legacy edges keep their old r→l anchoring.
+        sourceHandle: edge.fromHandle ?? 'r',
+        targetHandle: edge.toHandle ?? 'l',
         type: 'smoothstep',
-        label: edge.injection.kind === 'none'
-          ? t('edge.none')
-          : edge.injection.kind === 'full'
-            ? t('edge.full')
-            : t('edge.injected'),
-        ...(edge.injection.kind === 'none' ? { style: { opacity: 0.65 } } : {}),
+        selected: selectedEdgeIds.has(edgeId),
+        // Endpoints ride along for the edge context menu (id parsing would
+        // be ambiguous — card ids contain dashes).
+        data: { fromCardId: edge.fromCardId, toCardId: edge.toCardId },
+        // Pure association lines: no label, lighter than injection edges.
+        ...(kind === 'link'
+          ? { style: { opacity: 0.4 } }
+          : {
+              label: kind === 'none'
+                ? t('edge.none')
+                : kind === 'full'
+                  ? t('edge.full')
+                  : t('edge.injected'),
+              ...(kind === 'none' ? { style: { opacity: 0.65 } } : {}),
+            }),
+        // Auto-sync pipes animate — the moving dashes ARE the on-state.
+        ...(edge.autoSync === true ? { animated: true } : {}),
       })
     }
     for (const [cardId, card] of Object.entries(visibleCards)) {
@@ -363,13 +390,16 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         id: `lineage-${parentCardId}-${cardId}`,
         source: parentCardId,
         target: cardId,
+        sourceHandle: 'r',
+        targetHandle: 'l',
         type: 'smoothstep',
         selectable: false,
+        data: { fromCardId: parentCardId, toCardId: cardId },
         style: { strokeDasharray: '6 4', opacity: 0.5 },
       })
     }
     return out
-  }, [visibleCards, canvasState.edges, sessions, sessionIdToCardId])
+  }, [visibleCards, canvasState.edges, sessions, sessionIdToCardId, selectedEdgeIds])
 
   const nodes = isSelecting && frozenRef.current !== null ? frozenRef.current.nodes : liveNodes
   const edges = isSelecting && frozenRef.current !== null ? frozenRef.current.edges : liveEdges
@@ -469,17 +499,113 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     }
   }
 
+  const onEdgesChange = (changes: EdgeChange[]): void => {
+    for (const change of changes) {
+      if (change.type === 'select') {
+        setSelectedEdgeIds((previous) => {
+          const next = new Set(previous)
+          if (change.selected) next.add(change.id)
+          else next.delete(change.id)
+          return next
+        })
+      } else if (change.type === 'remove') {
+        // Backspace/Delete on a selected edge, or the edges of a removed
+        // node. Lineage edges are derived — nothing to delete.
+        if (!change.id.startsWith('lineage-')) canvas.removeEdges([change.id])
+        setSelectedEdgeIds((previous) => {
+          const next = new Set(previous)
+          next.delete(change.id)
+          return next
+        })
+      }
+    }
+  }
+
+  const showToast = (message: string): void => {
+    setToast(message)
+    if (toastTimer.current !== undefined) clearTimeout(toastTimer.current)
+    toastTimer.current = setTimeout(() => { setToast(null) }, 4000)
+  }
+
+  /** Pick edge anchor sides from the cards' relative placement. */
+  const sideHandles = (from: Card, to: Card): { fromHandle: string; toHandle: string } => {
+    const dx = to.x - from.x
+    const dy = to.y - from.y
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      return dx >= 0 ? { fromHandle: 'r', toHandle: 'l' } : { fromHandle: 'l', toHandle: 'r' }
+    }
+    return dy >= 0 ? { fromHandle: 'b', toHandle: 't' } : { fromHandle: 't', toHandle: 'b' }
+  }
+
+  /** A plain association between two existing cards. One edge per pair —
+   * a second draw over an already-connected pair is silently a no-op. */
+  const createLinkEdge = (
+    fromCardId: string,
+    toCardId: string,
+    handles?: { fromHandle?: string | null; toHandle?: string | null },
+  ): void => {
+    if (fromCardId === toCardId) return
+    const exists = Object.values(canvasState.edges).some(edge =>
+      (edge.fromCardId === fromCardId && edge.toCardId === toCardId)
+      || (edge.fromCardId === toCardId && edge.toCardId === fromCardId))
+    if (exists) return
+    const fromCard = canvasState.cards[fromCardId]
+    const toCard = canvasState.cards[toCardId]
+    if (fromCard === undefined || toCard === undefined) return
+    const geometry = sideHandles(fromCard, toCard)
+    const fromTitle = sessions.byId[fromCard.sessionId]?.displayTitle
+    canvas.addEdges({
+      [`edge-${crypto.randomUUID()}`]: {
+        boardId: INBOX_BOARD_ID,
+        fromCardId,
+        toCardId,
+        injection: { kind: 'link' },
+        fromHandle: handles?.fromHandle ?? geometry.fromHandle,
+        toHandle: handles?.toHandle ?? geometry.toHandle,
+        ...(fromTitle !== undefined ? { fromTitle } : {}),
+        createdAt: Date.now(),
+      },
+    })
+  }
+
+  /** Handle-to-handle drop on another card (ConnectionMode.Loose). */
+  const onConnect = (connection: Connection): void => {
+    createLinkEdge(connection.source, connection.target, {
+      fromHandle: connection.sourceHandle,
+      toHandle: connection.targetHandle,
+    })
+  }
+
+  /** The pipe: push the source's latest digest into the target's inbox. */
+  const pushAlongEdge = async (fromCardId: string, toCardId: string): Promise<void> => {
+    const fromCard = canvasState.cards[fromCardId]
+    const toCard = canvasState.cards[toCardId]
+    if (fromCard === undefined || toCard === undefined) return
+    const digest = canvasState.digests[fromCard.sessionId]
+    if (digest === undefined || digestIsEmpty(digest)) return
+    const fromTitle = sessions.byId[fromCard.sessionId]?.displayTitle ?? fromCard.sessionId
+    const toTitle = sessions.byId[toCard.sessionId]?.displayTitle ?? toCard.sessionId
+    try {
+      await talkMapApi.injectContext(toCard.sessionId, [
+        { sessionId: fromCard.sessionId, text: buildPushText(fromTitle, digest) },
+      ])
+      showToast(t('toast.pushed').replace('{to}', toTitle))
+    } catch (error) {
+      const message = String(error)
+      showToast(message.includes('not live') ? t('toast.notLive') : `${t('toast.pushFailed')}${message}`)
+    }
+  }
+
   const onConnectEnd = (
     event: MouseEvent | TouchEvent,
     connectionState: FinalConnectionState,
   ): void => {
-    if (connectionState.isValid === true) return
+    setConnecting(false)
+    if (connectionState.isValid === true) return // landed on a handle → onConnect
     const fromNodeId = connectionState.fromNode?.id
     if (fromNodeId === undefined) return
     const card = canvasState.cards[fromNodeId]
     if (card === undefined) return
-    const summary = sessions.byId[card.sessionId]
-    if (summary === undefined) return
     const client = 'clientX' in event
       ? { x: event.clientX, y: event.clientY }
       : event.changedTouches[0] !== undefined
@@ -487,6 +613,17 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         : undefined
     if (client === undefined) return
     const position = screenToFlowPosition(client)
+    // Dropped on an existing card's BODY (between handles)? That's a link,
+    // not a fork — only a drop on empty canvas opens the spawn panel.
+    const hit = Object.entries(visibleCards).find(([, target]) =>
+      position.x >= target.x && position.x <= target.x + CARD_W
+      && position.y >= target.y && position.y <= target.y + CARD_H)
+    if (hit !== undefined) {
+      if (hit[0] !== fromNodeId) createLinkEdge(fromNodeId, hit[0])
+      return
+    }
+    const summary = sessions.byId[card.sessionId]
+    if (summary === undefined) return
     const parentWorkspaceId = sessionWs.get(card.sessionId)
     setPendingSpawn({
       parent: { cardId: fromNodeId, sessionId: card.sessionId, title: summary.displayTitle },
@@ -629,7 +766,12 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
 
   // ---- context menu ----------------------------------------------------
 
-  const openMenu = (event: React.MouseEvent | MouseEvent, kind: MenuContext['kind'], targetId?: string): void => {
+  const openMenu = (
+    event: React.MouseEvent | MouseEvent,
+    kind: MenuContext['kind'],
+    targetId?: string,
+    edgeEnds?: { from: string; to: string },
+  ): void => {
     event.preventDefault()
     const wrapper = wrapperRef.current
     if (wrapper === null) return
@@ -642,6 +784,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       flowY: flow.y,
       kind,
       ...(targetId !== undefined ? { targetId } : {}),
+      ...(edgeEnds !== undefined ? { edgeFrom: edgeEnds.from, edgeTo: edgeEnds.to } : {}),
       view: 'root',
     })
   }
@@ -765,6 +908,61 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           close()
         },
       })
+    } else if (menu.kind === 'edge' && menu.targetId !== undefined
+      && menu.edgeFrom !== undefined && menu.edgeTo !== undefined) {
+      const edgeId = menu.targetId
+      const edgeFrom = menu.edgeFrom
+      const edgeTo = menu.edgeTo
+      const stored = canvasState.edges[edgeId]
+      const fromCard = canvasState.cards[edgeFrom]
+      const toCard = canvasState.cards[edgeTo]
+      const fromTitle = fromCard !== undefined
+        ? sessions.byId[fromCard.sessionId]?.displayTitle ?? fromCard.sessionId
+        : '?'
+      const toTitle = toCard !== undefined
+        ? sessions.byId[toCard.sessionId]?.displayTitle ?? toCard.sessionId
+        : '?'
+      title = `${fromTitle} → ${toTitle}`
+      const digest = fromCard !== undefined ? canvasState.digests[fromCard.sessionId] : undefined
+      const noDigest = digest === undefined || digestIsEmpty(digest)
+      items.push({
+        key: 'push',
+        label: t('edge.push'),
+        ...(noDigest ? { hint: t('edge.pushNoDigest'), disabled: true } : {}),
+        onPick: () => {
+          close()
+          void pushAlongEdge(edgeFrom, edgeTo)
+        },
+      })
+      // Stored edges only — lineage lines are derived, nothing to persist on.
+      if (stored !== undefined) {
+        const syncOn = stored.autoSync === true
+        items.push({
+          key: 'auto-sync',
+          label: syncOn ? t('edge.autoSyncOff') : t('edge.autoSyncOn'),
+          ...(syncOn ? {} : { hint: t('edge.autoSyncHint') }),
+          onPick: () => {
+            close()
+            const next = { ...stored }
+            if (syncOn) delete next.autoSync
+            else next.autoSync = true
+            // Refresh the title snapshot the host uses in push headers.
+            const liveTitle = fromCard !== undefined
+              ? sessions.byId[fromCard.sessionId]?.displayTitle
+              : undefined
+            if (liveTitle !== undefined) next.fromTitle = liveTitle
+            canvas.addEdges({ [edgeId]: next })
+          },
+        })
+        items.push({
+          key: 'delete-edge',
+          label: t('edge.delete'),
+          onPick: () => {
+            canvas.removeEdges([edgeId])
+            close()
+          },
+        })
+      }
     } else if (menu.kind === 'frame' && menu.targetId !== undefined) {
       const groupId = menu.targetId
       items.push({
@@ -793,7 +991,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       items,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menu, workspaces.items, sessions, boardSessionIds, wsFrames, wsTitles, canvasState.cards])
+  }, [menu, workspaces.items, sessions, boardSessionIds, wsFrames, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests])
 
   const savedCamera = canvas.savedCamera(INBOX_BOARD_ID)
   const hasContent = Object.keys(visibleCards).length > 0 || Object.keys(wsFrames).length > 0
@@ -801,7 +999,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   return (
     <div
       ref={wrapperRef}
-      className={styles['canvas']}
+      className={`${styles['canvas']}${connecting ? ` ${styles['canvasConnecting']}` : ''}`}
       onDoubleClick={(event) => {
         const target = event.target as HTMLElement
         if (target.closest('.react-flow__pane') === null) return
@@ -816,7 +1014,11 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onConnectStart={() => { setConnecting(true) }}
         onConnectEnd={onConnectEnd}
+        connectionMode={ConnectionMode.Loose}
         onSelectionStart={onSelectionStart}
         onSelectionEnd={onSelectionEnd}
         onNodeClick={(event, node) => {
@@ -843,6 +1045,14 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           if (node.type === 'sessionCard') openMenu(event, 'card', node.id)
           else if (node.type === 'wsFrame') openMenu(event, 'frame', node.id.slice('frame-'.length))
           else event.preventDefault()
+        }}
+        onEdgeContextMenu={(event, edge) => {
+          const data = edge.data as { fromCardId?: string; toCardId?: string } | undefined
+          if (data?.fromCardId !== undefined && data.toCardId !== undefined) {
+            openMenu(event, 'edge', edge.id, { from: data.fromCardId, to: data.toCardId })
+          } else {
+            event.preventDefault()
+          }
         }}
         onMoveEnd={(_event, viewport: Viewport) => {
           canvas.setCamera(INBOX_BOARD_ID, viewport)
@@ -881,6 +1091,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       {pendingSpawn !== null
         ? <SpawnPreview pending={pendingSpawn} onClose={() => { setPendingSpawn(null) }} />
         : null}
+      {toast !== null ? <div className={styles['toast']}>{toast}</div> : null}
     </div>
   )
 }

@@ -11,7 +11,8 @@
  * open/mount failures are logged and the affected layer stays inert.
  */
 import type { DigestHostServices, SpawnHostServices, TalkMapHostServices } from './host/dsh-host.ts'
-import { DigestPipeline } from './host/digest/pipeline.ts'
+import { pushAutoSyncUpdates } from './host/auto-sync.ts'
+import { DigestPipeline, DIGEST_DEFAULTS } from './host/digest/pipeline.ts'
 import { mountTalkMapRoutes, type TalkMapRuntime } from './host/routes.ts'
 import { Spawner } from './host/spawn.ts'
 import { openTalkMapStore, type TalkMapStore } from './host/store.ts'
@@ -65,7 +66,15 @@ export function apply(ctx: OuterContext): void {
   ctx.inject(['sessions', 'sessionQuery', 'llm', 'agentDefaultModel'], (injected: unknown) => {
     const services = injected as DigestHostServices
     services.effect(() => {
-      const pipeline = new DigestPipeline(services, storeReady)
+      // Fresh-digest hook → auto-sync fan-out (needs the layer-3 spawner;
+      // absent one, sync edges stay dormant instead of failing).
+      const pipeline = new DigestPipeline(services, storeReady, DIGEST_DEFAULTS, (sessionId, digest) => {
+        const spawner = runtime.spawner
+        if (spawner === undefined) return
+        void storeReady.then((store) => {
+          pushAutoSyncUpdates(store, spawner, services.logger, sessionId, digest)
+        }).catch(() => undefined)
+      })
       const stop = pipeline.start()
       runtime.digest = pipeline
       // Backfill: cards already on the board whose session has no digest yet
