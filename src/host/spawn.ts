@@ -24,6 +24,8 @@ export interface SpawnRequest {
   boardId: string
   x: number
   y: number
+  /** Map group the new card lands in (frame membership). */
+  wsOverride?: string
 }
 
 export interface SpawnResult {
@@ -82,6 +84,7 @@ export class Spawner {
       sessionId,
       x: request.x,
       y: request.y,
+      ...(request.wsOverride !== undefined ? { wsOverride: request.wsOverride } : {}),
       createdAt: Date.now(),
     }
     await store.cards.put(cardId, card)

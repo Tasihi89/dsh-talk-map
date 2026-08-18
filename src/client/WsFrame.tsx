@@ -9,12 +9,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useReactFlow, type NodeProps, type Node } from '@xyflow/react'
 import { colorOf } from './colors.ts'
+import { t } from './i18n.ts'
 import styles from './talk-map.module.css'
 
 export interface WsFrameData extends Record<string, unknown> {
   workspaceId: string
   title: string
   count: number
+  /** Member cards that no longer fit the frame (hidden, not gone). */
+  hiddenCount: number
   width: number
   height: number
   colorTag?: string
@@ -87,6 +90,9 @@ export function WsFrameNode(props: NodeProps<WsFrameNodeType>): React.JSX.Elemen
       >
         {data.title}
         <span className={styles['wsFrameCount']}>{data.count}</span>
+        {data.hiddenCount > 0
+          ? <span className={styles['wsFrameHidden']} title={t('frame.hiddenTitle')}>…+{data.hiddenCount}</span>
+          : null}
       </div>
       {/* border strips: clickable/draggable surfaces along the dashed edge */}
       <div className={styles['wsFrameEdge']} style={{ top: 0, left: 0, right: 0, height: EDGE }} />

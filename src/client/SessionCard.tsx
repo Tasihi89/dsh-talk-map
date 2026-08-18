@@ -76,7 +76,6 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
     >
       <Handle type="target" position={Position.Left} className={styles['cardHandle'] ?? ''} />
       <div className={styles['cardTop']}>
-        {data.running ? <span className={styles['runningDot']} title={t('card.running')} /> : null}
         <span className={styles['cardTitle']}>{data.ghost ? t('card.ghostTitle') : data.title}</span>
         {data.ghost
           ? null
@@ -121,13 +120,15 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
                 : null}
             </>
           )}
-      <div className={styles['cardMeta']}>
-        <span>{relativeTime(data.updatedAt)}</span>
+      <div className={styles['cardFooter']}>
+        <span className={styles['cardTime']}>{relativeTime(data.updatedAt)}</span>
         {data.waiting === true
           ? <span className={styles['cardBadgeWaiting']}>{t('card.waiting')}</span>
-          : data.done === true
-            ? <span className={styles['cardBadgeDone']}>{t('card.done')}</span>
-            : null}
+          : data.running
+            ? <span className={styles['cardBadgeRunning']}><span className={styles['runningDot']} />{t('card.running')}</span>
+            : data.done === true
+              ? <span className={styles['cardBadgeDone']}>{t('card.done')}</span>
+              : null}
       </div>
       <Handle type="source" position={Position.Right} className={styles['cardHandle'] ?? ''} />
     </div>

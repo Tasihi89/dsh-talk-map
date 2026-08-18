@@ -42,6 +42,7 @@ export const talkMapApi = {
     boardId: string
     x: number
     y: number
+    wsOverride?: string
   }): Promise<{ sessionId: string; cardId: string; card: Card; edges: Record<string, MapEdgeData> }> {
     return postJson('/talk-map/spawn', request)
   },

@@ -17,6 +17,8 @@ export interface PendingSpawn {
   /** Flow position where the connection was dropped (card lands here). */
   x: number
   y: number
+  /** Map group the drop point landed in (frame membership for the new card). */
+  wsOverride?: string
 }
 
 export function buildInjectionText(title: string, digest: Digest | undefined): string {
@@ -71,6 +73,7 @@ export function SpawnPreview(props: {
         boardId: INBOX_BOARD_ID,
         x: pending.x,
         y: pending.y,
+        ...(pending.wsOverride !== undefined ? { wsOverride: pending.wsOverride } : {}),
       })
       canvas.applySpawn(result)
       props.onClose()

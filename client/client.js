@@ -91,7 +91,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"map.title": "对话地图",
 			"map.close": "关闭地图（Esc）",
 			"map.toggle": "对话地图",
-			"map.empty": "还没有卡片 —— 双击空白处开始一个新对话",
+			"map.empty": "地图是空的 —— 右键导入工作区或对话；双击空白直接开新对话",
 			"map.sessions": "个会话",
 			"map.loading": "正在加载地图……",
 			"map.loadError": "地图数据加载失败：",
@@ -133,13 +133,25 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"color.toolbar": "颜色",
 			"color.clear": "清除颜色",
 			"card.waiting": "等你回复",
-			"card.done": "已完成"
+			"card.done": "已完成",
+			"frame.unknown": "分组",
+			"frame.hiddenTitle": "还有卡片被折叠在框外，放大分组框可见",
+			"menu.empty": "（没有可选项）",
+			"menu.newChat": "新对话",
+			"menu.importWs": "导入工作区",
+			"menu.importSession": "导入对话",
+			"menu.moveGroup": "移动到分组",
+			"menu.noGroup": "移出分组（自由卡片）",
+			"menu.open": "打开对话",
+			"menu.removeCard": "从地图移除",
+			"menu.syncGroup": "同步该工作区的新会话",
+			"menu.removeGroup": "移除分组（连同卡片）"
 		};
 		const en = {
 			"map.title": "Talk Map",
 			"map.close": "Close map (Esc)",
 			"map.toggle": "Talk Map",
-			"map.empty": "No cards yet — double-click empty space to start a chat",
+			"map.empty": "The map is empty — right-click to import a workspace or conversation; double-click to start a chat",
 			"map.sessions": "sessions",
 			"map.loading": "Loading map…",
 			"map.loadError": "Failed to load map data:",
@@ -181,7 +193,19 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"color.toolbar": "Color",
 			"color.clear": "Clear color",
 			"card.waiting": "needs you",
-			"card.done": "done"
+			"card.done": "done",
+			"frame.unknown": "Group",
+			"frame.hiddenTitle": "Some cards are folded outside the frame — enlarge it to see them",
+			"menu.empty": "(nothing to pick)",
+			"menu.newChat": "New conversation",
+			"menu.importWs": "Import workspace",
+			"menu.importSession": "Import conversation",
+			"menu.moveGroup": "Move to group",
+			"menu.noGroup": "Remove from group (free card)",
+			"menu.open": "Open conversation",
+			"menu.removeCard": "Remove from map",
+			"menu.syncGroup": "Sync new sessions of this workspace",
+			"menu.removeGroup": "Remove group (with its cards)"
 		};
 		function isZh() {
 			if (typeof document === "undefined") return false;
@@ -11166,7 +11190,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:module:src/client/talk-map.module.css.mjs
-		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleRow{width:100%;color:var(--dsw-alias-label-secondary);cursor:pointer;text-align:left;background:0 0;border:none;border-radius:8px;align-items:center;gap:8px;padding:6px 10px;font-size:13px;display:flex}._0iu0NW_toggleRow:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleLabel{white-space:nowrap}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:88px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardCurrent{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardMeta{color:var(--dsw-alias-label-tertiary);align-items:center;gap:8px;font-size:11px;display:flex}._0iu0NW_cardSummary{color:var(--dsw-alias-label-secondary);-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:12px;line-height:1.45;display:-webkit-box;overflow:hidden}._0iu0NW_cardBadgeWaiting{color:var(--dsw-alias-state-warn-label);background:var(--dsw-alias-state-warn-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardBadgeDone{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:none;width:8px;height:8px}._0iu0NW_cardRefresh{width:22px;height:22px;color:var(--dsw-alias-label-tertiary);cursor:pointer;opacity:0;background:0 0;border:none;border-radius:6px;flex:none;margin-left:auto;padding:0;font-size:13px;line-height:1;transition:opacity .12s}._0iu0NW_card:hover ._0iu0NW_cardRefresh{opacity:1}._0iu0NW_cardRefresh:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_cardRefreshBusy{opacity:1;animation:1s linear infinite _0iu0NW_talkmap-spin}@keyframes _0iu0NW_talkmap-spin{to{transform:rotate(360deg)}}._0iu0NW_spawnPanel{z-index:6;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:420px;max-width:calc(100% - 48px);box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:16px;display:flex;position:absolute;top:24px;right:24px}._0iu0NW_spawnHeading{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_spawnFrom{color:var(--dsw-alias-label-secondary);font-size:12px}._0iu0NW_spawnHint{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_spawnTextarea{resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:140px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_spawnError{color:var(--dsw-alias-state-error-primary);word-break:break-all;font-size:12px}._0iu0NW_spawnActions{justify-content:flex-end;gap:8px;display:flex}._0iu0NW_spawnBtnPrimary{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground);cursor:pointer;border:none;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnPrimary:hover{background:var(--dsw-alias-button-primary-hover)}._0iu0NW_spawnBtnPrimary:disabled{background:var(--dsw-alias-button-primary-dimmed);cursor:default}._0iu0NW_spawnBtnGhost{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnGhost:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_wsFrame{border:1.5px dashed var(--dsw-alias-border-l2);background:0 0;border-radius:16px;position:relative}._0iu0NW_wsFrameSelected{border-style:solid;border-color:var(--dsw-alias-brand-primary)}._0iu0NW_wsFrameLabel{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:nowrap;pointer-events:auto;cursor:grab;border-radius:999px;align-items:center;gap:6px;padding:2px 10px;font-size:12px;font-weight:600;display:flex;position:absolute;top:-12px;left:14px}._0iu0NW_wsFrameLabel:active{cursor:grabbing}._0iu0NW_wsFrameEdge{pointer-events:auto;cursor:grab;position:absolute}._0iu0NW_wsFrameEdge:active{cursor:grabbing}._0iu0NW_wsFrameResize{pointer-events:auto;cursor:nwse-resize;border-right:3px solid var(--dsw-alias-border-l3);border-bottom:3px solid var(--dsw-alias-border-l3);opacity:.7;border-bottom-right-radius:14px;width:16px;height:16px;position:absolute;bottom:-2px;right:-2px}._0iu0NW_wsFrameResize:hover{border-color:var(--dsw-alias-brand-primary);opacity:1}._0iu0NW_wsFrameCount{color:var(--dsw-alias-label-tertiary);font-weight:400}._0iu0NW_draftCard{box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);width:360px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:14px;font-size:13px;display:flex}._0iu0NW_draftHeading{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}._0iu0NW_draftRow{align-items:center;gap:8px;display:flex}._0iu0NW_draftLabel{width:52px;color:var(--dsw-alias-label-tertiary);flex:none;font-size:12px}._0iu0NW_draftSelect{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);min-width:0;color:var(--dsw-alias-label-primary);border-radius:7px;flex:1;padding:5px 8px;font-size:12px}._0iu0NW_draftGrow{flex-direction:column;flex:1;gap:3px;min-width:0;display:flex}._0iu0NW_draftInput{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;color:var(--dsw-alias-label-primary);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_draftPathPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;font-size:11px}._0iu0NW_draftTextarea{box-sizing:border-box;resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:88px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:9px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_colorToolbar{z-index:7;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 2px 10px var(--dsw-alias-bg-mask-1);border-radius:10px;align-items:center;gap:6px;padding:6px 10px;display:flex;position:absolute;top:12px;left:12px}._0iu0NW_colorToolbarLabel{color:var(--dsw-alias-label-tertiary);margin-right:2px;font-size:12px}._0iu0NW_colorSwatch{border:1px solid var(--dsw-alias-border-l2);cursor:pointer;width:18px;height:18px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;padding:0;font-size:11px;line-height:1;display:flex}._0iu0NW_colorSwatch:hover{transform:scale(1.15)}._0iu0NW_colorSwatchClear{background:0 0}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
+		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleRow{width:100%;color:var(--dsw-alias-label-secondary);cursor:pointer;text-align:left;background:0 0;border:none;border-radius:8px;align-items:center;gap:8px;padding:6px 10px;font-size:13px;display:flex}._0iu0NW_toggleRow:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleLabel{white-space:nowrap}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:104px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardCurrent{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardFooter{color:var(--dsw-alias-label-tertiary);justify-content:space-between;align-items:center;gap:8px;margin-top:auto;font-size:11px;display:flex}._0iu0NW_cardTime{flex:none}._0iu0NW_cardBadgeRunning{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;align-items:center;gap:5px;padding:1px 7px;font-size:10px;display:inline-flex}._0iu0NW_cardSummary{color:var(--dsw-alias-label-secondary);-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:12px;line-height:1.45;display:-webkit-box;overflow:hidden}._0iu0NW_cardBadgeWaiting{color:var(--dsw-alias-state-warn-label);background:var(--dsw-alias-state-warn-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardBadgeDone{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:none;width:8px;height:8px}._0iu0NW_cardRefresh{width:22px;height:22px;color:var(--dsw-alias-label-tertiary);cursor:pointer;opacity:0;background:0 0;border:none;border-radius:6px;flex:none;margin-left:auto;padding:0;font-size:13px;line-height:1;transition:opacity .12s}._0iu0NW_card:hover ._0iu0NW_cardRefresh{opacity:1}._0iu0NW_cardRefresh:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_cardRefreshBusy{opacity:1;animation:1s linear infinite _0iu0NW_talkmap-spin}@keyframes _0iu0NW_talkmap-spin{to{transform:rotate(360deg)}}._0iu0NW_spawnPanel{z-index:6;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:420px;max-width:calc(100% - 48px);box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:16px;display:flex;position:absolute;top:24px;right:24px}._0iu0NW_spawnHeading{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_spawnFrom{color:var(--dsw-alias-label-secondary);font-size:12px}._0iu0NW_spawnHint{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_spawnTextarea{resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:140px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_spawnError{color:var(--dsw-alias-state-error-primary);word-break:break-all;font-size:12px}._0iu0NW_spawnActions{justify-content:flex-end;gap:8px;display:flex}._0iu0NW_spawnBtnPrimary{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground);cursor:pointer;border:none;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnPrimary:hover{background:var(--dsw-alias-button-primary-hover)}._0iu0NW_spawnBtnPrimary:disabled{background:var(--dsw-alias-button-primary-dimmed);cursor:default}._0iu0NW_spawnBtnGhost{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnGhost:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_wsFrame{border:1.5px dashed var(--dsw-alias-border-l2);background:0 0;border-radius:16px;position:relative}._0iu0NW_wsFrameSelected{border-style:solid;border-color:var(--dsw-alias-brand-primary)}._0iu0NW_wsFrameLabel{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:nowrap;pointer-events:auto;cursor:grab;border-radius:999px;align-items:center;gap:6px;padding:2px 10px;font-size:12px;font-weight:600;display:flex;position:absolute;top:-12px;left:14px}._0iu0NW_wsFrameLabel:active{cursor:grabbing}._0iu0NW_wsFrameEdge{pointer-events:auto;cursor:grab;position:absolute}._0iu0NW_wsFrameEdge:active{cursor:grabbing}._0iu0NW_wsFrameResize{pointer-events:auto;cursor:nwse-resize;border-right:3px solid var(--dsw-alias-border-l3);border-bottom:3px solid var(--dsw-alias-border-l3);opacity:.7;border-bottom-right-radius:14px;width:16px;height:16px;position:absolute;bottom:-2px;right:-2px}._0iu0NW_wsFrameResize:hover{border-color:var(--dsw-alias-brand-primary);opacity:1}._0iu0NW_wsFrameCount{color:var(--dsw-alias-label-tertiary);font-weight:400}._0iu0NW_draftCard{box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);width:360px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:14px;font-size:13px;display:flex}._0iu0NW_draftHeading{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}._0iu0NW_draftRow{align-items:center;gap:8px;display:flex}._0iu0NW_draftLabel{width:52px;color:var(--dsw-alias-label-tertiary);flex:none;font-size:12px}._0iu0NW_draftSelect{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);min-width:0;color:var(--dsw-alias-label-primary);border-radius:7px;flex:1;padding:5px 8px;font-size:12px}._0iu0NW_draftGrow{flex-direction:column;flex:1;gap:3px;min-width:0;display:flex}._0iu0NW_draftInput{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;color:var(--dsw-alias-label-primary);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_draftPathPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;font-size:11px}._0iu0NW_draftTextarea{box-sizing:border-box;resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:88px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:9px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_colorToolbar{z-index:7;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 2px 10px var(--dsw-alias-bg-mask-1);border-radius:10px;align-items:center;gap:6px;padding:6px 10px;display:flex;position:absolute;top:12px;left:12px}._0iu0NW_colorToolbarLabel{color:var(--dsw-alias-label-tertiary);margin-right:2px;font-size:12px}._0iu0NW_colorSwatch{border:1px solid var(--dsw-alias-border-l2);cursor:pointer;width:18px;height:18px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;padding:0;font-size:11px;line-height:1;display:flex}._0iu0NW_colorSwatch:hover{transform:scale(1.15)}._0iu0NW_colorSwatchClear{background:0 0}._0iu0NW_menu{z-index:9;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);min-width:200px;max-width:280px;max-height:380px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:10px;flex-direction:column;padding:6px;display:flex;position:absolute;overflow-y:auto}._0iu0NW_menuTitle{color:var(--dsw-alias-label-tertiary);padding:4px 10px 6px;font-size:11px}._0iu0NW_menuEmpty{color:var(--dsw-alias-label-tertiary);padding:8px 10px;font-size:12px}._0iu0NW_menuItem{text-align:left;width:100%;color:var(--dsw-alias-label-primary);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:none;border-radius:7px;padding:6px 10px;font-size:13px;display:block;overflow:hidden}._0iu0NW_menuItem:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_menuItem:disabled{color:var(--dsw-alias-label-dimmed);cursor:default}._0iu0NW_wsFrameHidden{color:var(--dsw-alias-state-warn-primary);font-weight:400}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
 		const tagId = "dsh-talk-map/talk-map.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");
@@ -11176,69 +11200,128 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"card": "_0iu0NW_card",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"draftRow": "_0iu0NW_draftRow",
-			"draftInput": "_0iu0NW_draftInput",
 			"toggleLabel": "_0iu0NW_toggleLabel",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"headerBadge": "_0iu0NW_headerBadge",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"draftRow": "_0iu0NW_draftRow",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"cardTop": "_0iu0NW_cardTop",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"cardStale": "_0iu0NW_cardStale",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"closeButton": "_0iu0NW_closeButton",
+			"overlay": "_0iu0NW_overlay",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"spawnHint": "_0iu0NW_spawnHint",
 			"cardHandle": "_0iu0NW_cardHandle",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"menu": "_0iu0NW_menu",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"cardNext": "_0iu0NW_cardNext",
 			"cardSelected": "_0iu0NW_cardSelected",
 			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"canvas": "_0iu0NW_canvas",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"cardSummary": "_0iu0NW_cardSummary",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"draftCard": "_0iu0NW_draftCard",
-			"overlay": "_0iu0NW_overlay",
-			"cardStale": "_0iu0NW_cardStale",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"cardMeta": "_0iu0NW_cardMeta",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"runningDot": "_0iu0NW_runningDot",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"spawnError": "_0iu0NW_spawnError",
 			"draftSelect": "_0iu0NW_draftSelect",
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"toggleRow": "_0iu0NW_toggleRow",
 			"headerTitle": "_0iu0NW_headerTitle",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"draftTextarea": "_0iu0NW_draftTextarea",
 			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"cardNext": "_0iu0NW_cardNext",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"closeButton": "_0iu0NW_closeButton",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
 			"header": "_0iu0NW_header",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"spawnHint": "_0iu0NW_spawnHint",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"draftCard": "_0iu0NW_draftCard",
+			"draftInput": "_0iu0NW_draftInput",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"spawnError": "_0iu0NW_spawnError",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"card": "_0iu0NW_card",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"canvas": "_0iu0NW_canvas",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"cardNextText": "_0iu0NW_cardNextText",
 			"draftLabel": "_0iu0NW_draftLabel",
-			"cardTop": "_0iu0NW_cardTop",
-			"cardCurrent": "_0iu0NW_cardCurrent"
+			"cardTime": "_0iu0NW_cardTime",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"menuItem": "_0iu0NW_menuItem",
+			"runningDot": "_0iu0NW_runningDot",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"menuTitle": "_0iu0NW_menuTitle",
+			"draftTextarea": "_0iu0NW_draftTextarea"
 		};
+		//#endregion
+		//#region src/client/ContextMenu.tsx
+		/**
+		* Right-click menu for the board. One flat panel; entries that need a second
+		* step (import workspace, move to group, import session) swap the panel body
+		* for a pick list with a back row. Right-DRAG still pans — React Flow only
+		* raises the contextmenu callbacks on a plain right click.
+		*/
+		function ContextMenu(props) {
+			const { menu } = props;
+			(0, react.useEffect)(() => {
+				const release = mapUi.claimEscape("context-menu");
+				const onKeyDown = (event) => {
+					if (event.key === "Escape") {
+						event.stopPropagation();
+						props.onClose();
+					}
+				};
+				window.addEventListener("keydown", onKeyDown);
+				return () => {
+					window.removeEventListener("keydown", onKeyDown);
+					release();
+				};
+			}, []);
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+				className: talk_map_module_css_default["menu"],
+				style: {
+					left: menu.left,
+					top: menu.top
+				},
+				role: "menu",
+				onContextMenu: (event) => {
+					event.preventDefault();
+				},
+				children: [menu.title !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+					className: talk_map_module_css_default["menuTitle"],
+					children: menu.title
+				}) : null, menu.items.length === 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+					className: talk_map_module_css_default["menuEmpty"],
+					children: t("menu.empty")
+				}) : menu.items.map((item) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+					type: "button",
+					role: "menuitem",
+					className: talk_map_module_css_default["menuItem"],
+					disabled: item.disabled === true,
+					onClick: () => {
+						item.onPick();
+					},
+					children: item.label
+				}, item.key))]
+			});
+		}
 		//#endregion
 		//#region src/client/DraftCard.tsx
 		/**
@@ -11336,6 +11419,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						sessionId,
 						x: snap$1(props.positionAbsoluteX),
 						y: snap$1(props.positionAbsoluteY),
+						...data.groupId !== void 0 ? { wsOverride: data.groupId } : {},
 						createdAt: Date.now()
 					} });
 					if (modelKey !== "") {
@@ -11552,27 +11636,20 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					}),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: talk_map_module_css_default["cardTop"],
-						children: [
-							data.running ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-								className: talk_map_module_css_default["runningDot"],
-								title: t("card.running")
-							}) : null,
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-								className: talk_map_module_css_default["cardTitle"],
-								children: data.ghost ? t("card.ghostTitle") : data.title
-							}),
-							data.ghost ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-								type: "button",
-								className: `${talk_map_module_css_default["cardRefresh"]} nodrag${refreshing ? ` ${talk_map_module_css_default["cardRefreshBusy"]}` : ""}`,
-								title: t("card.refresh"),
-								"aria-label": t("card.refresh"),
-								onClick: (event) => {
-									event.stopPropagation();
-									refreshDigest();
-								},
-								children: "⟳"
-							})
-						]
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							className: talk_map_module_css_default["cardTitle"],
+							children: data.ghost ? t("card.ghostTitle") : data.title
+						}), data.ghost ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+							type: "button",
+							className: `${talk_map_module_css_default["cardRefresh"]} nodrag${refreshing ? ` ${talk_map_module_css_default["cardRefreshBusy"]}` : ""}`,
+							title: t("card.refresh"),
+							"aria-label": t("card.refresh"),
+							onClick: (event) => {
+								event.stopPropagation();
+								refreshDigest();
+							},
+							children: "⟳"
+						})]
 					}),
 					data.ghost ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 						type: "button",
@@ -11603,10 +11680,16 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						]
 					}) : null] }),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
-						className: talk_map_module_css_default["cardMeta"],
-						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: relativeTime(data.updatedAt) }), data.waiting === true ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+						className: talk_map_module_css_default["cardFooter"],
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							className: talk_map_module_css_default["cardTime"],
+							children: relativeTime(data.updatedAt)
+						}), data.waiting === true ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: talk_map_module_css_default["cardBadgeWaiting"],
 							children: t("card.waiting")
+						}) : data.running ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("span", {
+							className: talk_map_module_css_default["cardBadgeRunning"],
+							children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { className: talk_map_module_css_default["runningDot"] }), t("card.running")]
 						}) : data.done === true ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 							className: talk_map_module_css_default["cardBadgeDone"],
 							children: t("card.done")
@@ -11674,7 +11757,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						}],
 						boardId: INBOX_BOARD_ID,
 						x: pending.x,
-						y: pending.y
+						y: pending.y,
+						...pending.wsOverride !== void 0 ? { wsOverride: pending.wsOverride } : {}
 					});
 					canvas.applySpawn(result);
 					props.onClose();
@@ -11816,10 +11900,18 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							borderColor: color.border,
 							backgroundImage: `linear-gradient(${color.fill}, ${color.fill})`
 						} : {},
-						children: [data.title, /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-							className: talk_map_module_css_default["wsFrameCount"],
-							children: data.count
-						})]
+						children: [
+							data.title,
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+								className: talk_map_module_css_default["wsFrameCount"],
+								children: data.count
+							}),
+							data.hiddenCount > 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("span", {
+								className: talk_map_module_css_default["wsFrameHidden"],
+								title: t("frame.hiddenTitle"),
+								children: ["…+", data.hiddenCount]
+							}) : null
+						]
 					}),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: talk_map_module_css_default["wsFrameEdge"],
@@ -11896,20 +11988,18 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		//#endregion
 		//#region src/client/MapCanvas.tsx
 		/**
-		* The board: cards ⨝ sessions rendered through React Flow, grouped visually
-		* by workspace (derived frames), with an in-place draft composer.
+		* The board. Import-based: nothing lands here automatically — the user
+		* imports a workspace (frame + its sessions as cards), imports single
+		* conversations, or creates new ones on the canvas (draft card / fork edge).
 		*
-		* Interaction model: RIGHT-button (or middle) drag pans; left drag is box
-		* selection on the pane and node drag on cards; a frame is dragged by its
-		* label chip and carries every member card with it. Dropping a card inside
-		* another frame adopts it into that group — a map-level membership override
-		* (dsh @rc.6 has no cross-workspace session move RPC; the sidebar keeps its
-		* own truth).
+		* Groups are containers: a member card cannot be dragged out of its frame
+		* (drag clamps at the border); dragging the frame carries every member;
+		* shrinking the frame hides members that no longer fit and the label shows
+		* "…+N" — the cards are still there, just out of view. Membership changes
+		* go through the right-click menu.
 		*
-		* Position law: manual placement is sacred. The writes to card positions are
-		* (1) the user's own drag, (2) a frame drag translating its members,
-		* (3) grid placement of a session that has no card yet, (4) the one-time
-		* layout-v2 migration, (5) a draft card sent at its own spot.
+		* Interaction: right/middle-drag pans, plain right-click opens the context
+		* menu, left-drag box-selects on the pane and drags nodes.
 		*/
 		const nodeTypes = {
 			sessionCard: SessionCardNode,
@@ -11921,11 +12011,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		const CARD_H = 120;
 		const GAP_Y = 56;
 		const COLS = 3;
-		const REGION_GAP = 200;
 		const FRAME_PAD = 32;
 		const FRAME_LABEL_H = 30;
-		const UNGROUPED = "__ungrouped__";
-		const LAYOUT_VERSION = 2;
+		const LAYOUT_VERSION = 3;
 		function snap(value) {
 			return Math.round(value / GRID) * GRID;
 		}
@@ -11936,20 +12024,10 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				return summary !== void 0 && !summary.blank && summary.origin !== "subagent";
 			});
 		}
-		/** sessionId → workspaceId, from the workspace registry's own accounting. */
 		function sessionWorkspaceIndex(workspaces) {
 			const index = /* @__PURE__ */ new Map();
 			for (const workspace of workspaces.items) for (const sessionId of workspace.sessionIds) index.set(sessionId, workspace.workspaceId);
 			return index;
-		}
-		function workspaceEntries(workspaces) {
-			return [...workspaces.items.map((item) => ({
-				id: item.workspaceId,
-				title: item.title
-			})), {
-				id: UNGROUPED,
-				title: t("frame.ungrouped")
-			}];
 		}
 		function gridPosition(origin, index) {
 			const column = index % COLS;
@@ -11959,134 +12037,46 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				y: snap(origin.y + row * 176)
 			};
 		}
-		/**
-		* Layout-v2 migration: place EVERY known session into its workspace region.
-		* Cards whose session no longer exists keep their spot (ghosts stay put).
-		*/
-		function planGroupedFull(sessions, sessionWs, wsList, existingCards) {
-			const placeable = placeableSessionIds(sessions);
-			const bySession = /* @__PURE__ */ new Map();
-			for (const [cardId, card] of Object.entries(existingCards)) if (!bySession.has(card.sessionId)) bySession.set(card.sessionId, cardId);
-			const plan = {};
-			let cursorX = 0;
-			for (const workspace of wsList) {
-				const members = placeable.filter((id) => (sessionWs.get(id) ?? UNGROUPED) === workspace.id).sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0));
-				if (members.length === 0) continue;
-				members.forEach((sessionId, index) => {
-					const position = gridPosition({
-						x: cursorX,
-						y: 0
-					}, index);
-					const cardId = bySession.get(sessionId) ?? newCardId();
-					const previous = existingCards[cardId];
-					plan[cardId] = {
-						boardId: INBOX_BOARD_ID,
-						sessionId,
-						x: position.x,
-						y: position.y,
-						createdAt: previous?.createdAt ?? Date.now(),
-						...previous?.colorTag !== void 0 ? { colorTag: previous.colorTag } : {}
-					};
-				});
-				cursorX += 968;
-			}
-			return plan;
+		/** Frame rect that fits a set of member cards. */
+		function fitRect(members) {
+			const minX = Math.min(...members.map((card) => card.x));
+			const minY = Math.min(...members.map((card) => card.y));
+			const maxX = Math.max(...members.map((card) => card.x + CARD_W));
+			const maxY = Math.max(...members.map((card) => card.y + CARD_H));
+			return {
+				x: minX - FRAME_PAD,
+				y: minY - FRAME_PAD - FRAME_LABEL_H,
+				width: maxX - minX + 64,
+				height: maxY - minY + 64 + FRAME_LABEL_H
+			};
 		}
-		/** Incremental placement for sessions that appeared after the migration. */
-		function planGroupedIncremental(missing, sessions, sessionWs, existingCards, wsOfCard) {
-			const boxes = /* @__PURE__ */ new Map();
-			let globalMaxX = 0;
-			for (const card of Object.values(existingCards)) {
-				const workspaceId = wsOfCard(card);
-				const box = boxes.get(workspaceId) ?? {
-					minX: card.x,
-					minY: card.y,
-					maxX: card.x,
-					maxY: card.y
-				};
-				box.minX = Math.min(box.minX, card.x);
-				box.minY = Math.min(box.minY, card.y);
-				box.maxX = Math.max(box.maxX, card.x);
-				box.maxY = Math.max(box.maxY, card.y);
-				boxes.set(workspaceId, box);
-				globalMaxX = Math.max(globalMaxX, card.x + CARD_W);
-			}
-			const plan = {};
-			const grouped = /* @__PURE__ */ new Map();
-			for (const sessionId of missing) {
-				const workspaceId = sessionWs.get(sessionId) ?? UNGROUPED;
-				grouped.set(workspaceId, [...grouped.get(workspaceId) ?? [], sessionId]);
-			}
-			let newRegionX = globalMaxX + REGION_GAP;
-			for (const [workspaceId, members] of grouped) {
-				const sorted = members.sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0));
-				const box = boxes.get(workspaceId);
-				const origin = box !== void 0 ? {
-					x: box.minX,
-					y: box.maxY + CARD_H + GAP_Y
-				} : {
-					x: newRegionX,
-					y: 0
-				};
-				if (box === void 0) newRegionX += 968;
-				sorted.forEach((sessionId, index) => {
-					const position = gridPosition(origin, index);
-					plan[newCardId()] = {
-						boardId: INBOX_BOARD_ID,
-						sessionId,
-						x: position.x,
-						y: position.y,
-						createdAt: Date.now()
-					};
-				});
-			}
-			return plan;
+		/** Whether a card is fully inside its frame's body. */
+		function insideFrame(card, rect) {
+			return card.x >= rect.x && card.y >= rect.y + FRAME_LABEL_H && card.x + CARD_W <= rect.x + rect.width && card.y + CARD_H <= rect.y + rect.height;
 		}
-		function frameRects(cards, wsOfCard, wsList, manual) {
-			const byWs = /* @__PURE__ */ new Map();
-			for (const card of Object.values(cards)) {
-				if (card.boardId !== "inbox") continue;
-				const workspaceId = wsOfCard(card);
-				byWs.set(workspaceId, [...byWs.get(workspaceId) ?? [], card]);
-			}
-			const titles = new Map(wsList.map((entry) => [entry.id, entry.title]));
-			const rects = [];
-			for (const [workspaceId, members] of byWs) {
-				if (members.length === 0) continue;
-				const sized = manual?.[workspaceId];
-				if (sized !== void 0) {
-					rects.push({
-						workspaceId,
-						title: titles.get(workspaceId) ?? workspaceId,
-						count: members.length,
-						...sized
-					});
-					continue;
-				}
-				const minX = Math.min(...members.map((card) => card.x));
-				const minY = Math.min(...members.map((card) => card.y));
-				const maxX = Math.max(...members.map((card) => card.x + CARD_W));
-				const maxY = Math.max(...members.map((card) => card.y + CARD_H));
-				rects.push({
-					workspaceId,
-					title: titles.get(workspaceId) ?? workspaceId,
-					count: members.length,
-					x: minX - FRAME_PAD,
-					y: minY - FRAME_PAD - FRAME_LABEL_H,
-					width: maxX - minX + 64,
-					height: maxY - minY + 64 + FRAME_LABEL_H
-				});
-			}
-			for (const [workspaceId, sized] of Object.entries(manual ?? {})) {
-				if (byWs.has(workspaceId)) continue;
-				rects.push({
-					workspaceId,
-					title: titles.get(workspaceId) ?? workspaceId,
-					count: 0,
-					...sized
-				});
-			}
-			return rects;
+		/** Clamp a card position so the card stays fully inside the frame body. */
+		function clampToFrame(x, y, rect) {
+			const minX = rect.x + 4;
+			const maxX = rect.x + rect.width - CARD_W - 4;
+			const minY = rect.y + FRAME_LABEL_H + 4;
+			const maxY = rect.y + rect.height - CARD_H - 4;
+			return {
+				x: Math.min(Math.max(x, minX), Math.max(minX, maxX)),
+				y: Math.min(Math.max(y, minY), Math.max(minY, maxY))
+			};
+		}
+		/** Grow a frame just enough to contain one more card. */
+		function grownRect(rect, card) {
+			const minX = Math.min(rect.x, card.x - FRAME_PAD);
+			const minY = Math.min(rect.y, card.y - FRAME_PAD - FRAME_LABEL_H);
+			const maxX = Math.max(rect.x + rect.width, card.x + CARD_W + FRAME_PAD);
+			const maxY = Math.max(rect.y + rect.height, card.y + CARD_H + FRAME_PAD);
+			return {
+				x: minX,
+				y: minY,
+				width: maxX - minX,
+				height: maxY - minY
+			};
 		}
 		function CanvasInner(props) {
 			const dark = useDsDarkTheme();
@@ -12097,44 +12087,51 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const [selectedIds, setSelectedIds] = (0, react.useState)(/* @__PURE__ */ new Set());
 			const [pendingSpawn, setPendingSpawn] = (0, react.useState)(null);
 			const [draft, setDraft] = (0, react.useState)(null);
+			const [menu, setMenu] = (0, react.useState)(null);
 			const framePosRef = (0, react.useRef)({});
+			const wrapperRef = (0, react.useRef)(null);
 			const sessionWs = (0, react.useMemo)(() => sessionWorkspaceIndex(workspaces), [workspaces]);
-			const wsList = (0, react.useMemo)(() => workspaceEntries(workspaces), [workspaces]);
+			const wsTitles = (0, react.useMemo)(() => new Map(workspaces.items.map((item) => [item.workspaceId, item.title])), [workspaces]);
 			const workspacesReady = workspaces.baselinesReady !== false;
-			const wsOfCard = (0, react.useMemo)(() => {
-				return (card) => card.wsOverride ?? sessionWs.get(card.sessionId) ?? UNGROUPED;
-			}, [sessionWs]);
+			const wsFrames = canvasState.global?.wsFrames ?? {};
 			const layoutVersion = canvasState.global?.layoutVersion ?? 1;
-			const migrationPending = canvasState.phase === "ready" && layoutVersion < LAYOUT_VERSION;
 			(0, react.useEffect)(() => {
-				if (!migrationPending || !workspacesReady) return;
-				if (workspaces.items.length === 0 && sessions.ids.length === 0) return;
-				for (const [cardId, card] of Object.entries(canvasState.cards)) if (sessions.byId[card.sessionId]?.blank === true) canvas.removeCard(cardId);
-				const plan = planGroupedFull(sessions, sessionWs, wsList, canvasState.cards);
-				if (Object.keys(plan).length > 0) canvas.addCards(plan);
-				canvas.patchGlobalNow({ layoutVersion: LAYOUT_VERSION });
-			}, [
-				migrationPending,
-				workspacesReady,
-				sessions,
-				sessionWs,
-				wsList,
-				canvasState.cards
-			]);
-			(0, react.useEffect)(() => {
-				if (canvasState.phase !== "ready" || migrationPending || !workspacesReady) return;
-				const placed = new Set(Object.values(canvasState.cards).map((card) => card.sessionId));
-				const missing = placeableSessionIds(sessions).filter((id) => !placed.has(id));
-				if (missing.length === 0) return;
-				canvas.addCards(planGroupedIncremental(missing, sessions, sessionWs, canvasState.cards, wsOfCard));
+				if (canvasState.phase !== "ready" || layoutVersion >= LAYOUT_VERSION || !workspacesReady) return;
+				const patches = {};
+				const effective = {};
+				for (const [cardId, card] of Object.entries(canvasState.cards)) {
+					let next = card;
+					if (card.wsOverride === void 0) {
+						const home = sessionWs.get(card.sessionId);
+						if (home !== void 0) {
+							next = {
+								...card,
+								wsOverride: home
+							};
+							patches[cardId] = next;
+						}
+					}
+					effective[cardId] = next;
+				}
+				const byGroup = /* @__PURE__ */ new Map();
+				for (const card of Object.values(effective)) {
+					if (card.wsOverride === void 0) continue;
+					byGroup.set(card.wsOverride, [...byGroup.get(card.wsOverride) ?? [], card]);
+				}
+				const framesNext = { ...canvasState.global?.wsFrames };
+				for (const [groupId, members] of byGroup) if (framesNext[groupId] === void 0 && members.length > 0) framesNext[groupId] = fitRect(members);
+				if (Object.keys(patches).length > 0) canvas.addCards(patches);
+				canvas.patchGlobalNow({
+					layoutVersion: LAYOUT_VERSION,
+					wsFrames: framesNext
+				});
 			}, [
 				canvasState.phase,
-				migrationPending,
+				layoutVersion,
 				workspacesReady,
 				canvasState.cards,
-				sessions,
-				sessionWs,
-				wsOfCard
+				canvasState.global,
+				sessionWs
 			]);
 			const visibleCards = (0, react.useMemo)(() => {
 				const out = {};
@@ -12144,31 +12141,30 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				}
 				return out;
 			}, [canvasState.cards, sessions]);
-			const sessionIdToCardId = (0, react.useMemo)(() => {
-				const index = /* @__PURE__ */ new Map();
-				for (const [cardId, card] of Object.entries(visibleCards)) if (!index.has(card.sessionId)) index.set(card.sessionId, cardId);
-				return index;
-			}, [visibleCards]);
-			const frames = (0, react.useMemo)(() => frameRects(visibleCards, wsOfCard, wsList, canvasState.global?.wsFrames), [
-				visibleCards,
-				wsOfCard,
-				wsList,
-				canvasState.global
-			]);
-			const membersByWs = (0, react.useMemo)(() => {
+			const membersByGroup = (0, react.useMemo)(() => {
 				const index = /* @__PURE__ */ new Map();
 				for (const [cardId, card] of Object.entries(visibleCards)) {
-					const workspaceId = wsOfCard(card);
-					index.set(workspaceId, [...index.get(workspaceId) ?? [], cardId]);
+					if (card.wsOverride === void 0) continue;
+					index.set(card.wsOverride, [...index.get(card.wsOverride) ?? [], cardId]);
 				}
 				return index;
-			}, [visibleCards, wsOfCard]);
+			}, [visibleCards]);
+			/** Member cards hidden because the frame no longer fits them. */
+			const hiddenCardIds = (0, react.useMemo)(() => {
+				const hidden = /* @__PURE__ */ new Set();
+				for (const [cardId, card] of Object.entries(visibleCards)) {
+					if (card.wsOverride === void 0) continue;
+					const rect = wsFrames[card.wsOverride];
+					if (rect !== void 0 && !insideFrame(card, rect)) hidden.add(cardId);
+				}
+				return hidden;
+			}, [visibleCards, wsFrames]);
 			(0, react.useEffect)(() => {
-				framePosRef.current = Object.fromEntries(frames.map((frame) => [`frame-${frame.workspaceId}`, {
-					x: frame.x,
-					y: frame.y
+				framePosRef.current = Object.fromEntries(Object.entries(wsFrames).map(([groupId, rect]) => [`frame-${groupId}`, {
+					x: rect.x,
+					y: rect.y
 				}]));
-			}, [frames]);
+			}, [wsFrames]);
 			const hasSelection = selectedIds.size > 0;
 			(0, react.useEffect)(() => {
 				if (!hasSelection) return;
@@ -12187,37 +12183,42 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			}, [hasSelection]);
 			const nodes = (0, react.useMemo)(() => {
 				const wsColors = canvasState.global?.wsColors ?? {};
-				const frameNodes = frames.map((frame) => ({
-					id: `frame-${frame.workspaceId}`,
-					type: "wsFrame",
-					position: {
-						x: frame.x,
-						y: frame.y
-					},
-					data: {
-						workspaceId: frame.workspaceId,
-						title: frame.title,
-						count: frame.count,
-						width: frame.width,
-						height: frame.height,
-						...wsColors[frame.workspaceId] !== void 0 ? { colorTag: wsColors[frame.workspaceId] } : {},
-						onResizeEnd: (size) => {
-							canvas.setWsFrameRect(frame.workspaceId, {
-								x: frame.x,
-								y: frame.y,
-								width: size.width,
-								height: size.height
-							});
-						}
-					},
-					draggable: true,
-					selectable: true,
-					focusable: false,
-					selected: selectedIds.has(`frame-${frame.workspaceId}`),
-					zIndex: -1,
-					style: { pointerEvents: "none" }
-				}));
-				const cardNodes = Object.entries(visibleCards).filter(([, card]) => card.boardId === INBOX_BOARD_ID).map(([cardId, card]) => {
+				const frameNodes = Object.entries(wsFrames).map(([groupId, rect]) => {
+					const members = membersByGroup.get(groupId) ?? [];
+					const hiddenCount = members.filter((id) => hiddenCardIds.has(id)).length;
+					return {
+						id: `frame-${groupId}`,
+						type: "wsFrame",
+						position: {
+							x: rect.x,
+							y: rect.y
+						},
+						data: {
+							workspaceId: groupId,
+							title: wsTitles.get(groupId) ?? t("frame.unknown"),
+							count: members.length,
+							hiddenCount,
+							width: rect.width,
+							height: rect.height,
+							...wsColors[groupId] !== void 0 ? { colorTag: wsColors[groupId] } : {},
+							onResizeEnd: (size) => {
+								canvas.setWsFrameRect(groupId, {
+									x: rect.x,
+									y: rect.y,
+									width: size.width,
+									height: size.height
+								});
+							}
+						},
+						draggable: true,
+						selectable: true,
+						focusable: false,
+						selected: selectedIds.has(`frame-${groupId}`),
+						zIndex: -1,
+						style: { pointerEvents: "none" }
+					};
+				});
+				const cardNodes = Object.entries(visibleCards).filter(([cardId, card]) => card.boardId === "inbox" && !hiddenCardIds.has(cardId)).map(([cardId, card]) => {
 					const summary = sessions.byId[card.sessionId];
 					const digest = canvasState.digests[card.sessionId];
 					const data = {
@@ -12261,6 +12262,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							path: item.path
 						})),
 						...draft.workspaceId !== void 0 ? { defaultWorkspaceId: draft.workspaceId } : {},
+						...draft.groupId !== void 0 ? { groupId: draft.groupId } : {},
 						onClose: () => {
 							setDraft(null);
 						}
@@ -12272,7 +12274,10 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					...draftNodes
 				];
 			}, [
-				frames,
+				wsFrames,
+				membersByGroup,
+				hiddenCardIds,
+				wsTitles,
 				visibleCards,
 				canvasState.digests,
 				canvasState.global,
@@ -12281,11 +12286,19 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				draft,
 				workspaces.items
 			]);
+			const sessionIdToCardId = (0, react.useMemo)(() => {
+				const index = /* @__PURE__ */ new Map();
+				for (const [cardId, card] of Object.entries(visibleCards)) if (!hiddenCardIds.has(cardId) && !index.has(card.sessionId)) index.set(card.sessionId, cardId);
+				return index;
+			}, [visibleCards, hiddenCardIds]);
 			const edges = (0, react.useMemo)(() => {
 				const out = [];
+				const present = new Set(sessionIdToCardId.values());
+				for (const [cardId] of Object.entries(visibleCards)) if (!hiddenCardIds.has(cardId)) present.add(cardId);
 				const injectionPairs = /* @__PURE__ */ new Set();
 				for (const [edgeId, edge] of Object.entries(canvasState.edges)) {
 					injectionPairs.add(`${edge.fromCardId}->${edge.toCardId}`);
+					if (!present.has(edge.fromCardId) || !present.has(edge.toCardId)) continue;
 					out.push({
 						id: edgeId,
 						source: edge.fromCardId,
@@ -12295,6 +12308,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					});
 				}
 				for (const [cardId, card] of Object.entries(visibleCards)) {
+					if (hiddenCardIds.has(cardId)) continue;
 					const parentSessionId = sessions.byId[card.sessionId]?.parentId;
 					if (parentSessionId === void 0) continue;
 					const parentCardId = sessionIdToCardId.get(parentSessionId);
@@ -12315,6 +12329,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				return out;
 			}, [
 				visibleCards,
+				hiddenCardIds,
 				canvasState.edges,
 				sessions,
 				sessionIdToCardId
@@ -12328,11 +12343,11 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					});
 					else if (change.id.startsWith("frame-")) {
 						const previous = framePosRef.current[change.id];
-						const workspaceId = change.id.slice(6);
+						const groupId = change.id.slice(6);
 						if (previous !== void 0) {
 							const dx = change.position.x - previous.x;
 							const dy = change.position.y - previous.y;
-							if (dx !== 0 || dy !== 0) for (const cardId of membersByWs.get(workspaceId) ?? []) {
+							if (dx !== 0 || dy !== 0) for (const cardId of membersByGroup.get(groupId) ?? []) {
 								const card = canvasState.cards[cardId];
 								if (card !== void 0) canvas.moveCard(cardId, card.x + dx, card.y + dy);
 							}
@@ -12341,33 +12356,27 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							x: change.position.x,
 							y: change.position.y
 						};
-						const manual = canvasState.global?.wsFrames?.[workspaceId];
-						if (manual !== void 0) canvas.setWsFrameRect(workspaceId, {
+						const rect = wsFrames[groupId];
+						if (rect !== void 0) canvas.setWsFrameRect(groupId, {
 							x: change.position.x,
 							y: change.position.y,
-							width: manual.width,
-							height: manual.height
+							width: rect.width,
+							height: rect.height
 						});
-					} else canvas.moveCard(change.id, change.position.x, change.position.y);
+					} else {
+						const card = canvasState.cards[change.id];
+						const rect = card?.wsOverride !== void 0 ? wsFrames[card.wsOverride] : void 0;
+						if (card !== void 0 && rect !== void 0) {
+							const clamped = clampToFrame(change.position.x, change.position.y, rect);
+							canvas.moveCard(change.id, clamped.x, clamped.y);
+						} else canvas.moveCard(change.id, change.position.x, change.position.y);
+					}
 				} else if (change.type === "select") setSelectedIds((previous) => {
 					const next = new Set(previous);
 					if (change.selected) next.add(change.id);
 					else next.delete(change.id);
 					return next;
 				});
-			};
-			const onNodeDragStop = (_event, node) => {
-				if (node.type !== "sessionCard") return;
-				const card = canvasState.cards[node.id];
-				if (card === void 0) return;
-				const centerX = node.position.x + CARD_W / 2;
-				const centerY = node.position.y + CARD_H / 2;
-				const target = frames.find((rect) => centerX >= rect.x && centerX <= rect.x + rect.width && centerY >= rect.y && centerY <= rect.y + rect.height);
-				if (target === void 0) return;
-				const current = wsOfCard(card);
-				if (target.workspaceId === current) return;
-				const home = sessionWs.get(card.sessionId) ?? UNGROUPED;
-				canvas.setCardWorkspaceOverride(node.id, target.workspaceId === home ? void 0 : target.workspaceId);
 			};
 			const onConnectEnd = (event, connectionState) => {
 				if (connectionState.isValid === true) return;
@@ -12386,6 +12395,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				} : void 0;
 				if (client === void 0) return;
 				const position = screenToFlowPosition(client);
+				const group = groupAtPoint(position.x, position.y);
 				setPendingSpawn({
 					parent: {
 						cardId: fromNodeId,
@@ -12393,7 +12403,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						title: summary.displayTitle
 					},
 					x: snap(position.x - CARD_W / 2),
-					y: snap(position.y - CARD_H / 2)
+					y: snap(position.y - CARD_H / 2),
+					...group !== void 0 ? { wsOverride: group } : {}
 				});
 			};
 			const openSession = (sessionId) => {
@@ -12402,37 +12413,304 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				mapUi.setOpen(false);
 				services.sessions.open(sessionId);
 			};
-			const openDraftAt = (clientX, clientY) => {
-				const position = screenToFlowPosition({
-					x: clientX,
-					y: clientY
-				});
-				const x = snap(position.x - CARD_W / 2);
-				const y = snap(position.y - 40);
-				const frame = frames.find((rect) => position.x >= rect.x && position.x <= rect.x + rect.width && position.y >= rect.y && position.y <= rect.y + rect.height);
-				const workspaceId = frame !== void 0 && frame.workspaceId !== UNGROUPED ? frame.workspaceId : void 0;
+			const groupAtPoint = (x, y) => {
+				for (const [groupId, rect] of Object.entries(wsFrames)) if (x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height) return groupId;
+			};
+			const openDraftAt = (flowX, flowY) => {
+				const x = snap(flowX - CARD_W / 2);
+				const y = snap(flowY - 40);
+				const groupId = groupAtPoint(flowX, flowY);
+				const isWorkspace = groupId !== void 0 && wsTitles.has(groupId);
 				setDraft({
 					x,
 					y,
-					...workspaceId !== void 0 ? { workspaceId } : {}
+					...isWorkspace ? { workspaceId: groupId } : {},
+					...groupId !== void 0 ? { groupId } : {}
 				});
 			};
-			const selectedCardIds = (0, react.useMemo)(() => [...selectedIds].filter((id) => visibleCards[id] !== void 0), [selectedIds, visibleCards]);
-			const selectedFrameWs = (0, react.useMemo)(() => [...selectedIds].filter((id) => id.startsWith("frame-")).map((id) => id.slice(6)), [selectedIds]);
-			const applyColor = (colorTag) => {
-				if (selectedCardIds.length > 0) canvas.setCardsColor(selectedCardIds, colorTag);
-				for (const workspaceId of selectedFrameWs) canvas.setWorkspaceColor(workspaceId, colorTag);
+			const boardSessionIds = (0, react.useMemo)(() => new Set(Object.values(canvasState.cards).map((card) => card.sessionId)), [canvasState.cards]);
+			const importWorkspace = (workspaceId, atX, atY) => {
+				const memberSessions = placeableSessionIds(sessions).filter((id) => sessionWs.get(id) === workspaceId && !boardSessionIds.has(id)).sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0));
+				const origin = {
+					x: snap(atX),
+					y: snap(atY)
+				};
+				const added = {};
+				const placed = [];
+				memberSessions.forEach((sessionId, index) => {
+					const position = gridPosition(origin, index);
+					const card = {
+						boardId: INBOX_BOARD_ID,
+						sessionId,
+						x: position.x,
+						y: position.y,
+						wsOverride: workspaceId,
+						createdAt: Date.now()
+					};
+					added[newCardId()] = card;
+					placed.push(card);
+				});
+				if (placed.length > 0) canvas.addCards(added);
+				const rect = placed.length > 0 ? fitRect(placed) : {
+					x: origin.x - FRAME_PAD,
+					y: origin.y - FRAME_PAD - FRAME_LABEL_H,
+					width: 400,
+					height: 260
+				};
+				canvas.setWsFrameRect(workspaceId, rect);
 			};
+			const importSession = (sessionId, atX, atY) => {
+				const groupId = groupAtPoint(atX, atY);
+				const card = {
+					boardId: INBOX_BOARD_ID,
+					sessionId,
+					x: snap(atX),
+					y: snap(atY),
+					...groupId !== void 0 ? { wsOverride: groupId } : {},
+					createdAt: Date.now()
+				};
+				canvas.addCards({ [newCardId()]: card });
+			};
+			const syncGroup = (groupId) => {
+				const rect = wsFrames[groupId];
+				if (rect === void 0) return;
+				const fresh = placeableSessionIds(sessions).filter((id) => sessionWs.get(id) === groupId && !boardSessionIds.has(id));
+				if (fresh.length === 0) return;
+				const members = (membersByGroup.get(groupId) ?? []).map((id) => canvasState.cards[id]).filter((card) => card !== void 0);
+				const origin = members.length > 0 ? {
+					x: Math.min(...members.map((card) => card.x)),
+					y: Math.max(...members.map((card) => card.y)) + CARD_H + GAP_Y
+				} : {
+					x: rect.x + FRAME_PAD,
+					y: rect.y + FRAME_LABEL_H + FRAME_PAD
+				};
+				const added = {};
+				let grown = rect;
+				fresh.forEach((sessionId, index) => {
+					const position = gridPosition(origin, index);
+					const card = {
+						boardId: INBOX_BOARD_ID,
+						sessionId,
+						x: position.x,
+						y: position.y,
+						wsOverride: groupId,
+						createdAt: Date.now()
+					};
+					added[newCardId()] = card;
+					grown = grownRect(grown, card);
+				});
+				canvas.addCards(added);
+				canvas.setWsFrameRect(groupId, grown);
+			};
+			const moveCardToGroup = (cardId, groupId) => {
+				canvas.setCardWorkspaceOverride(cardId, groupId);
+				if (groupId === void 0) return;
+				const rect = wsFrames[groupId];
+				const card = canvasState.cards[cardId];
+				if (rect === void 0 || card === void 0) return;
+				if (!insideFrame(card, rect)) {
+					const clamped = clampToFrame(card.x, card.y, rect);
+					canvas.moveCard(cardId, clamped.x, clamped.y);
+				}
+			};
+			const removeGroup = (groupId) => {
+				for (const cardId of membersByGroup.get(groupId) ?? []) canvas.removeCard(cardId);
+				const framesNext = { ...wsFrames };
+				delete framesNext[groupId];
+				const colorsNext = { ...canvasState.global?.wsColors };
+				delete colorsNext[groupId];
+				canvas.patchGlobalNow({
+					wsFrames: framesNext,
+					wsColors: colorsNext
+				});
+			};
+			const openMenu = (event, kind, targetId) => {
+				event.preventDefault();
+				const wrapper = wrapperRef.current;
+				if (wrapper === null) return;
+				const bounds = wrapper.getBoundingClientRect();
+				const flow = screenToFlowPosition({
+					x: event.clientX,
+					y: event.clientY
+				});
+				setMenu({
+					left: event.clientX - bounds.left,
+					top: event.clientY - bounds.top,
+					flowX: flow.x,
+					flowY: flow.y,
+					kind,
+					...targetId !== void 0 ? { targetId } : {},
+					view: "root"
+				});
+			};
+			const menuState = (0, react.useMemo)(() => {
+				if (menu === null) return null;
+				const close = () => {
+					setMenu(null);
+				};
+				const items = [];
+				let title;
+				if (menu.view === "import-ws") {
+					title = t("menu.importWs");
+					const candidates = workspaces.items.filter((item) => wsFrames[item.workspaceId] === void 0);
+					for (const item of candidates) items.push({
+						key: item.workspaceId,
+						label: item.title,
+						onPick: () => {
+							importWorkspace(item.workspaceId, menu.flowX, menu.flowY);
+							close();
+						}
+					});
+				} else if (menu.view === "import-session") {
+					title = t("menu.importSession");
+					const candidates = placeableSessionIds(sessions).filter((id) => !boardSessionIds.has(id)).slice(0, 40);
+					for (const sessionId of candidates) items.push({
+						key: sessionId,
+						label: sessions.byId[sessionId]?.displayTitle ?? sessionId,
+						onPick: () => {
+							importSession(sessionId, menu.flowX, menu.flowY);
+							close();
+						}
+					});
+				} else if (menu.view === "move-group") {
+					title = t("menu.moveGroup");
+					const cardId = menu.targetId;
+					if (cardId !== void 0) {
+						for (const groupId of Object.keys(wsFrames)) items.push({
+							key: groupId,
+							label: wsTitles.get(groupId) ?? t("frame.unknown"),
+							onPick: () => {
+								moveCardToGroup(cardId, groupId);
+								close();
+							}
+						});
+						items.push({
+							key: "__none__",
+							label: t("menu.noGroup"),
+							onPick: () => {
+								moveCardToGroup(cardId, void 0);
+								close();
+							}
+						});
+					}
+				} else if (menu.kind === "pane") {
+					items.push({
+						key: "draft",
+						label: t("menu.newChat"),
+						onPick: () => {
+							openDraftAt(menu.flowX, menu.flowY);
+							close();
+						}
+					});
+					items.push({
+						key: "import-ws",
+						label: `${t("menu.importWs")}…`,
+						onPick: () => {
+							setMenu({
+								...menu,
+								view: "import-ws"
+							});
+						}
+					});
+					items.push({
+						key: "import-session",
+						label: `${t("menu.importSession")}…`,
+						onPick: () => {
+							setMenu({
+								...menu,
+								view: "import-session"
+							});
+						}
+					});
+				} else if (menu.kind === "card" && menu.targetId !== void 0) {
+					const cardId = menu.targetId;
+					const card = canvasState.cards[cardId];
+					items.push({
+						key: "open",
+						label: t("menu.open"),
+						onPick: () => {
+							close();
+							if (card !== void 0) openSession(card.sessionId);
+						}
+					});
+					items.push({
+						key: "digest",
+						label: t("card.refresh"),
+						onPick: () => {
+							close();
+							if (card !== void 0) talkMapApi.refreshDigest(card.sessionId).catch(() => void 0);
+						}
+					});
+					items.push({
+						key: "move",
+						label: `${t("menu.moveGroup")}…`,
+						onPick: () => {
+							setMenu({
+								...menu,
+								view: "move-group"
+							});
+						}
+					});
+					items.push({
+						key: "remove",
+						label: t("menu.removeCard"),
+						onPick: () => {
+							canvas.removeCard(cardId);
+							close();
+						}
+					});
+				} else if (menu.kind === "frame" && menu.targetId !== void 0) {
+					const groupId = menu.targetId;
+					items.push({
+						key: "sync",
+						label: t("menu.syncGroup"),
+						onPick: () => {
+							syncGroup(groupId);
+							close();
+						}
+					});
+					items.push({
+						key: "remove-group",
+						label: t("menu.removeGroup"),
+						onPick: () => {
+							removeGroup(groupId);
+							close();
+						}
+					});
+				}
+				return {
+					left: menu.left,
+					top: menu.top,
+					...title !== void 0 ? { title } : {},
+					items
+				};
+			}, [
+				menu,
+				workspaces.items,
+				sessions,
+				boardSessionIds,
+				wsFrames,
+				wsTitles,
+				canvasState.cards
+			]);
 			const savedCamera = canvas.savedCamera(INBOX_BOARD_ID);
-			const hasCards = Object.keys(visibleCards).length > 0;
+			const hasContent = Object.keys(visibleCards).length > 0 || Object.keys(wsFrames).length > 0;
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+				ref: wrapperRef,
 				className: talk_map_module_css_default["canvas"],
 				onDoubleClick: (event) => {
 					if (event.target.closest(".react-flow__pane") === null) return;
-					openDraftAt(event.clientX, event.clientY);
+					const position = screenToFlowPosition({
+						x: event.clientX,
+						y: event.clientY
+					});
+					openDraftAt(position.x, position.y);
 				},
 				onContextMenu: (event) => {
 					event.preventDefault();
+				},
+				onClick: () => {
+					if (menu !== null) setMenu(null);
 				},
 				children: [
 					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)(index, {
@@ -12440,10 +12718,17 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						edges,
 						nodeTypes,
 						onNodesChange,
-						onNodeDragStop,
 						onConnectEnd,
 						onNodeDoubleClick: (_event, node) => {
 							if (node.type === "sessionCard" && !node.data.ghost) openSession(node.data.sessionId);
+						},
+						onPaneContextMenu: (event) => {
+							openMenu(event, "pane");
+						},
+						onNodeContextMenu: (event, node) => {
+							if (node.type === "sessionCard") openMenu(event, "card", node.id);
+							else if (node.type === "wsFrame") openMenu(event, "frame", node.id.slice(6));
+							else event.preventDefault();
 						},
 						onMoveEnd: (_event, viewport) => {
 							canvas.setCamera(INBOX_BOARD_ID, viewport);
@@ -12456,54 +12741,72 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						selectionOnDrag: true,
 						minZoom: .1,
 						proOptions: { hideAttribution: true },
-						...savedCamera !== void 0 ? { defaultViewport: savedCamera } : { fitView: hasCards },
+						...savedCamera !== void 0 ? { defaultViewport: savedCamera } : { fitView: hasContent },
 						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(Background, {
 							variant: BackgroundVariant.Dots,
 							gap: GRID,
 							size: 1
 						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(Controls, { showInteractive: false })]
 					}),
-					selectedCardIds.length > 0 || selectedFrameWs.length > 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
-						className: talk_map_module_css_default["colorToolbar"],
-						role: "toolbar",
-						"aria-label": t("color.toolbar"),
-						children: [
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-								className: talk_map_module_css_default["colorToolbarLabel"],
-								children: t("color.toolbar")
-							}),
-							COLOR_TAGS.map((tag) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-								type: "button",
-								className: talk_map_module_css_default["colorSwatch"],
-								style: { background: tag.swatch },
-								title: tag.id,
-								"aria-label": tag.id,
-								onClick: () => {
-									applyColor(tag.id);
-								}
-							}, tag.id)),
-							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
-								type: "button",
-								className: `${talk_map_module_css_default["colorSwatch"]} ${talk_map_module_css_default["colorSwatchClear"]}`,
-								title: t("color.clear"),
-								"aria-label": t("color.clear"),
-								onClick: () => {
-									applyColor(void 0);
-								},
-								children: "×"
-							})
-						]
+					selectedIds.size > 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ColorToolbar, {
+						selectedIds,
+						visibleCards
 					}) : null,
-					hasCards || draft !== null ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+					hasContent || draft !== null ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: talk_map_module_css_default["emptyHint"],
 						children: t("map.empty")
 					}),
+					menuState !== null ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ContextMenu, {
+						menu: menuState,
+						onClose: () => {
+							setMenu(null);
+						}
+					}) : null,
 					pendingSpawn !== null ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(SpawnPreview, {
 						pending: pendingSpawn,
 						onClose: () => {
 							setPendingSpawn(null);
 						}
 					}) : null
+				]
+			});
+		}
+		function ColorToolbar(props) {
+			const selectedCardIds = [...props.selectedIds].filter((id) => props.visibleCards[id] !== void 0);
+			const selectedFrameWs = [...props.selectedIds].filter((id) => id.startsWith("frame-")).map((id) => id.slice(6));
+			const applyColor = (colorTag) => {
+				if (selectedCardIds.length > 0) canvas.setCardsColor(selectedCardIds, colorTag);
+				for (const workspaceId of selectedFrameWs) canvas.setWorkspaceColor(workspaceId, colorTag);
+			};
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+				className: talk_map_module_css_default["colorToolbar"],
+				role: "toolbar",
+				"aria-label": t("color.toolbar"),
+				children: [
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+						className: talk_map_module_css_default["colorToolbarLabel"],
+						children: t("color.toolbar")
+					}),
+					COLOR_TAGS.map((tag) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+						type: "button",
+						className: talk_map_module_css_default["colorSwatch"],
+						style: { background: tag.swatch },
+						title: tag.id,
+						"aria-label": tag.id,
+						onClick: () => {
+							applyColor(tag.id);
+						}
+					}, tag.id)),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+						type: "button",
+						className: `${talk_map_module_css_default["colorSwatch"]} ${talk_map_module_css_default["colorSwatchClear"]}`,
+						title: t("color.clear"),
+						"aria-label": t("color.clear"),
+						onClick: () => {
+							applyColor(void 0);
+						},
+						children: "×"
+					})
 				]
 			});
 		}
@@ -12688,6 +12991,19 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					order: 100,
 					label: () => t("map.title")
 				}, MapOverlay));
+				ctx.effect(() => {
+					const onKeyDown = (event) => {
+						if (event.altKey && event.code === "KeyF" && !event.metaKey && !event.ctrlKey) {
+							event.preventDefault();
+							event.stopPropagation();
+							mapUi.toggle();
+						}
+					};
+					window.addEventListener("keydown", onKeyDown, { capture: true });
+					return () => {
+						window.removeEventListener("keydown", onKeyDown, { capture: true });
+					};
+				}, "dsh-talk-map: alt+f shortcut");
 			} catch (error) {
 				console.error("[dsh-talk-map] client apply failed:", error);
 			}

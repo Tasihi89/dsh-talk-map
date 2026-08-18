@@ -1,35 +1,35 @@
 /**
- * The board: cards ⨝ sessions rendered through React Flow, grouped visually
- * by workspace (derived frames), with an in-place draft composer.
+ * The board. Import-based: nothing lands here automatically — the user
+ * imports a workspace (frame + its sessions as cards), imports single
+ * conversations, or creates new ones on the canvas (draft card / fork edge).
  *
- * Interaction model: RIGHT-button (or middle) drag pans; left drag is box
- * selection on the pane and node drag on cards; a frame is dragged by its
- * label chip and carries every member card with it. Dropping a card inside
- * another frame adopts it into that group — a map-level membership override
- * (dsh @rc.6 has no cross-workspace session move RPC; the sidebar keeps its
- * own truth).
+ * Groups are containers: a member card cannot be dragged out of its frame
+ * (drag clamps at the border); dragging the frame carries every member;
+ * shrinking the frame hides members that no longer fit and the label shows
+ * "…+N" — the cards are still there, just out of view. Membership changes
+ * go through the right-click menu.
  *
- * Position law: manual placement is sacred. The writes to card positions are
- * (1) the user's own drag, (2) a frame drag translating its members,
- * (3) grid placement of a session that has no card yet, (4) the one-time
- * layout-v2 migration, (5) a draft card sent at its own spot.
+ * Interaction: right/middle-drag pans, plain right-click opens the context
+ * menu, left-drag box-selects on the pane and drags nodes.
  */
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Background, BackgroundVariant, Controls, ReactFlow, ReactFlowProvider,
-  useReactFlow, type Edge, type FinalConnectionState, type Node, type NodeChange, type Viewport,
+  useReactFlow, type Edge, type FinalConnectionState, type NodeChange, type Viewport,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import type { RootSlotStandardProps, SessionListState, WorkspaceListState } from './dsh.ts'
-import type { Card } from '../shared/model.ts'
+import type { Card, FrameGeometry } from '../shared/model.ts'
 import { canvas, INBOX_BOARD_ID, newCardId, type CanvasState } from './canvas-store.ts'
 import { COLOR_TAGS } from './colors.ts'
 import { getServices, mapUi } from './map-state.ts'
+import { ContextMenu, type MenuItem, type MenuState } from './ContextMenu.tsx'
 import { DraftCardNode, type DraftCardNodeType } from './DraftCard.tsx'
 import { SessionCardNode, type SessionCardData, type SessionCardNodeType } from './SessionCard.tsx'
 import { SpawnPreview, type PendingSpawn } from './SpawnPreview.tsx'
 import { WsFrameNode, type WsFrameNodeType } from './WsFrame.tsx'
 import { t } from './i18n.ts'
+import { talkMapApi } from './api.ts'
 import { useDsDarkTheme } from './use-dark.ts'
 import styles from './talk-map.module.css'
 
@@ -41,11 +41,9 @@ const CARD_H = 120
 const GAP_X = 48
 const GAP_Y = 56
 const COLS = 3
-const REGION_GAP = 200
 const FRAME_PAD = 32
 const FRAME_LABEL_H = 30
-const UNGROUPED = '__ungrouped__'
-const LAYOUT_VERSION = 2
+const LAYOUT_VERSION = 3
 
 type TalkMapNode = SessionCardNodeType | WsFrameNodeType | DraftCardNodeType
 
@@ -61,25 +59,12 @@ function placeableSessionIds(sessions: SessionListState): string[] {
   })
 }
 
-interface WsEntry {
-  id: string
-  title: string
-}
-
-/** sessionId → workspaceId, from the workspace registry's own accounting. */
 function sessionWorkspaceIndex(workspaces: WorkspaceListState): Map<string, string> {
   const index = new Map<string, string>()
   for (const workspace of workspaces.items) {
     for (const sessionId of workspace.sessionIds) index.set(sessionId, workspace.workspaceId)
   }
   return index
-}
-
-function workspaceEntries(workspaces: WorkspaceListState): WsEntry[] {
-  return [
-    ...workspaces.items.map(item => ({ id: item.workspaceId, title: item.title })),
-    { id: UNGROUPED, title: t('frame.ungrouped') },
-  ]
 }
 
 function gridPosition(origin: { x: number; y: number }, index: number): { x: number; y: number } {
@@ -91,162 +76,64 @@ function gridPosition(origin: { x: number; y: number }, index: number): { x: num
   }
 }
 
-/**
- * Layout-v2 migration: place EVERY known session into its workspace region.
- * Cards whose session no longer exists keep their spot (ghosts stay put).
- */
-function planGroupedFull(
-  sessions: SessionListState,
-  sessionWs: Map<string, string>,
-  wsList: WsEntry[],
-  existingCards: Readonly<Record<string, Card>>,
-): Record<string, Card> {
-  const placeable = placeableSessionIds(sessions)
-  const bySession = new Map<string, string>()
-  for (const [cardId, card] of Object.entries(existingCards)) {
-    if (!bySession.has(card.sessionId)) bySession.set(card.sessionId, cardId)
+/** Frame rect that fits a set of member cards. */
+function fitRect(members: Card[]): FrameGeometry {
+  const minX = Math.min(...members.map(card => card.x))
+  const minY = Math.min(...members.map(card => card.y))
+  const maxX = Math.max(...members.map(card => card.x + CARD_W))
+  const maxY = Math.max(...members.map(card => card.y + CARD_H))
+  return {
+    x: minX - FRAME_PAD,
+    y: minY - FRAME_PAD - FRAME_LABEL_H,
+    width: maxX - minX + FRAME_PAD * 2,
+    height: maxY - minY + FRAME_PAD * 2 + FRAME_LABEL_H,
   }
-  const plan: Record<string, Card> = {}
-  let cursorX = 0
-  for (const workspace of wsList) {
-    const members = placeable
-      .filter(id => (sessionWs.get(id) ?? UNGROUPED) === workspace.id)
-      .sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0))
-    if (members.length === 0) continue
-    members.forEach((sessionId, index) => {
-      const position = gridPosition({ x: cursorX, y: 0 }, index)
-      const cardId = bySession.get(sessionId) ?? newCardId()
-      const previous = existingCards[cardId]
-      plan[cardId] = {
-        boardId: INBOX_BOARD_ID,
-        sessionId,
-        x: position.x,
-        y: position.y,
-        createdAt: previous?.createdAt ?? Date.now(),
-        ...(previous?.colorTag !== undefined ? { colorTag: previous.colorTag } : {}),
-      }
-    })
-    cursorX += COLS * (CARD_W + GAP_X) - GAP_X + REGION_GAP
-  }
-  return plan
 }
 
-/** Incremental placement for sessions that appeared after the migration. */
-function planGroupedIncremental(
-  missing: string[],
-  sessions: SessionListState,
-  sessionWs: Map<string, string>,
-  existingCards: Readonly<Record<string, Card>>,
-  wsOfCard: (card: Card) => string,
-): Record<string, Card> {
-  interface Box { minX: number; minY: number; maxX: number; maxY: number }
-  const boxes = new Map<string, Box>()
-  let globalMaxX = 0
-  for (const card of Object.values(existingCards)) {
-    const workspaceId = wsOfCard(card)
-    const box = boxes.get(workspaceId) ?? { minX: card.x, minY: card.y, maxX: card.x, maxY: card.y }
-    box.minX = Math.min(box.minX, card.x)
-    box.minY = Math.min(box.minY, card.y)
-    box.maxX = Math.max(box.maxX, card.x)
-    box.maxY = Math.max(box.maxY, card.y)
-    boxes.set(workspaceId, box)
-    globalMaxX = Math.max(globalMaxX, card.x + CARD_W)
-  }
-  const plan: Record<string, Card> = {}
-  const grouped = new Map<string, string[]>()
-  for (const sessionId of missing) {
-    const workspaceId = sessionWs.get(sessionId) ?? UNGROUPED
-    grouped.set(workspaceId, [...grouped.get(workspaceId) ?? [], sessionId])
-  }
-  let newRegionX = globalMaxX + REGION_GAP
-  for (const [workspaceId, members] of grouped) {
-    const sorted = members.sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0))
-    const box = boxes.get(workspaceId)
-    const origin = box !== undefined
-      ? { x: box.minX, y: box.maxY + CARD_H + GAP_Y }
-      : { x: newRegionX, y: 0 }
-    if (box === undefined) newRegionX += COLS * (CARD_W + GAP_X) - GAP_X + REGION_GAP
-    sorted.forEach((sessionId, index) => {
-      const position = gridPosition(origin, index)
-      plan[newCardId()] = {
-        boardId: INBOX_BOARD_ID,
-        sessionId,
-        x: position.x,
-        y: position.y,
-        createdAt: Date.now(),
-      }
-    })
-  }
-  return plan
+/** Whether a card is fully inside its frame's body. */
+function insideFrame(card: { x: number; y: number }, rect: FrameGeometry): boolean {
+  return card.x >= rect.x
+    && card.y >= rect.y + FRAME_LABEL_H
+    && card.x + CARD_W <= rect.x + rect.width
+    && card.y + CARD_H <= rect.y + rect.height
 }
 
-interface FrameRect {
-  workspaceId: string
-  title: string
-  count: number
-  x: number
-  y: number
-  width: number
-  height: number
+/** Clamp a card position so the card stays fully inside the frame body. */
+function clampToFrame(x: number, y: number, rect: FrameGeometry): { x: number; y: number } {
+  const minX = rect.x + 4
+  const maxX = rect.x + rect.width - CARD_W - 4
+  const minY = rect.y + FRAME_LABEL_H + 4
+  const maxY = rect.y + rect.height - CARD_H - 4
+  return {
+    x: Math.min(Math.max(x, minX), Math.max(minX, maxX)),
+    y: Math.min(Math.max(y, minY), Math.max(minY, maxY)),
+  }
 }
 
-function frameRects(
-  cards: Readonly<Record<string, Card>>,
-  wsOfCard: (card: Card) => string,
-  wsList: WsEntry[],
-  manual: Readonly<Record<string, { x: number; y: number; width: number; height: number }>> | undefined,
-): FrameRect[] {
-  const byWs = new Map<string, Card[]>()
-  for (const card of Object.values(cards)) {
-    if (card.boardId !== INBOX_BOARD_ID) continue
-    const workspaceId = wsOfCard(card)
-    byWs.set(workspaceId, [...byWs.get(workspaceId) ?? [], card])
-  }
-  const titles = new Map(wsList.map(entry => [entry.id, entry.title]))
-  const rects: FrameRect[] = []
-  for (const [workspaceId, members] of byWs) {
-    if (members.length === 0) continue
-    const sized = manual?.[workspaceId]
-    if (sized !== undefined) {
-      rects.push({
-        workspaceId,
-        title: titles.get(workspaceId) ?? workspaceId,
-        count: members.length,
-        ...sized,
-      })
-      continue
-    }
-    const minX = Math.min(...members.map(card => card.x))
-    const minY = Math.min(...members.map(card => card.y))
-    const maxX = Math.max(...members.map(card => card.x + CARD_W))
-    const maxY = Math.max(...members.map(card => card.y + CARD_H))
-    rects.push({
-      workspaceId,
-      title: titles.get(workspaceId) ?? workspaceId,
-      count: members.length,
-      x: minX - FRAME_PAD,
-      y: minY - FRAME_PAD - FRAME_LABEL_H,
-      width: maxX - minX + FRAME_PAD * 2,
-      height: maxY - minY + FRAME_PAD * 2 + FRAME_LABEL_H,
-    })
-  }
-  // Manually sized frames survive even with no member cards on the board.
-  for (const [workspaceId, sized] of Object.entries(manual ?? {})) {
-    if (byWs.has(workspaceId)) continue
-    rects.push({
-      workspaceId,
-      title: titles.get(workspaceId) ?? workspaceId,
-      count: 0,
-      ...sized,
-    })
-  }
-  return rects
+/** Grow a frame just enough to contain one more card. */
+function grownRect(rect: FrameGeometry, card: { x: number; y: number }): FrameGeometry {
+  const minX = Math.min(rect.x, card.x - FRAME_PAD)
+  const minY = Math.min(rect.y, card.y - FRAME_PAD - FRAME_LABEL_H)
+  const maxX = Math.max(rect.x + rect.width, card.x + CARD_W + FRAME_PAD)
+  const maxY = Math.max(rect.y + rect.height, card.y + CARD_H + FRAME_PAD)
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
 }
 
 interface DraftState {
   x: number
   y: number
   workspaceId?: string
+  groupId?: string
+}
+
+interface MenuContext {
+  left: number
+  top: number
+  flowX: number
+  flowY: number
+  kind: 'pane' | 'card' | 'frame'
+  targetId?: string
+  view: 'root' | 'import-ws' | 'import-session' | 'move-group'
 }
 
 function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
@@ -258,43 +145,54 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set())
   const [pendingSpawn, setPendingSpawn] = useState<PendingSpawn | null>(null)
   const [draft, setDraft] = useState<DraftState | null>(null)
+  const [menu, setMenu] = useState<MenuContext | null>(null)
   const framePosRef = useRef<Record<string, { x: number; y: number }>>({})
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
 
   const sessionWs = useMemo(() => sessionWorkspaceIndex(workspaces), [workspaces])
-  const wsList = useMemo(() => workspaceEntries(workspaces), [workspaces])
+  const wsTitles = useMemo(
+    () => new Map(workspaces.items.map(item => [item.workspaceId, item.title])),
+    [workspaces],
+  )
   const workspacesReady = workspaces.baselinesReady !== false
 
-  const wsOfCard = useMemo(() => {
-    return (card: Card): string => card.wsOverride ?? sessionWs.get(card.sessionId) ?? UNGROUPED
-  }, [sessionWs])
-
+  const wsFrames = canvasState.global?.wsFrames ?? {}
   const layoutVersion = canvasState.global?.layoutVersion ?? 1
-  const migrationPending = canvasState.phase === 'ready' && layoutVersion < LAYOUT_VERSION
 
-  // One-time layout-v2 migration: regroup everything by workspace. Runs once
-  // (guarded by the persisted layoutVersion stamp).
+  // Migration v3 → the import-based world: existing cards keep their spots,
+  // get explicit group membership stamped from the sidebar accounting, and
+  // every populated group gets a stored frame. Runs once.
   useEffect(() => {
-    if (!migrationPending || !workspacesReady) return
-    if (workspaces.items.length === 0 && sessions.ids.length === 0) return
+    if (canvasState.phase !== 'ready' || layoutVersion >= LAYOUT_VERSION || !workspacesReady) return
+    const patches: Record<string, Card> = {}
+    const effective: Record<string, Card> = {}
     for (const [cardId, card] of Object.entries(canvasState.cards)) {
-      if (sessions.byId[card.sessionId]?.blank === true) canvas.removeCard(cardId)
+      let next = card
+      if (card.wsOverride === undefined) {
+        const home = sessionWs.get(card.sessionId)
+        if (home !== undefined) {
+          next = { ...card, wsOverride: home }
+          patches[cardId] = next
+        }
+      }
+      effective[cardId] = next
     }
-    const plan = planGroupedFull(sessions, sessionWs, wsList, canvasState.cards)
-    if (Object.keys(plan).length > 0) canvas.addCards(plan)
-    canvas.patchGlobalNow({ layoutVersion: LAYOUT_VERSION })
-  }, [migrationPending, workspacesReady, sessions, sessionWs, wsList, canvasState.cards])
+    const byGroup = new Map<string, Card[]>()
+    for (const card of Object.values(effective)) {
+      if (card.wsOverride === undefined) continue
+      byGroup.set(card.wsOverride, [...byGroup.get(card.wsOverride) ?? [], card])
+    }
+    const framesNext = { ...canvasState.global?.wsFrames }
+    for (const [groupId, members] of byGroup) {
+      if (framesNext[groupId] === undefined && members.length > 0) {
+        framesNext[groupId] = fitRect(members)
+      }
+    }
+    if (Object.keys(patches).length > 0) canvas.addCards(patches)
+    canvas.patchGlobalNow({ layoutVersion: LAYOUT_VERSION, wsFrames: framesNext })
+  }, [canvasState.phase, layoutVersion, workspacesReady, canvasState.cards, canvasState.global, sessionWs])
 
-  // Incremental placement of card-less sessions (post-migration only).
-  useEffect(() => {
-    if (canvasState.phase !== 'ready' || migrationPending || !workspacesReady) return
-    const placed = new Set(Object.values(canvasState.cards).map(card => card.sessionId))
-    const missing = placeableSessionIds(sessions).filter(id => !placed.has(id))
-    if (missing.length === 0) return
-    canvas.addCards(planGroupedIncremental(missing, sessions, sessionWs, canvasState.cards, wsOfCard))
-  }, [canvasState.phase, migrationPending, workspacesReady, canvasState.cards, sessions, sessionWs, wsOfCard])
-
-  // Cards pointing at blank (empty-log) sessions are noise — hidden from the
-  // board and from frame bounding boxes.
+  // Cards pointing at blank (empty-log) sessions are noise.
   const visibleCards = useMemo(() => {
     const out: Record<string, Card> = {}
     for (const [cardId, card] of Object.entries(canvasState.cards)) {
@@ -304,33 +202,31 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     return out
   }, [canvasState.cards, sessions])
 
-  const sessionIdToCardId = useMemo(() => {
-    const index = new Map<string, string>()
+  const membersByGroup = useMemo(() => {
+    const index = new Map<string, string[]>()
     for (const [cardId, card] of Object.entries(visibleCards)) {
-      if (!index.has(card.sessionId)) index.set(card.sessionId, cardId)
+      if (card.wsOverride === undefined) continue
+      index.set(card.wsOverride, [...index.get(card.wsOverride) ?? [], cardId])
     }
     return index
   }, [visibleCards])
 
-  const frames = useMemo(
-    () => frameRects(visibleCards, wsOfCard, wsList, canvasState.global?.wsFrames),
-    [visibleCards, wsOfCard, wsList, canvasState.global],
-  )
-
-  const membersByWs = useMemo(() => {
-    const index = new Map<string, string[]>()
+  /** Member cards hidden because the frame no longer fits them. */
+  const hiddenCardIds = useMemo(() => {
+    const hidden = new Set<string>()
     for (const [cardId, card] of Object.entries(visibleCards)) {
-      const workspaceId = wsOfCard(card)
-      index.set(workspaceId, [...index.get(workspaceId) ?? [], cardId])
+      if (card.wsOverride === undefined) continue
+      const rect = wsFrames[card.wsOverride]
+      if (rect !== undefined && !insideFrame(card, rect)) hidden.add(cardId)
     }
-    return index
-  }, [visibleCards, wsOfCard])
+    return hidden
+  }, [visibleCards, wsFrames])
 
   useEffect(() => {
     framePosRef.current = Object.fromEntries(
-      frames.map(frame => [`frame-${frame.workspaceId}`, { x: frame.x, y: frame.y }]),
+      Object.entries(wsFrames).map(([groupId, rect]) => [`frame-${groupId}`, { x: rect.x, y: rect.y }]),
     )
-  }, [frames])
+  }, [wsFrames])
 
   // With a selection active, Esc clears it instead of closing the map.
   const hasSelection = selectedIds.size > 0
@@ -352,37 +248,35 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
 
   const nodes = useMemo<TalkMapNode[]>(() => {
     const wsColors = canvasState.global?.wsColors ?? {}
-    const frameNodes: TalkMapNode[] = frames.map(frame => ({
-      id: `frame-${frame.workspaceId}`,
-      type: 'wsFrame' as const,
-      position: { x: frame.x, y: frame.y },
-      data: {
-        workspaceId: frame.workspaceId,
-        title: frame.title,
-        count: frame.count,
-        width: frame.width,
-        height: frame.height,
-        ...(wsColors[frame.workspaceId] !== undefined ? { colorTag: wsColors[frame.workspaceId] } : {}),
-        onResizeEnd: (size: { width: number; height: number }) => {
-          canvas.setWsFrameRect(frame.workspaceId, {
-            x: frame.x,
-            y: frame.y,
-            width: size.width,
-            height: size.height,
-          })
+    const frameNodes: TalkMapNode[] = Object.entries(wsFrames).map(([groupId, rect]) => {
+      const members = membersByGroup.get(groupId) ?? []
+      const hiddenCount = members.filter(id => hiddenCardIds.has(id)).length
+      return {
+        id: `frame-${groupId}`,
+        type: 'wsFrame' as const,
+        position: { x: rect.x, y: rect.y },
+        data: {
+          workspaceId: groupId,
+          title: wsTitles.get(groupId) ?? t('frame.unknown'),
+          count: members.length,
+          hiddenCount,
+          width: rect.width,
+          height: rect.height,
+          ...(wsColors[groupId] !== undefined ? { colorTag: wsColors[groupId] } : {}),
+          onResizeEnd: (size: { width: number; height: number }) => {
+            canvas.setWsFrameRect(groupId, { x: rect.x, y: rect.y, width: size.width, height: size.height })
+          },
         },
-      },
-      draggable: true,
-      selectable: true,
-      focusable: false,
-      selected: selectedIds.has(`frame-${frame.workspaceId}`),
-      zIndex: -1,
-      // Body center click-through; the label chip, border strips, and the
-      // resize handle re-enable pointer events.
-      style: { pointerEvents: 'none' as const },
-    }))
+        draggable: true,
+        selectable: true,
+        focusable: false,
+        selected: selectedIds.has(`frame-${groupId}`),
+        zIndex: -1,
+        style: { pointerEvents: 'none' as const },
+      }
+    })
     const cardNodes: TalkMapNode[] = Object.entries(visibleCards)
-      .filter(([, card]) => card.boardId === INBOX_BOARD_ID)
+      .filter(([cardId, card]) => card.boardId === INBOX_BOARD_ID && !hiddenCardIds.has(cardId))
       .map(([cardId, card]) => {
         const summary = sessions.byId[card.sessionId]
         const digest = canvasState.digests[card.sessionId]
@@ -423,17 +317,31 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
               path: item.path,
             })),
             ...(draft.workspaceId !== undefined ? { defaultWorkspaceId: draft.workspaceId } : {}),
+            ...(draft.groupId !== undefined ? { groupId: draft.groupId } : {}),
             onClose: () => { setDraft(null) },
           },
         }]
     return [...frameNodes, ...cardNodes, ...draftNodes]
-  }, [frames, visibleCards, canvasState.digests, canvasState.global, sessions, selectedIds, draft, workspaces.items])
+  }, [wsFrames, membersByGroup, hiddenCardIds, wsTitles, visibleCards, canvasState.digests, canvasState.global, sessions, selectedIds, draft, workspaces.items])
+
+  const sessionIdToCardId = useMemo(() => {
+    const index = new Map<string, string>()
+    for (const [cardId, card] of Object.entries(visibleCards)) {
+      if (!hiddenCardIds.has(cardId) && !index.has(card.sessionId)) index.set(card.sessionId, cardId)
+    }
+    return index
+  }, [visibleCards, hiddenCardIds])
 
   const edges = useMemo<Edge[]>(() => {
     const out: Edge[] = []
+    const present = new Set(sessionIdToCardId.values())
+    for (const [cardId] of Object.entries(visibleCards)) {
+      if (!hiddenCardIds.has(cardId)) present.add(cardId)
+    }
     const injectionPairs = new Set<string>()
     for (const [edgeId, edge] of Object.entries(canvasState.edges)) {
       injectionPairs.add(`${edge.fromCardId}->${edge.toCardId}`)
+      if (!present.has(edge.fromCardId) || !present.has(edge.toCardId)) continue
       out.push({
         id: edgeId,
         source: edge.fromCardId,
@@ -443,6 +351,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       })
     }
     for (const [cardId, card] of Object.entries(visibleCards)) {
+      if (hiddenCardIds.has(cardId)) continue
       const parentSessionId = sessions.byId[card.sessionId]?.parentId
       if (parentSessionId === undefined) continue
       const parentCardId = sessionIdToCardId.get(parentSessionId)
@@ -458,7 +367,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       })
     }
     return out
-  }, [visibleCards, canvasState.edges, sessions, sessionIdToCardId])
+  }, [visibleCards, hiddenCardIds, canvasState.edges, sessions, sessionIdToCardId])
 
   const onNodesChange = (changes: NodeChange<TalkMapNode>[]): void => {
     for (const change of changes) {
@@ -468,32 +377,38 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
             ? previous
             : { ...previous, x: change.position?.x ?? previous.x, y: change.position?.y ?? previous.y })
         } else if (change.id.startsWith('frame-')) {
-          // Frame drag: translate every member card by the same delta.
           const previous = framePosRef.current[change.id]
-          const workspaceId = change.id.slice('frame-'.length)
+          const groupId = change.id.slice('frame-'.length)
           if (previous !== undefined) {
             const dx = change.position.x - previous.x
             const dy = change.position.y - previous.y
             if (dx !== 0 || dy !== 0) {
-              for (const cardId of membersByWs.get(workspaceId) ?? []) {
+              for (const cardId of membersByGroup.get(groupId) ?? []) {
                 const card = canvasState.cards[cardId]
                 if (card !== undefined) canvas.moveCard(cardId, card.x + dx, card.y + dy)
               }
             }
           }
           framePosRef.current[change.id] = { x: change.position.x, y: change.position.y }
-          // A manually sized frame carries its own geometry.
-          const manual = canvasState.global?.wsFrames?.[workspaceId]
-          if (manual !== undefined) {
-            canvas.setWsFrameRect(workspaceId, {
+          const rect = wsFrames[groupId]
+          if (rect !== undefined) {
+            canvas.setWsFrameRect(groupId, {
               x: change.position.x,
               y: change.position.y,
-              width: manual.width,
-              height: manual.height,
+              width: rect.width,
+              height: rect.height,
             })
           }
         } else {
-          canvas.moveCard(change.id, change.position.x, change.position.y)
+          // Member cards stay inside their frame: clamp at the border.
+          const card = canvasState.cards[change.id]
+          const rect = card?.wsOverride !== undefined ? wsFrames[card.wsOverride] : undefined
+          if (card !== undefined && rect !== undefined) {
+            const clamped = clampToFrame(change.position.x, change.position.y, rect)
+            canvas.moveCard(change.id, clamped.x, clamped.y)
+          } else {
+            canvas.moveCard(change.id, change.position.x, change.position.y)
+          }
         }
       } else if (change.type === 'select') {
         setSelectedIds((previous) => {
@@ -504,23 +419,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         })
       }
     }
-  }
-
-  const onNodeDragStop = (_event: unknown, node: Node): void => {
-    if (node.type !== 'sessionCard') return
-    const card = canvasState.cards[node.id]
-    if (card === undefined) return
-    const centerX = node.position.x + CARD_W / 2
-    const centerY = node.position.y + CARD_H / 2
-    const target = frames.find(rect =>
-      centerX >= rect.x && centerX <= rect.x + rect.width
-      && centerY >= rect.y && centerY <= rect.y + rect.height)
-    if (target === undefined) return
-    const current = wsOfCard(card)
-    if (target.workspaceId === current) return
-    const home = sessionWs.get(card.sessionId) ?? UNGROUPED
-    // Dropping back home clears the override instead of recording one.
-    canvas.setCardWorkspaceOverride(node.id, target.workspaceId === home ? undefined : target.workspaceId)
   }
 
   const onConnectEnd = (
@@ -541,10 +439,12 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         : undefined
     if (client === undefined) return
     const position = screenToFlowPosition(client)
+    const group = groupAtPoint(position.x, position.y)
     setPendingSpawn({
       parent: { cardId: fromNodeId, sessionId: card.sessionId, title: summary.displayTitle },
       x: snap(position.x - CARD_W / 2),
       y: snap(position.y - CARD_H / 2),
+      ...(group !== undefined ? { wsOverride: group } : {}),
     })
   }
 
@@ -555,59 +455,308 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     services.sessions.open(sessionId)
   }
 
-  const openDraftAt = (clientX: number, clientY: number): void => {
-    const position = screenToFlowPosition({ x: clientX, y: clientY })
-    const x = snap(position.x - CARD_W / 2)
-    const y = snap(position.y - 40)
-    const frame = frames.find(rect =>
-      position.x >= rect.x && position.x <= rect.x + rect.width
-      && position.y >= rect.y && position.y <= rect.y + rect.height)
-    const workspaceId = frame !== undefined && frame.workspaceId !== UNGROUPED
-      ? frame.workspaceId
-      : undefined
-    setDraft({ x, y, ...(workspaceId !== undefined ? { workspaceId } : {}) })
+  const groupAtPoint = (x: number, y: number): string | undefined => {
+    for (const [groupId, rect] of Object.entries(wsFrames)) {
+      if (x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height) return groupId
+    }
+    return undefined
   }
 
-  // Color toolbar targets: selected cards + selected frames.
-  const selectedCardIds = useMemo(
-    () => [...selectedIds].filter(id => visibleCards[id] !== undefined),
-    [selectedIds, visibleCards],
-  )
-  const selectedFrameWs = useMemo(
-    () => [...selectedIds]
-      .filter(id => id.startsWith('frame-'))
-      .map(id => id.slice('frame-'.length)),
-    [selectedIds],
-  )
-  const applyColor = (colorTag: string | undefined): void => {
-    if (selectedCardIds.length > 0) canvas.setCardsColor(selectedCardIds, colorTag)
-    for (const workspaceId of selectedFrameWs) canvas.setWorkspaceColor(workspaceId, colorTag)
+  const openDraftAt = (flowX: number, flowY: number): void => {
+    const x = snap(flowX - CARD_W / 2)
+    const y = snap(flowY - 40)
+    const groupId = groupAtPoint(flowX, flowY)
+    const isWorkspace = groupId !== undefined && wsTitles.has(groupId)
+    setDraft({
+      x,
+      y,
+      ...(isWorkspace ? { workspaceId: groupId } : {}),
+      ...(groupId !== undefined ? { groupId } : {}),
+    })
   }
+
+  // ---- import actions -------------------------------------------------
+
+  const boardSessionIds = useMemo(
+    () => new Set(Object.values(canvasState.cards).map(card => card.sessionId)),
+    [canvasState.cards],
+  )
+
+  const importWorkspace = (workspaceId: string, atX: number, atY: number): void => {
+    const memberSessions = placeableSessionIds(sessions)
+      .filter(id => sessionWs.get(id) === workspaceId && !boardSessionIds.has(id))
+      .sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0))
+    const origin = { x: snap(atX), y: snap(atY) }
+    const added: Record<string, Card> = {}
+    const placed: Card[] = []
+    memberSessions.forEach((sessionId, index) => {
+      const position = gridPosition(origin, index)
+      const card: Card = {
+        boardId: INBOX_BOARD_ID,
+        sessionId,
+        x: position.x,
+        y: position.y,
+        wsOverride: workspaceId,
+        createdAt: Date.now(),
+      }
+      added[newCardId()] = card
+      placed.push(card)
+    })
+    if (placed.length > 0) canvas.addCards(added)
+    const rect = placed.length > 0
+      ? fitRect(placed)
+      : { x: origin.x - FRAME_PAD, y: origin.y - FRAME_PAD - FRAME_LABEL_H, width: 400, height: 260 }
+    canvas.setWsFrameRect(workspaceId, rect)
+  }
+
+  const importSession = (sessionId: string, atX: number, atY: number): void => {
+    const groupId = groupAtPoint(atX, atY)
+    const card: Card = {
+      boardId: INBOX_BOARD_ID,
+      sessionId,
+      x: snap(atX),
+      y: snap(atY),
+      ...(groupId !== undefined ? { wsOverride: groupId } : {}),
+      createdAt: Date.now(),
+    }
+    canvas.addCards({ [newCardId()]: card })
+  }
+
+  const syncGroup = (groupId: string): void => {
+    const rect = wsFrames[groupId]
+    if (rect === undefined) return
+    const fresh = placeableSessionIds(sessions)
+      .filter(id => sessionWs.get(id) === groupId && !boardSessionIds.has(id))
+    if (fresh.length === 0) return
+    const members = (membersByGroup.get(groupId) ?? [])
+      .map(id => canvasState.cards[id])
+      .filter((card): card is Card => card !== undefined)
+    const origin = members.length > 0
+      ? { x: Math.min(...members.map(card => card.x)), y: Math.max(...members.map(card => card.y)) + CARD_H + GAP_Y }
+      : { x: rect.x + FRAME_PAD, y: rect.y + FRAME_LABEL_H + FRAME_PAD }
+    const added: Record<string, Card> = {}
+    let grown = rect
+    fresh.forEach((sessionId, index) => {
+      const position = gridPosition(origin, index)
+      const card: Card = {
+        boardId: INBOX_BOARD_ID,
+        sessionId,
+        x: position.x,
+        y: position.y,
+        wsOverride: groupId,
+        createdAt: Date.now(),
+      }
+      added[newCardId()] = card
+      grown = grownRect(grown, card)
+    })
+    canvas.addCards(added)
+    canvas.setWsFrameRect(groupId, grown)
+  }
+
+  const moveCardToGroup = (cardId: string, groupId: string | undefined): void => {
+    canvas.setCardWorkspaceOverride(cardId, groupId)
+    if (groupId === undefined) return
+    const rect = wsFrames[groupId]
+    const card = canvasState.cards[cardId]
+    if (rect === undefined || card === undefined) return
+    if (!insideFrame(card, rect)) {
+      // Bring the card into view: clamp it into the frame, growing if packed.
+      const clamped = clampToFrame(card.x, card.y, rect)
+      canvas.moveCard(cardId, clamped.x, clamped.y)
+    }
+  }
+
+  const removeGroup = (groupId: string): void => {
+    for (const cardId of membersByGroup.get(groupId) ?? []) canvas.removeCard(cardId)
+    const framesNext = { ...wsFrames }
+    delete framesNext[groupId]
+    const colorsNext = { ...canvasState.global?.wsColors }
+    delete colorsNext[groupId]
+    canvas.patchGlobalNow({ wsFrames: framesNext, wsColors: colorsNext })
+  }
+
+  // ---- context menu ----------------------------------------------------
+
+  const openMenu = (event: React.MouseEvent | MouseEvent, kind: MenuContext['kind'], targetId?: string): void => {
+    event.preventDefault()
+    const wrapper = wrapperRef.current
+    if (wrapper === null) return
+    const bounds = wrapper.getBoundingClientRect()
+    const flow = screenToFlowPosition({ x: event.clientX, y: event.clientY })
+    setMenu({
+      left: event.clientX - bounds.left,
+      top: event.clientY - bounds.top,
+      flowX: flow.x,
+      flowY: flow.y,
+      kind,
+      ...(targetId !== undefined ? { targetId } : {}),
+      view: 'root',
+    })
+  }
+
+  const menuState: MenuState | null = useMemo(() => {
+    if (menu === null) return null
+    const close = (): void => { setMenu(null) }
+    const items: MenuItem[] = []
+    let title: string | undefined
+
+    if (menu.view === 'import-ws') {
+      title = t('menu.importWs')
+      const candidates = workspaces.items.filter(item => wsFrames[item.workspaceId] === undefined)
+      for (const item of candidates) {
+        items.push({
+          key: item.workspaceId,
+          label: item.title,
+          onPick: () => {
+            importWorkspace(item.workspaceId, menu.flowX, menu.flowY)
+            close()
+          },
+        })
+      }
+    } else if (menu.view === 'import-session') {
+      title = t('menu.importSession')
+      const candidates = placeableSessionIds(sessions)
+        .filter(id => !boardSessionIds.has(id))
+        .slice(0, 40)
+      for (const sessionId of candidates) {
+        items.push({
+          key: sessionId,
+          label: sessions.byId[sessionId]?.displayTitle ?? sessionId,
+          onPick: () => {
+            importSession(sessionId, menu.flowX, menu.flowY)
+            close()
+          },
+        })
+      }
+    } else if (menu.view === 'move-group') {
+      title = t('menu.moveGroup')
+      const cardId = menu.targetId
+      if (cardId !== undefined) {
+        for (const groupId of Object.keys(wsFrames)) {
+          items.push({
+            key: groupId,
+            label: wsTitles.get(groupId) ?? t('frame.unknown'),
+            onPick: () => {
+              moveCardToGroup(cardId, groupId)
+              close()
+            },
+          })
+        }
+        items.push({
+          key: '__none__',
+          label: t('menu.noGroup'),
+          onPick: () => {
+            moveCardToGroup(cardId, undefined)
+            close()
+          },
+        })
+      }
+    } else if (menu.kind === 'pane') {
+      items.push({
+        key: 'draft',
+        label: t('menu.newChat'),
+        onPick: () => {
+          openDraftAt(menu.flowX, menu.flowY)
+          close()
+        },
+      })
+      items.push({
+        key: 'import-ws',
+        label: `${t('menu.importWs')}…`,
+        onPick: () => { setMenu({ ...menu, view: 'import-ws' }) },
+      })
+      items.push({
+        key: 'import-session',
+        label: `${t('menu.importSession')}…`,
+        onPick: () => { setMenu({ ...menu, view: 'import-session' }) },
+      })
+    } else if (menu.kind === 'card' && menu.targetId !== undefined) {
+      const cardId = menu.targetId
+      const card = canvasState.cards[cardId]
+      items.push({
+        key: 'open',
+        label: t('menu.open'),
+        onPick: () => {
+          close()
+          if (card !== undefined) openSession(card.sessionId)
+        },
+      })
+      items.push({
+        key: 'digest',
+        label: t('card.refresh'),
+        onPick: () => {
+          close()
+          if (card !== undefined) void talkMapApi.refreshDigest(card.sessionId).catch(() => undefined)
+        },
+      })
+      items.push({
+        key: 'move',
+        label: `${t('menu.moveGroup')}…`,
+        onPick: () => { setMenu({ ...menu, view: 'move-group' }) },
+      })
+      items.push({
+        key: 'remove',
+        label: t('menu.removeCard'),
+        onPick: () => {
+          canvas.removeCard(cardId)
+          close()
+        },
+      })
+    } else if (menu.kind === 'frame' && menu.targetId !== undefined) {
+      const groupId = menu.targetId
+      items.push({
+        key: 'sync',
+        label: t('menu.syncGroup'),
+        onPick: () => {
+          syncGroup(groupId)
+          close()
+        },
+      })
+      items.push({
+        key: 'remove-group',
+        label: t('menu.removeGroup'),
+        onPick: () => {
+          removeGroup(groupId)
+          close()
+        },
+      })
+    }
+    return { left: menu.left, top: menu.top, ...(title !== undefined ? { title } : {}), items }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menu, workspaces.items, sessions, boardSessionIds, wsFrames, wsTitles, canvasState.cards])
 
   const savedCamera = canvas.savedCamera(INBOX_BOARD_ID)
-  const hasCards = Object.keys(visibleCards).length > 0
+  const hasContent = Object.keys(visibleCards).length > 0 || Object.keys(wsFrames).length > 0
 
   return (
     <div
+      ref={wrapperRef}
       className={styles['canvas']}
       onDoubleClick={(event) => {
         const target = event.target as HTMLElement
         if (target.closest('.react-flow__pane') === null) return
-        openDraftAt(event.clientX, event.clientY)
+        const position = screenToFlowPosition({ x: event.clientX, y: event.clientY })
+        openDraftAt(position.x, position.y)
       }}
       onContextMenu={(event) => { event.preventDefault() }}
+      onClick={() => { if (menu !== null) setMenu(null) }}
     >
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
-        onNodeDragStop={onNodeDragStop}
         onConnectEnd={onConnectEnd}
         onNodeDoubleClick={(_event, node) => {
           if (node.type === 'sessionCard' && !(node as SessionCardNodeType).data.ghost) {
             openSession((node as SessionCardNodeType).data.sessionId)
           }
+        }}
+        onPaneContextMenu={(event) => { openMenu(event as MouseEvent, 'pane') }}
+        onNodeContextMenu={(event, node) => {
+          if (node.type === 'sessionCard') openMenu(event, 'card', node.id)
+          else if (node.type === 'wsFrame') openMenu(event, 'frame', node.id.slice('frame-'.length))
+          else event.preventDefault()
         }}
         onMoveEnd={(_event, viewport: Viewport) => {
           canvas.setCamera(INBOX_BOARD_ID, viewport)
@@ -620,42 +769,63 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         selectionOnDrag
         minZoom={0.1}
         proOptions={{ hideAttribution: true }}
-        {...(savedCamera !== undefined ? { defaultViewport: savedCamera } : { fitView: hasCards })}
+        {...(savedCamera !== undefined ? { defaultViewport: savedCamera } : { fitView: hasContent })}
       >
         <Background variant={BackgroundVariant.Dots} gap={GRID} size={1} />
         <Controls showInteractive={false} />
       </ReactFlow>
-      {selectedCardIds.length > 0 || selectedFrameWs.length > 0
+      {selectedIds.size > 0
         ? (
-            <div className={styles['colorToolbar']} role="toolbar" aria-label={t('color.toolbar')}>
-              <span className={styles['colorToolbarLabel']}>{t('color.toolbar')}</span>
-              {COLOR_TAGS.map(tag => (
-                <button
-                  key={tag.id}
-                  type="button"
-                  className={styles['colorSwatch']}
-                  style={{ background: tag.swatch }}
-                  title={tag.id}
-                  aria-label={tag.id}
-                  onClick={() => { applyColor(tag.id) }}
-                />
-              ))}
-              <button
-                type="button"
-                className={`${styles['colorSwatch']} ${styles['colorSwatchClear']}`}
-                title={t('color.clear')}
-                aria-label={t('color.clear')}
-                onClick={() => { applyColor(undefined) }}
-              >
-                ×
-              </button>
-            </div>
+            <ColorToolbar
+              selectedIds={selectedIds}
+              visibleCards={visibleCards}
+            />
           )
         : null}
-      {hasCards || draft !== null ? null : <div className={styles['emptyHint']}>{t('map.empty')}</div>}
+      {hasContent || draft !== null ? null : <div className={styles['emptyHint']}>{t('map.empty')}</div>}
+      {menuState !== null ? <ContextMenu menu={menuState} onClose={() => { setMenu(null) }} /> : null}
       {pendingSpawn !== null
         ? <SpawnPreview pending={pendingSpawn} onClose={() => { setPendingSpawn(null) }} />
         : null}
+    </div>
+  )
+}
+
+function ColorToolbar(props: {
+  selectedIds: ReadonlySet<string>
+  visibleCards: Readonly<Record<string, Card>>
+}): React.JSX.Element {
+  const selectedCardIds = [...props.selectedIds].filter(id => props.visibleCards[id] !== undefined)
+  const selectedFrameWs = [...props.selectedIds]
+    .filter(id => id.startsWith('frame-'))
+    .map(id => id.slice('frame-'.length))
+  const applyColor = (colorTag: string | undefined): void => {
+    if (selectedCardIds.length > 0) canvas.setCardsColor(selectedCardIds, colorTag)
+    for (const workspaceId of selectedFrameWs) canvas.setWorkspaceColor(workspaceId, colorTag)
+  }
+  return (
+    <div className={styles['colorToolbar']} role="toolbar" aria-label={t('color.toolbar')}>
+      <span className={styles['colorToolbarLabel']}>{t('color.toolbar')}</span>
+      {COLOR_TAGS.map(tag => (
+        <button
+          key={tag.id}
+          type="button"
+          className={styles['colorSwatch']}
+          style={{ background: tag.swatch }}
+          title={tag.id}
+          aria-label={tag.id}
+          onClick={() => { applyColor(tag.id) }}
+        />
+      ))}
+      <button
+        type="button"
+        className={`${styles['colorSwatch']} ${styles['colorSwatchClear']}`}
+        title={t('color.clear')}
+        aria-label={t('color.clear')}
+        onClick={() => { applyColor(undefined) }}
+      >
+        ×
+      </button>
     </div>
   )
 }

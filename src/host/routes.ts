@@ -86,6 +86,7 @@ const spawnBody = z.object({
   boardId: z.string(),
   x: z.number(),
   y: z.number(),
+  wsOverride: z.string().optional(),
 })
 const refreshDigestBody = z.object({
   sessionId: z.string(),

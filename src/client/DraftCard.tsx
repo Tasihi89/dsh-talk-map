@@ -25,6 +25,8 @@ export interface DraftCardData extends Record<string, unknown> {
   workspaceOptions: { id: string; title: string; path: string }[]
   /** Preselected workspace (set when the double-click landed inside a frame). */
   defaultWorkspaceId?: string
+  /** Map group the draft was opened in — the new card's frame membership. */
+  groupId?: string
   onClose: () => void
 }
 
@@ -136,6 +138,7 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
           sessionId,
           x: snap(props.positionAbsoluteX),
           y: snap(props.positionAbsoluteY),
+          ...(data.groupId !== undefined ? { wsOverride: data.groupId } : {}),
           createdAt: Date.now(),
         },
       })
