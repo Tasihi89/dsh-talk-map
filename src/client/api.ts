@@ -49,6 +49,9 @@ export const talkMapApi = {
   refreshDigest(sessionId: string): Promise<{ sessionId: string; digest: Digest }> {
     return postJson('/talk-map/digest/refresh', { sessionId })
   },
+  ensureDir(path: string): Promise<{ ok: true; path: string }> {
+    return postJson('/talk-map/fs/ensure-dir', { path })
+  },
   getDefaults(): Promise<{
     model: { provider: string; model: string; reasoningEffort?: string } | null
     preset: string | null

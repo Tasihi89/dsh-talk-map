@@ -633,6 +633,24 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
+.menuSearch {
+  box-sizing: border-box;
+  width: calc(100% - 8px);
+  margin: 2px 4px 6px;
+  padding: 5px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 7px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.menuHint {
+  font-size: 11px;
+  color: var(--dsw-alias-label-dimmed);
+}
+
 .menuEmpty {
   padding: 8px 10px;
   font-size: 12px;

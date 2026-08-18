@@ -3,11 +3,9 @@
  * imports a workspace (frame + its sessions as cards), imports single
  * conversations, or creates new ones on the canvas (draft card / fork edge).
  *
- * Groups are containers: a member card cannot be dragged out of its frame
- * (drag clamps at the border); dragging the frame carries every member;
- * shrinking the frame hides members that no longer fit and the label shows
- * "…+N" — the cards are still there, just out of view. Membership changes
- * go through the right-click menu.
+ * Cards drag freely; a group's frame is derived from its members and
+ * stretches after them. Dragging the frame (label chip or border) carries
+ * every member. Membership changes go through the right-click menu.
  *
  * Interaction: right/middle-drag pans, plain right-click opens the context
  * menu, left-drag box-selects on the pane and drags nodes.
@@ -90,34 +88,6 @@ function fitRect(members: Card[]): FrameGeometry {
   }
 }
 
-/** Whether a card is fully inside its frame's body. */
-function insideFrame(card: { x: number; y: number }, rect: FrameGeometry): boolean {
-  return card.x >= rect.x
-    && card.y >= rect.y + FRAME_LABEL_H
-    && card.x + CARD_W <= rect.x + rect.width
-    && card.y + CARD_H <= rect.y + rect.height
-}
-
-/** Clamp a card position so the card stays fully inside the frame body. */
-function clampToFrame(x: number, y: number, rect: FrameGeometry): { x: number; y: number } {
-  const minX = rect.x + 4
-  const maxX = rect.x + rect.width - CARD_W - 4
-  const minY = rect.y + FRAME_LABEL_H + 4
-  const maxY = rect.y + rect.height - CARD_H - 4
-  return {
-    x: Math.min(Math.max(x, minX), Math.max(minX, maxX)),
-    y: Math.min(Math.max(y, minY), Math.max(minY, maxY)),
-  }
-}
-
-/** Grow a frame just enough to contain one more card. */
-function grownRect(rect: FrameGeometry, card: { x: number; y: number }): FrameGeometry {
-  const minX = Math.min(rect.x, card.x - FRAME_PAD)
-  const minY = Math.min(rect.y, card.y - FRAME_PAD - FRAME_LABEL_H)
-  const maxX = Math.max(rect.x + rect.width, card.x + CARD_W + FRAME_PAD)
-  const maxY = Math.max(rect.y + rect.height, card.y + CARD_H + FRAME_PAD)
-  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
-}
 
 interface DraftState {
   x: number
@@ -211,22 +181,24 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     return index
   }, [visibleCards])
 
-  /** Member cards hidden because the frame no longer fits them. */
-  const hiddenCardIds = useMemo(() => {
-    const hidden = new Set<string>()
-    for (const [cardId, card] of Object.entries(visibleCards)) {
-      if (card.wsOverride === undefined) continue
-      const rect = wsFrames[card.wsOverride]
-      if (rect !== undefined && !insideFrame(card, rect)) hidden.add(cardId)
+  // Frame geometry FOLLOWS its members (free dragging stretches the frame);
+  // the stored rect only positions a group that currently has no cards.
+  const frameGeometry = useMemo(() => {
+    const out: Record<string, FrameGeometry> = {}
+    for (const [groupId, stored] of Object.entries(wsFrames)) {
+      const members = (membersByGroup.get(groupId) ?? [])
+        .map(id => visibleCards[id])
+        .filter((card): card is Card => card !== undefined)
+      out[groupId] = members.length > 0 ? fitRect(members) : stored
     }
-    return hidden
-  }, [visibleCards, wsFrames])
+    return out
+  }, [wsFrames, membersByGroup, visibleCards])
 
   useEffect(() => {
     framePosRef.current = Object.fromEntries(
-      Object.entries(wsFrames).map(([groupId, rect]) => [`frame-${groupId}`, { x: rect.x, y: rect.y }]),
+      Object.entries(frameGeometry).map(([groupId, rect]) => [`frame-${groupId}`, { x: rect.x, y: rect.y }]),
     )
-  }, [wsFrames])
+  }, [frameGeometry])
 
   // With a selection active, Esc clears it instead of closing the map.
   const hasSelection = selectedIds.size > 0
@@ -248,9 +220,8 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
 
   const nodes = useMemo<TalkMapNode[]>(() => {
     const wsColors = canvasState.global?.wsColors ?? {}
-    const frameNodes: TalkMapNode[] = Object.entries(wsFrames).map(([groupId, rect]) => {
+    const frameNodes: TalkMapNode[] = Object.entries(frameGeometry).map(([groupId, rect]) => {
       const members = membersByGroup.get(groupId) ?? []
-      const hiddenCount = members.filter(id => hiddenCardIds.has(id)).length
       return {
         id: `frame-${groupId}`,
         type: 'wsFrame' as const,
@@ -259,13 +230,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           workspaceId: groupId,
           title: wsTitles.get(groupId) ?? t('frame.unknown'),
           count: members.length,
-          hiddenCount,
           width: rect.width,
           height: rect.height,
           ...(wsColors[groupId] !== undefined ? { colorTag: wsColors[groupId] } : {}),
-          onResizeEnd: (size: { width: number; height: number }) => {
-            canvas.setWsFrameRect(groupId, { x: rect.x, y: rect.y, width: size.width, height: size.height })
-          },
         },
         draggable: true,
         selectable: true,
@@ -276,7 +243,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       }
     })
     const cardNodes: TalkMapNode[] = Object.entries(visibleCards)
-      .filter(([cardId, card]) => card.boardId === INBOX_BOARD_ID && !hiddenCardIds.has(cardId))
+      .filter(([, card]) => card.boardId === INBOX_BOARD_ID)
       .map(([cardId, card]) => {
         const summary = sessions.byId[card.sessionId]
         const digest = canvasState.digests[card.sessionId]
@@ -322,22 +289,19 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           },
         }]
     return [...frameNodes, ...cardNodes, ...draftNodes]
-  }, [wsFrames, membersByGroup, hiddenCardIds, wsTitles, visibleCards, canvasState.digests, canvasState.global, sessions, selectedIds, draft, workspaces.items])
+  }, [frameGeometry, membersByGroup, wsTitles, visibleCards, canvasState.digests, canvasState.global, sessions, selectedIds, draft, workspaces.items])
 
   const sessionIdToCardId = useMemo(() => {
     const index = new Map<string, string>()
     for (const [cardId, card] of Object.entries(visibleCards)) {
-      if (!hiddenCardIds.has(cardId) && !index.has(card.sessionId)) index.set(card.sessionId, cardId)
+      if (!index.has(card.sessionId)) index.set(card.sessionId, cardId)
     }
     return index
-  }, [visibleCards, hiddenCardIds])
+  }, [visibleCards])
 
   const edges = useMemo<Edge[]>(() => {
     const out: Edge[] = []
-    const present = new Set(sessionIdToCardId.values())
-    for (const [cardId] of Object.entries(visibleCards)) {
-      if (!hiddenCardIds.has(cardId)) present.add(cardId)
-    }
+    const present = new Set(Object.keys(visibleCards))
     const injectionPairs = new Set<string>()
     for (const [edgeId, edge] of Object.entries(canvasState.edges)) {
       injectionPairs.add(`${edge.fromCardId}->${edge.toCardId}`)
@@ -351,7 +315,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       })
     }
     for (const [cardId, card] of Object.entries(visibleCards)) {
-      if (hiddenCardIds.has(cardId)) continue
       const parentSessionId = sessions.byId[card.sessionId]?.parentId
       if (parentSessionId === undefined) continue
       const parentCardId = sessionIdToCardId.get(parentSessionId)
@@ -367,7 +330,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       })
     }
     return out
-  }, [visibleCards, hiddenCardIds, canvasState.edges, sessions, sessionIdToCardId])
+  }, [visibleCards, canvasState.edges, sessions, sessionIdToCardId])
 
   const onNodesChange = (changes: NodeChange<TalkMapNode>[]): void => {
     for (const change of changes) {
@@ -400,15 +363,8 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
             })
           }
         } else {
-          // Member cards stay inside their frame: clamp at the border.
-          const card = canvasState.cards[change.id]
-          const rect = card?.wsOverride !== undefined ? wsFrames[card.wsOverride] : undefined
-          if (card !== undefined && rect !== undefined) {
-            const clamped = clampToFrame(change.position.x, change.position.y, rect)
-            canvas.moveCard(change.id, clamped.x, clamped.y)
-          } else {
-            canvas.moveCard(change.id, change.position.x, change.position.y)
-          }
+          // Free dragging — the frame stretches after its members.
+          canvas.moveCard(change.id, change.position.x, change.position.y)
         }
       } else if (change.type === 'select') {
         setSelectedIds((previous) => {
@@ -523,7 +479,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   }
 
   const syncGroup = (groupId: string): void => {
-    const rect = wsFrames[groupId]
+    const rect = frameGeometry[groupId]
     if (rect === undefined) return
     const fresh = placeableSessionIds(sessions)
       .filter(id => sessionWs.get(id) === groupId && !boardSessionIds.has(id))
@@ -535,10 +491,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       ? { x: Math.min(...members.map(card => card.x)), y: Math.max(...members.map(card => card.y)) + CARD_H + GAP_Y }
       : { x: rect.x + FRAME_PAD, y: rect.y + FRAME_LABEL_H + FRAME_PAD }
     const added: Record<string, Card> = {}
-    let grown = rect
     fresh.forEach((sessionId, index) => {
       const position = gridPosition(origin, index)
-      const card: Card = {
+      added[newCardId()] = {
         boardId: INBOX_BOARD_ID,
         sessionId,
         x: position.x,
@@ -546,24 +501,14 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         wsOverride: groupId,
         createdAt: Date.now(),
       }
-      added[newCardId()] = card
-      grown = grownRect(grown, card)
     })
     canvas.addCards(added)
-    canvas.setWsFrameRect(groupId, grown)
   }
 
   const moveCardToGroup = (cardId: string, groupId: string | undefined): void => {
+    // Frames follow their members, so membership alone is enough — the
+    // target frame stretches to wherever the card already sits.
     canvas.setCardWorkspaceOverride(cardId, groupId)
-    if (groupId === undefined) return
-    const rect = wsFrames[groupId]
-    const card = canvasState.cards[cardId]
-    if (rect === undefined || card === undefined) return
-    if (!insideFrame(card, rect)) {
-      // Bring the card into view: clamp it into the frame, growing if packed.
-      const clamped = clampToFrame(card.x, card.y, rect)
-      canvas.moveCard(cardId, clamped.x, clamped.y)
-    }
   }
 
   const removeGroup = (groupId: string): void => {
@@ -602,13 +547,15 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
 
     if (menu.view === 'import-ws') {
       title = t('menu.importWs')
-      const candidates = workspaces.items.filter(item => wsFrames[item.workspaceId] === undefined)
-      for (const item of candidates) {
+      for (const item of workspaces.items) {
+        const imported = wsFrames[item.workspaceId] !== undefined
         items.push({
           key: item.workspaceId,
           label: item.title,
+          ...(imported ? { hint: t('menu.alreadyImported') } : {}),
           onPick: () => {
-            importWorkspace(item.workspaceId, menu.flowX, menu.flowY)
+            if (imported) syncGroup(item.workspaceId)
+            else importWorkspace(item.workspaceId, menu.flowX, menu.flowY)
             close()
           },
         })
@@ -617,7 +564,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       title = t('menu.importSession')
       const candidates = placeableSessionIds(sessions)
         .filter(id => !boardSessionIds.has(id))
-        .slice(0, 40)
+        .slice(0, 200)
       for (const sessionId of candidates) {
         items.push({
           key: sessionId,
@@ -721,7 +668,14 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         },
       })
     }
-    return { left: menu.left, top: menu.top, ...(title !== undefined ? { title } : {}), items }
+    const searchable = menu.view === 'import-ws' || menu.view === 'import-session' || menu.view === 'move-group'
+    return {
+      left: menu.left,
+      top: menu.top,
+      ...(title !== undefined ? { title } : {}),
+      ...(searchable ? { searchable } : {}),
+      items,
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menu, workspaces.items, sessions, boardSessionIds, wsFrames, wsTitles, canvasState.cards])
 
@@ -783,7 +737,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           )
         : null}
       {hasContent || draft !== null ? null : <div className={styles['emptyHint']}>{t('map.empty')}</div>}
-      {menuState !== null ? <ContextMenu menu={menuState} onClose={() => { setMenu(null) }} /> : null}
+      {menuState !== null
+        ? <ContextMenu key={menu?.view ?? 'root'} menu={menuState} onClose={() => { setMenu(null) }} />
+        : null}
       {pendingSpawn !== null
         ? <SpawnPreview pending={pendingSpawn} onClose={() => { setPendingSpawn(null) }} />
         : null}

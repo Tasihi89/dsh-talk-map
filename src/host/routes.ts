@@ -5,6 +5,9 @@
  * origin-less local tools (curl); a cross-origin browser POST is refused.
  */
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { mkdir } from 'node:fs/promises'
+import { homedir } from 'node:os'
+import { resolve as resolvePath, sep } from 'node:path'
 import { z } from 'zod'
 import type { DomainChanged, TalkMapHostServices } from './dsh-host.ts'
 import type { DigestPipeline } from './digest/pipeline.ts'
@@ -90,6 +93,9 @@ const spawnBody = z.object({
 })
 const refreshDigestBody = z.object({
   sessionId: z.string(),
+})
+const ensureDirBody = z.object({
+  path: z.string().min(1),
 })
 
 /**
@@ -221,6 +227,22 @@ export function mountTalkMapRoutes(
           const body = spawnBody.parse(await readJsonBody(request))
           const result = await runtime.spawner.spawn(body)
           sendJson(response, 200, result)
+          return
+        }
+
+        if (route === 'POST /talk-map/fs/ensure-dir') {
+          // dsh's workspace.create only REGISTERS an existing directory
+          // (realpath fails on a missing one) — the draft composer's
+          // "new workspace" flow creates the folder here first.
+          const body = ensureDirBody.parse(await readJsonBody(request))
+          const target = resolvePath(body.path)
+          const home = homedir()
+          if (target !== home && !target.startsWith(home + sep)) {
+            sendJson(response, 400, { error: 'path must be inside the home directory' })
+            return
+          }
+          await mkdir(target, { recursive: true })
+          sendJson(response, 200, { ok: true, path: target })
           return
         }
 

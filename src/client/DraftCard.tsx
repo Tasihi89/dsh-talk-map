@@ -118,6 +118,8 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
     try {
       let targetWorkspaceId = workspaceId
       if (creatingWorkspace) {
+        // dsh only registers existing directories — create the folder first.
+        await talkMapApi.ensureDir(newWsPath)
         const created = unwrap(
           await services.connection.api.workspace.create({ path: newWsPath }),
           'workspace.create',
