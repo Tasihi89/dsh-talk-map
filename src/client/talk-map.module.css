@@ -362,6 +362,92 @@
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
+.wsFrame {
+  position: relative;
+  border: 1.5px dashed var(--dsw-alias-border-l2);
+  border-radius: 16px;
+  background: transparent;
+}
+
+.wsFrameLabel {
+  position: absolute;
+  top: -12px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+  white-space: nowrap;
+}
+
+.wsFrameCount {
+  font-weight: 400;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.draftCard {
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1.5px solid var(--dsw-alias-brand-primary);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 8px 30px var(--dsw-alias-bg-mask-2);
+  font-size: 13px;
+}
+
+.draftHeading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.draftRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.draftLabel {
+  flex: none;
+  width: 52px;
+  font-size: 12px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.draftSelect {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 7px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+}
+
+.draftTextarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 88px;
+  padding: 9px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
 .emptyHint {
   position: absolute;
   left: 50%;

@@ -96,10 +96,70 @@ export interface WorkspacesService {
   startSession(workspaceId?: string): void
 }
 
+/** RPC envelopes (packages/host/apiproxy/src/api/rpc.ts): the fetch client
+ * resolves RpcResponse — the ok/value union sits under `.result`. */
+export type RpcResult<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: { code?: string; message?: string } }
+export interface RpcEnvelope<T> {
+  rpcId: string
+  result: RpcResult<T>
+}
+
+/** One advisory model entry / provider group (session.models / llm.models). */
+export interface ModelCatalogModel {
+  id: string
+  name: string
+  reasoning?: { efforts: { id: string; name: string }[]; defaultEffort?: string }
+}
+export interface ModelProviderGroup {
+  id: string
+  name: string
+  models: ModelCatalogModel[]
+}
+
+export interface AgentPresetEntry {
+  id: string
+  name?: string
+  description?: string
+}
+
+/**
+ * ctx.connection — the shared typed RPC client (ConnectionHandle.api subset;
+ * packages/client/connection + packages/host/apiproxy/src/fetch/client.ts).
+ */
+export interface ConnectionService {
+  api: {
+    sessions: {
+      create(payload: { workspaceId?: string; cwd?: string; sessionId?: string; agentPreset?: string }):
+      Promise<RpcEnvelope<{ sessionId: string; agentPreset?: string }>>
+      models(payload: { sessionId: string }):
+      Promise<RpcEnvelope<{ current: unknown; groups?: ModelProviderGroup[] }>>
+      selectModel(payload: { sessionId: string; provider: string; model: string; reasoningEffort?: string }):
+      Promise<RpcEnvelope<{ selected: unknown }>>
+      prompt(payload: {
+        sessionId: string
+        mode: 'queue' | 'steer'
+        content: { type: 'text'; text: string }[]
+        clientTimeZone?: string
+      }): Promise<RpcEnvelope<{ accepted: true }>>
+    }
+    llm: {
+      models(payload: Record<string, never>):
+      Promise<RpcEnvelope<{ groups: ModelProviderGroup[] }>>
+    }
+    agentPresets: {
+      list(payload: Record<string, never>):
+      Promise<RpcEnvelope<{ presets: readonly AgentPresetEntry[]; authorable: boolean; hasDocument: boolean }>>
+    }
+  }
+}
+
 /** The client cordis context surface this plugin relies on (structural). */
 export interface TalkMapClientContext {
   slots: SlotsService
   sessions: SessionsService
   workspaces: WorkspacesService
+  connection: ConnectionService
   effect(callback: () => unknown, label?: string): void
 }

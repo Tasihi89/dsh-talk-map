@@ -4,7 +4,7 @@
  * session before anything happens. Confirm spawns via the host route, then
  * jumps into the new conversation.
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { talkMapApi } from './api.ts'
 import { canvas, INBOX_BOARD_ID } from './canvas-store.ts'
 import { getServices, mapUi } from './map-state.ts'
@@ -44,6 +44,22 @@ export function SpawnPreview(props: {
   const [text, setText] = useState(() => buildInjectionText(pending.parent.title, digest))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    const release = mapUi.claimEscape('spawn-preview')
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        event.stopPropagation()
+        props.onClose()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      release()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const confirm = async (): Promise<void> => {
     if (busy || text.trim() === '') return

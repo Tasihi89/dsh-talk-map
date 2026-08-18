@@ -72,6 +72,8 @@ export const globalSchema = z.object({
   version: z.number(),
   activeBoard: z.string(),
   cameraByBoard: z.record(z.string(), cameraSchema),
+  /** Auto-placement generation; absent = v1 (pre-workspace-grouping). */
+  layoutVersion: z.number().optional(),
 })
 export type MapGlobal = z.infer<typeof globalSchema>
 

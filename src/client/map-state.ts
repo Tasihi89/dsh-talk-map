@@ -3,7 +3,7 @@
  * two components registered into unrelated slots, so they meet through this
  * module-level external store (useSyncExternalStore on the React side).
  */
-import type { SessionsService, WorkspacesService } from './dsh.ts'
+import type { ConnectionService, SessionsService, WorkspacesService } from './dsh.ts'
 
 export interface MapUiState {
   readonly open: boolean
@@ -17,6 +17,12 @@ let state: MapUiState = { open: false }
 function emit(): void {
   for (const listener of listeners) listener()
 }
+
+/**
+ * Escape routing: inner surfaces (draft card, spawn preview) claim Esc so
+ * the overlay's own Esc-to-close stands down while one of them is open.
+ */
+const escGuards = new Set<string>()
 
 export const mapUi = {
   get(): MapUiState {
@@ -34,6 +40,13 @@ export const mapUi = {
   toggle(): void {
     mapUi.setOpen(!state.open)
   },
+  claimEscape(id: string): () => void {
+    escGuards.add(id)
+    return () => { escGuards.delete(id) }
+  },
+  escapeClaimed(): boolean {
+    return escGuards.size > 0
+  },
 }
 
 /**
@@ -43,6 +56,7 @@ export const mapUi = {
 export interface MapServices {
   sessions: SessionsService
   workspaces: WorkspacesService
+  connection: ConnectionService
 }
 
 let services: MapServices | undefined

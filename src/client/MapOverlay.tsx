@@ -25,6 +25,8 @@ function OpenMapOverlay(props: RootSlotStandardProps): React.JSX.Element {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
+        // An inner surface (draft card, spawn preview) claims Esc for itself.
+        if (mapUi.escapeClaimed()) return
         event.stopPropagation()
         mapUi.setOpen(false)
       }

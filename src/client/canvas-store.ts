@@ -146,6 +146,16 @@ export const canvas = {
     })
   },
 
+  /** Immediate global patch (layout-version stamp etc.) — no debounce. */
+  patchGlobalNow(patch: Partial<MapGlobal>): void {
+    if (state.global === null) return
+    const global: MapGlobal = { ...state.global, ...patch }
+    setState({ global })
+    void talkMapApi.setGlobal(global).catch((error) => {
+      console.error('[dsh-talk-map] global save failed:', error)
+    })
+  },
+
   setCamera(boardId: string, camera: Camera): void {
     if (state.global === null) return
     const global: MapGlobal = {

@@ -33,6 +33,15 @@ const zh: Record<string, string> = {
   'inject.summary': '摘要：',
   'inject.findings': '关键结论：',
   'inject.next': '下一步：',
+  'frame.ungrouped': '未分组',
+  'draft.heading': '新对话',
+  'draft.workspace': '工作区',
+  'draft.model': '模型',
+  'draft.preset': '模式',
+  'draft.default': '默认',
+  'draft.placeholder': '想聊什么？发送后会话在后台开跑，卡片留在地图上（⌘/Ctrl+Enter 发送）',
+  'draft.send': '发送',
+  'draft.sending': '发送中……',
 }
 
 const en: Record<string, string> = {
@@ -65,6 +74,15 @@ const en: Record<string, string> = {
   'inject.summary': 'Summary: ',
   'inject.findings': 'Key findings:',
   'inject.next': 'Next step: ',
+  'frame.ungrouped': 'Ungrouped',
+  'draft.heading': 'New conversation',
+  'draft.workspace': 'Workspace',
+  'draft.model': 'Model',
+  'draft.preset': 'Preset',
+  'draft.default': 'Default',
+  'draft.placeholder': 'What is this about? On send the session runs in the background; the card stays on the map (⌘/Ctrl+Enter to send)',
+  'draft.send': 'Send',
+  'draft.sending': 'Sending…',
 }
 
 function isZh(): boolean {

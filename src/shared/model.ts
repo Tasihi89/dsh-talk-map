@@ -56,6 +56,8 @@ export interface MapGlobal {
   version: number
   activeBoard: string
   cameraByBoard: Record<string, Camera>
+  /** Auto-placement generation; absent = v1 (pre-workspace-grouping). */
+  layoutVersion?: number
 }
 
 export interface MapStatePayload {
