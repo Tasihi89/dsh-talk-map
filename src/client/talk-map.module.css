@@ -93,6 +93,123 @@
   position: relative;
 }
 
+.card {
+  width: 224px;
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  box-shadow: 0 1px 3px var(--dsw-alias-bg-mask-1);
+  font-size: 13px;
+}
+
+.cardSelected {
+  border-color: var(--dsw-alias-brand-primary);
+}
+
+.cardCurrent {
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: 1px;
+}
+
+.cardGhost {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cardTitle {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.runningDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dsw-alias-state-success-primary);
+  animation: talkmap-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes talkmap-pulse {
+  50% { opacity: 0.35; }
+}
+
+.cardNext {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  min-width: 0;
+}
+
+.cardNextLabel {
+  flex: none;
+  font-size: 11px;
+  color: var(--dsw-alias-brand-primary);
+  font-weight: 600;
+}
+
+.cardNextText {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardStale {
+  flex: none;
+  color: var(--dsw-alias-state-warn-primary);
+  font-size: 12px;
+}
+
+.cardMeta {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.cardRemove {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cardRemove:hover {
+  background: var(--dsw-alias-interactive-bg-hover-danger);
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.cardHandle {
+  width: 8px;
+  height: 8px;
+  background: var(--dsw-alias-border-l3);
+  border: none;
+}
+
 .emptyHint {
   position: absolute;
   left: 50%;

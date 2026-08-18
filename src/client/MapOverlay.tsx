@@ -5,12 +5,10 @@
  * stays fully interactive.
  */
 import { useEffect, useSyncExternalStore } from 'react'
-import { Background, BackgroundVariant, Controls, ReactFlow, ReactFlowProvider } from '@xyflow/react'
-import '@xyflow/react/dist/style.css'
 import type { RootSlotStandardProps } from './dsh.ts'
 import { t } from './i18n.ts'
 import { mapUi } from './map-state.ts'
-import { useDsDarkTheme } from './use-dark.ts'
+import { MapCanvas } from './MapCanvas.tsx'
 import styles from './talk-map.module.css'
 
 function CloseIcon(): React.JSX.Element {
@@ -22,7 +20,6 @@ function CloseIcon(): React.JSX.Element {
 }
 
 function OpenMapOverlay(props: RootSlotStandardProps): React.JSX.Element {
-  const dark = useDsDarkTheme()
   const sessionCount = props.useSessions(state => state.ids.length)
 
   useEffect(() => {
@@ -52,23 +49,7 @@ function OpenMapOverlay(props: RootSlotStandardProps): React.JSX.Element {
           <CloseIcon />
         </button>
       </div>
-      <div className={styles['canvas']}>
-        <ReactFlowProvider>
-          <ReactFlow
-            nodes={[]}
-            edges={[]}
-            colorMode={dark ? 'dark' : 'light'}
-            snapToGrid
-            snapGrid={[16, 16]}
-            proOptions={{ hideAttribution: true }}
-            fitView
-          >
-            <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
-            <Controls showInteractive={false} />
-          </ReactFlow>
-        </ReactFlowProvider>
-        <div className={styles['emptyHint']}>{t('map.empty')}</div>
-      </div>
+      <MapCanvas {...props} />
     </div>
   )
 }

@@ -39,15 +39,17 @@ export interface SessionListState {
   readonly current?: string
 }
 
-/** The useWorkspaces standard feed — refined as needed (M1 uses ids only). */
-export interface WorkspaceSummary {
-  readonly id: string
-  readonly cwd?: string
-  readonly name?: string
+/** The useWorkspaces standard feed (subset of WorkspaceListState/WorkspaceView). */
+export interface WorkspaceView {
+  readonly workspaceId: string
+  readonly path: string
+  readonly title: string
+  readonly sessionIds: readonly string[]
 }
 export interface WorkspaceListState {
-  readonly items?: readonly WorkspaceSummary[]
-  readonly recentWorkspaceId?: string
+  readonly items: readonly WorkspaceView[]
+  readonly recentWorkspaceId: string | undefined
+  readonly baselinesReady?: boolean
 }
 
 /** Standard props every root-scope slot component receives. */

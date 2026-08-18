@@ -32,33 +32,90 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		let react_jsx_runtime = require("react/jsx-runtime");
 		require("react-dom");
 		//#region src/client/map-state.ts
-		const listeners = /* @__PURE__ */ new Set();
-		let state = { open: false };
+		const listeners$1 = /* @__PURE__ */ new Set();
+		let state$1 = { open: false };
 		function emit() {
-			for (const listener of listeners) listener();
+			for (const listener of listeners$1) listener();
 		}
 		const mapUi = {
 			get() {
-				return state;
+				return state$1;
 			},
 			subscribe(listener) {
-				listeners.add(listener);
+				listeners$1.add(listener);
 				return () => {
-					listeners.delete(listener);
+					listeners$1.delete(listener);
 				};
 			},
 			setOpen(open) {
-				if (state.open === open) return;
-				state = {
-					...state,
+				if (state$1.open === open) return;
+				state$1 = {
+					...state$1,
 					open
 				};
 				emit();
 			},
 			toggle() {
-				mapUi.setOpen(!state.open);
+				mapUi.setOpen(!state$1.open);
 			}
 		};
+		let services;
+		function attachServices(next) {
+			services = next;
+		}
+		function getServices() {
+			return services;
+		}
+		//#endregion
+		//#region src/client/i18n.ts
+		/**
+		* Two-locale copy dictionary reading <html lang> directly (the pattern
+		* dsh-plugin-market uses), so no dependency on the locale service. dsh sets
+		* the document language; anything starting with "zh" renders Chinese.
+		*/
+		const zh = {
+			"map.title": "对话地图",
+			"map.close": "关闭地图（Esc）",
+			"map.toggle": "对话地图",
+			"map.empty": "还没有卡片 —— 双击空白处开始一个新对话",
+			"map.sessions": "个会话",
+			"map.loading": "正在加载地图……",
+			"map.loadError": "地图数据加载失败：",
+			"card.running": "正在运行",
+			"card.ghostTitle": "会话已不存在",
+			"card.remove": "移除卡片",
+			"card.next": "下一步",
+			"card.stale": "摘要已过期",
+			"time.now": "刚刚",
+			"time.m": " 分钟前",
+			"time.h": " 小时前",
+			"time.d": " 天前"
+		};
+		const en = {
+			"map.title": "Talk Map",
+			"map.close": "Close map (Esc)",
+			"map.toggle": "Talk Map",
+			"map.empty": "No cards yet — double-click empty space to start a chat",
+			"map.sessions": "sessions",
+			"map.loading": "Loading map…",
+			"map.loadError": "Failed to load map data:",
+			"card.running": "running",
+			"card.ghostTitle": "Session no longer exists",
+			"card.remove": "Remove card",
+			"card.next": "Next",
+			"card.stale": "digest stale",
+			"time.now": "now",
+			"time.m": "m ago",
+			"time.h": "h ago",
+			"time.d": "d ago"
+		};
+		function isZh() {
+			if (typeof document === "undefined") return false;
+			return (document.documentElement.lang ?? "").toLowerCase().startsWith("zh");
+		}
+		function t(key) {
+			return (isZh() ? zh : en)[key] ?? en[key] ?? key;
+		}
 		//#endregion
 		//#region node_modules/.pnpm/classcat@5.0.5/node_modules/classcat/index.js
 		function cc(names) {
@@ -10691,32 +10748,345 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		//#endregion
-		//#region src/client/i18n.ts
-		/**
-		* Two-locale copy dictionary reading <html lang> directly (the pattern
-		* dsh-plugin-market uses), so no dependency on the locale service. dsh sets
-		* the document language; anything starting with "zh" renders Chinese.
-		*/
-		const zh = {
-			"map.title": "对话地图",
-			"map.close": "关闭地图（Esc）",
-			"map.toggle": "对话地图",
-			"map.empty": "还没有卡片 —— 双击空白处开始一个新对话",
-			"map.sessions": "个会话"
-		};
-		const en = {
-			"map.title": "Talk Map",
-			"map.close": "Close map (Esc)",
-			"map.toggle": "Talk Map",
-			"map.empty": "No cards yet — double-click empty space to start a chat",
-			"map.sessions": "sessions"
-		};
-		function isZh() {
-			if (typeof document === "undefined") return false;
-			return (document.documentElement.lang ?? "").toLowerCase().startsWith("zh");
+		//#region src/client/api.ts
+		async function requestJson(path, init) {
+			const response = await fetch(path, init);
+			if (!response.ok) {
+				let detail = "";
+				try {
+					detail = JSON.stringify(await response.json());
+				} catch {}
+				throw new Error(`${path} → ${response.status} ${detail}`);
+			}
+			return await response.json();
 		}
-		function t(key) {
-			return (isZh() ? zh : en)[key] ?? en[key] ?? key;
+		function postJson(path, body) {
+			return requestJson(path, {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify(body)
+			});
+		}
+		const talkMapApi = {
+			getState() {
+				return requestJson("/talk-map/state");
+			},
+			upsertCards(cards) {
+				return postJson("/talk-map/cards/upsert", { cards });
+			},
+			deleteCards(ids) {
+				return postJson("/talk-map/cards/delete", { ids });
+			},
+			setGlobal(global) {
+				return postJson("/talk-map/global", { global });
+			},
+			/**
+			* Subscribe to host-side domain changes (multi-tab sync, digest arrivals).
+			* @returns disposer closing the EventSource.
+			*/
+			subscribeChanges(onChange) {
+				const source = new EventSource("/talk-map/events");
+				source.addEventListener("change", (event) => {
+					try {
+						onChange(JSON.parse(event.data));
+					} catch {}
+				});
+				return () => {
+					source.close();
+				};
+			}
+		};
+		//#endregion
+		//#region src/shared/model.ts
+		const INBOX_BOARD_ID = "inbox";
+		//#endregion
+		//#region src/client/canvas-store.ts
+		/**
+		* Canvas data store: the client-side working copy of the talk-map domain.
+		* Reads land here from GET /talk-map/state plus the SSE change feed; writes
+		* are optimistic (local first) with debounced persistence. Card positions
+		* are sacred user data — nothing here ever moves a card except an explicit
+		* user drag or the one-time auto-placement of a session that has no card yet.
+		*/
+		const FLUSH_DELAY_MS = 500;
+		const CAMERA_DELAY_MS = 800;
+		let state = {
+			phase: "idle",
+			cards: {},
+			edges: {},
+			digests: {},
+			global: null
+		};
+		const listeners = /* @__PURE__ */ new Set();
+		function setState(next) {
+			state = {
+				...state,
+				...next
+			};
+			for (const listener of listeners) listener();
+		}
+		const dirtyCards = /* @__PURE__ */ new Set();
+		let flushTimer;
+		let cameraTimer;
+		function scheduleCardFlush() {
+			if (flushTimer !== void 0) return;
+			flushTimer = setTimeout(() => {
+				flushTimer = void 0;
+				flushCards();
+			}, FLUSH_DELAY_MS);
+		}
+		async function flushCards() {
+			if (dirtyCards.size === 0) return;
+			const payload = {};
+			for (const id of dirtyCards) {
+				const card = state.cards[id];
+				if (card !== void 0) payload[id] = card;
+			}
+			dirtyCards.clear();
+			if (Object.keys(payload).length === 0) return;
+			try {
+				await talkMapApi.upsertCards(payload);
+			} catch (error) {
+				console.error("[dsh-talk-map] card flush failed:", error);
+				for (const id of Object.keys(payload)) dirtyCards.add(id);
+			}
+		}
+		const canvas = {
+			get() {
+				return state;
+			},
+			subscribe(listener) {
+				listeners.add(listener);
+				return () => {
+					listeners.delete(listener);
+				};
+			},
+			ensureLoaded() {
+				if (state.phase === "loading" || state.phase === "ready") return;
+				setState({
+					phase: "loading",
+					error: void 0
+				});
+				talkMapApi.getState().then((payload) => {
+					setState({
+						phase: "ready",
+						cards: payload.cards,
+						edges: payload.edges,
+						digests: payload.digests,
+						global: payload.global
+					});
+				}).catch((error) => {
+					setState({
+						phase: "error",
+						error: String(error)
+					});
+				});
+			},
+			/** SSE mirror: applies host-confirmed changes (idempotent over our own writes). */
+			connect() {
+				return talkMapApi.subscribeChanges((change) => {
+					if (change.table === "cards") {
+						if (dirtyCards.has(change.key)) return;
+						const cards = { ...state.cards };
+						if (change.operation === "deleted") delete cards[change.key];
+						else cards[change.key] = change.value;
+						setState({ cards });
+						return;
+					}
+					if (change.table === "edges") {
+						const edges = { ...state.edges };
+						if (change.operation === "deleted") delete edges[change.key];
+						else edges[change.key] = change.value;
+						setState({ edges });
+						return;
+					}
+					if (change.table === "digests") {
+						const digests = { ...state.digests };
+						if (change.operation === "deleted") delete digests[change.key];
+						else digests[change.key] = change.value;
+						setState({ digests });
+					}
+				});
+			},
+			moveCard(id, x, y) {
+				const card = state.cards[id];
+				if (card === void 0) return;
+				setState({ cards: {
+					...state.cards,
+					[id]: {
+						...card,
+						x,
+						y
+					}
+				} });
+				dirtyCards.add(id);
+				scheduleCardFlush();
+			},
+			/** Immediate-persist upsert (new cards from double-click / auto-placement). */
+			addCards(entries) {
+				setState({ cards: {
+					...state.cards,
+					...entries
+				} });
+				talkMapApi.upsertCards(entries).catch((error) => {
+					console.error("[dsh-talk-map] card upsert failed:", error);
+				});
+			},
+			removeCard(id) {
+				const cards = { ...state.cards };
+				delete cards[id];
+				setState({ cards });
+				talkMapApi.deleteCards([id]).catch((error) => {
+					console.error("[dsh-talk-map] card delete failed:", error);
+				});
+			},
+			setCamera(boardId, camera) {
+				if (state.global === null) return;
+				setState({ global: {
+					...state.global,
+					cameraByBoard: {
+						...state.global.cameraByBoard,
+						[boardId]: camera
+					}
+				} });
+				if (cameraTimer !== void 0) clearTimeout(cameraTimer);
+				cameraTimer = setTimeout(() => {
+					cameraTimer = void 0;
+					const current = state.global;
+					if (current === null) return;
+					talkMapApi.setGlobal(current).catch((error) => {
+						console.error("[dsh-talk-map] camera save failed:", error);
+					});
+				}, CAMERA_DELAY_MS);
+			},
+			savedCamera(boardId) {
+				return state.global?.cameraByBoard[boardId];
+			},
+			/** First card found for a session (M1: one board, at most one card each). */
+			cardIdForSession(sessionId) {
+				for (const [id, card] of Object.entries(state.cards)) if (card.sessionId === sessionId) return id;
+			}
+		};
+		function newCardId() {
+			return `card-${crypto.randomUUID()}`;
+		}
+		//#endregion
+		//#region \0dsh-css:module:src/client/talk-map.module.css.mjs
+		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:88px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardCurrent{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardMeta{color:var(--dsw-alias-label-tertiary);font-size:11px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:none;width:8px;height:8px}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
+		const tagId = "dsh-talk-map/talk-map.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-talk-map";
+			tag.dataset.pluginCss = tagId;
+			tag.textContent = css;
+			document.head.appendChild(tag);
+		}
+		var talk_map_module_css_default = {
+			"cardHandle": "_0iu0NW_cardHandle",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"overlay": "_0iu0NW_overlay",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"cardTop": "_0iu0NW_cardTop",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"cardNext": "_0iu0NW_cardNext",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"card": "_0iu0NW_card",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"header": "_0iu0NW_header",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"cardStale": "_0iu0NW_cardStale",
+			"cardMeta": "_0iu0NW_cardMeta",
+			"canvas": "_0iu0NW_canvas",
+			"closeButton": "_0iu0NW_closeButton",
+			"runningDot": "_0iu0NW_runningDot"
+		};
+		//#endregion
+		//#region src/client/SessionCard.tsx
+		/**
+		* The card node: one session on the board. Front face is the ADHD resume
+		* surface — title, the digest's "next step" once M2 fills it, relative time,
+		* running state. A card whose session no longer exists renders as a ghost
+		* (grey, removable) — the host never auto-deletes placements.
+		*/
+		function relativeTime(timestamp) {
+			if (timestamp === void 0) return "";
+			const delta = Date.now() - timestamp;
+			const minutes = Math.round(delta / 6e4);
+			if (minutes < 1) return t("time.now");
+			if (minutes < 60) return `${minutes}${t("time.m")}`;
+			const hours = Math.round(minutes / 60);
+			if (hours < 24) return `${hours}${t("time.h")}`;
+			return `${Math.round(hours / 24)}${t("time.d")}`;
+		}
+		function SessionCardNode(props) {
+			const { data, selected } = props;
+			const classNames = [talk_map_module_css_default["card"]];
+			if (data.ghost) classNames.push(talk_map_module_css_default["cardGhost"]);
+			if (selected === true) classNames.push(talk_map_module_css_default["cardSelected"]);
+			if (data.isCurrent) classNames.push(talk_map_module_css_default["cardCurrent"]);
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+				className: classNames.filter(Boolean).join(" "),
+				children: [
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)(Handle, {
+						type: "target",
+						position: Position.Left,
+						className: talk_map_module_css_default["cardHandle"] ?? ""
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+						className: talk_map_module_css_default["cardTop"],
+						children: [data.running ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							className: talk_map_module_css_default["runningDot"],
+							title: t("card.running")
+						}) : null, /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							className: talk_map_module_css_default["cardTitle"],
+							children: data.ghost ? t("card.ghostTitle") : data.title
+						})]
+					}),
+					data.ghost ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+						type: "button",
+						className: `${talk_map_module_css_default["cardRemove"]} nodrag`,
+						onClick: () => {
+							canvas.removeCard(data.cardId);
+						},
+						children: t("card.remove")
+					}) : data.nextStep !== void 0 && data.nextStep !== "" ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+						className: talk_map_module_css_default["cardNext"],
+						children: [
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+								className: talk_map_module_css_default["cardNextLabel"],
+								children: t("card.next")
+							}),
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+								className: talk_map_module_css_default["cardNextText"],
+								children: data.nextStep
+							}),
+							data.stale === true ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+								className: talk_map_module_css_default["cardStale"],
+								title: t("card.stale"),
+								children: "⟳"
+							}) : null
+						]
+					}) : null,
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["cardMeta"],
+						children: relativeTime(data.updatedAt)
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)(Handle, {
+						type: "source",
+						position: Position.Right,
+						className: talk_map_module_css_default["cardHandle"] ?? ""
+					})
+				]
+			});
 		}
 		//#endregion
 		//#region src/client/use-dark.ts
@@ -10746,29 +11116,251 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			return (0, react.useSyncExternalStore)(subscribe, getSnapshot);
 		}
 		//#endregion
-		//#region \0dsh-css:module:src/client/talk-map.module.css.mjs
-		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
-		const tagId = "dsh-talk-map/talk-map.module.css";
-		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
-			const tag = document.createElement("style");
-			tag.dataset.plugin = "dsh-talk-map";
-			tag.dataset.pluginCss = tagId;
-			tag.textContent = css;
-			document.head.appendChild(tag);
+		//#region src/client/MapCanvas.tsx
+		/**
+		* The board: cards ⨝ sessions rendered through React Flow.
+		*
+		* Position law: manual placement is sacred. The only writes to card
+		* positions are (1) the user's own drag, (2) the one-time grid placement of
+		* a session that has no card yet, (3) an explicit double-click create at the
+		* click point. Nothing ever re-arranges existing cards.
+		*/
+		const nodeTypes = { sessionCard: SessionCardNode };
+		const GRID = 16;
+		const CARD_W = 224;
+		const CARD_H = 104;
+		const GAP_Y = 48;
+		const PLACE_COLUMNS = 4;
+		function snap(value) {
+			return Math.round(value / GRID) * GRID;
 		}
-		var talk_map_module_css_default = {
-			"canvas": "_0iu0NW_canvas",
-			"overlay": "_0iu0NW_overlay",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"header": "_0iu0NW_header",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"closeButton": "_0iu0NW_closeButton",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"emptyHint": "_0iu0NW_emptyHint"
-		};
+		/** Sessions eligible for a card: top-level, non-empty logs. */
+		function placeableSessionIds(sessions) {
+			return sessions.ids.filter((id) => {
+				const summary = sessions.byId[id];
+				return summary !== void 0 && !summary.blank && summary.origin !== "subagent";
+			});
+		}
+		/** One-time grid placement below the existing content for card-less sessions. */
+		function planPlacement(missing, sessions, cards) {
+			const existing = Object.values(cards);
+			const startY = existing.length > 0 ? snap(Math.max(...existing.map((card) => card.y)) + CARD_H + GAP_Y) : 0;
+			const sorted = [...missing].sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0));
+			const planned = {};
+			sorted.forEach((sessionId, index) => {
+				const column = index % PLACE_COLUMNS;
+				const row = Math.floor(index / PLACE_COLUMNS);
+				planned[newCardId()] = {
+					boardId: INBOX_BOARD_ID,
+					sessionId,
+					x: snap(column * 272),
+					y: snap(startY + row * 152),
+					createdAt: Date.now()
+				};
+			});
+			return planned;
+		}
+		function CanvasInner(props) {
+			const dark = useDsDarkTheme();
+			const canvasState = (0, react.useSyncExternalStore)(canvas.subscribe, canvas.get);
+			const sessions = props.useSessions((state) => state);
+			const workspaces = props.useWorkspaces((state) => state);
+			const { screenToFlowPosition } = useReactFlow();
+			const [selectedIds, setSelectedIds] = (0, react.useState)(/* @__PURE__ */ new Set());
+			const creatingRef = (0, react.useRef)(false);
+			(0, react.useEffect)(() => {
+				if (canvasState.phase !== "ready") return;
+				const placed = new Set(Object.values(canvasState.cards).map((card) => card.sessionId));
+				const missing = placeableSessionIds(sessions).filter((id) => !placed.has(id));
+				if (missing.length === 0) return;
+				canvas.addCards(planPlacement(missing, sessions, canvasState.cards));
+			}, [
+				canvasState.phase,
+				canvasState.cards,
+				sessions
+			]);
+			const sessionIdToCardId = (0, react.useMemo)(() => {
+				const index = /* @__PURE__ */ new Map();
+				for (const [cardId, card] of Object.entries(canvasState.cards)) if (!index.has(card.sessionId)) index.set(card.sessionId, cardId);
+				return index;
+			}, [canvasState.cards]);
+			const nodes = (0, react.useMemo)(() => {
+				return Object.entries(canvasState.cards).filter(([, card]) => card.boardId === INBOX_BOARD_ID).map(([cardId, card]) => {
+					const summary = sessions.byId[card.sessionId];
+					const digest = canvasState.digests[card.sessionId];
+					const data = {
+						cardId,
+						sessionId: card.sessionId,
+						title: summary?.displayTitle ?? card.sessionId,
+						running: summary?.running ?? false,
+						isCurrent: sessions.current === card.sessionId,
+						ghost: summary === void 0,
+						updatedAt: summary?.updatedAt,
+						nextStep: digest?.nextStep ?? digest?.todoNext
+					};
+					return {
+						id: cardId,
+						type: "sessionCard",
+						position: {
+							x: card.x,
+							y: card.y
+						},
+						selected: selectedIds.has(cardId),
+						data
+					};
+				});
+			}, [
+				canvasState.cards,
+				canvasState.digests,
+				sessions,
+				selectedIds
+			]);
+			const edges = (0, react.useMemo)(() => {
+				const out = [];
+				for (const [cardId, card] of Object.entries(canvasState.cards)) {
+					const parentSessionId = sessions.byId[card.sessionId]?.parentId;
+					if (parentSessionId === void 0) continue;
+					const parentCardId = sessionIdToCardId.get(parentSessionId);
+					if (parentCardId === void 0) continue;
+					out.push({
+						id: `lineage-${parentCardId}-${cardId}`,
+						source: parentCardId,
+						target: cardId,
+						type: "smoothstep",
+						selectable: false,
+						style: {
+							strokeDasharray: "6 4",
+							opacity: .5
+						}
+					});
+				}
+				for (const [edgeId, edge] of Object.entries(canvasState.edges)) out.push({
+					id: edgeId,
+					source: edge.fromCardId,
+					target: edge.toCardId,
+					type: "smoothstep",
+					label: edge.injection.kind
+				});
+				return out;
+			}, [
+				canvasState.cards,
+				canvasState.edges,
+				sessions,
+				sessionIdToCardId
+			]);
+			const onNodesChange = (changes) => {
+				for (const change of changes) if (change.type === "position" && change.position !== void 0) canvas.moveCard(change.id, change.position.x, change.position.y);
+				else if (change.type === "select") setSelectedIds((previous) => {
+					const next = new Set(previous);
+					if (change.selected) next.add(change.id);
+					else next.delete(change.id);
+					return next;
+				});
+			};
+			const openSession = (sessionId) => {
+				const services = getServices();
+				if (services === void 0) return;
+				mapUi.setOpen(false);
+				services.sessions.open(sessionId);
+			};
+			const createSessionAt = async (clientX, clientY) => {
+				const services = getServices();
+				if (services === void 0 || creatingRef.current) return;
+				const workspaceId = workspaces.recentWorkspaceId ?? workspaces.items[0]?.workspaceId;
+				if (workspaceId === void 0) {
+					services.workspaces.startSession();
+					mapUi.setOpen(false);
+					return;
+				}
+				creatingRef.current = true;
+				try {
+					const position = screenToFlowPosition({
+						x: clientX,
+						y: clientY
+					});
+					const sessionId = await services.workspaces.connectWorkspace(workspaceId);
+					const x = snap(position.x - CARD_W / 2);
+					const y = snap(position.y - CARD_H / 2);
+					const existingCard = canvas.cardIdForSession(sessionId);
+					if (existingCard !== void 0) canvas.moveCard(existingCard, x, y);
+					else canvas.addCards({ [newCardId()]: {
+						boardId: INBOX_BOARD_ID,
+						sessionId,
+						x,
+						y,
+						createdAt: Date.now()
+					} });
+					mapUi.setOpen(false);
+					services.sessions.open(sessionId);
+				} catch (error) {
+					console.error("[dsh-talk-map] create-at failed:", error);
+				} finally {
+					creatingRef.current = false;
+				}
+			};
+			const savedCamera = canvas.savedCamera(INBOX_BOARD_ID);
+			const hasCards = nodes.length > 0;
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+				className: talk_map_module_css_default["canvas"],
+				onDoubleClick: (event) => {
+					if (event.target.closest(".react-flow__pane") === null) return;
+					createSessionAt(event.clientX, event.clientY);
+				},
+				children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)(index, {
+					nodes,
+					edges,
+					nodeTypes,
+					onNodesChange,
+					onNodeDoubleClick: (_event, node) => {
+						if (!node.data.ghost) openSession(node.data.sessionId);
+					},
+					onMoveEnd: (_event, viewport) => {
+						canvas.setCamera(INBOX_BOARD_ID, viewport);
+					},
+					colorMode: dark ? "dark" : "light",
+					snapToGrid: true,
+					snapGrid: [GRID, GRID],
+					zoomOnDoubleClick: false,
+					minZoom: .1,
+					proOptions: { hideAttribution: true },
+					...savedCamera !== void 0 ? { defaultViewport: savedCamera } : { fitView: hasCards },
+					children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(Background, {
+						variant: BackgroundVariant.Dots,
+						gap: GRID,
+						size: 1
+					}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(Controls, { showInteractive: false })]
+				}), hasCards ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+					className: talk_map_module_css_default["emptyHint"],
+					children: t("map.empty")
+				})]
+			});
+		}
+		function MapCanvas(props) {
+			const canvasState = (0, react.useSyncExternalStore)(canvas.subscribe, canvas.get);
+			(0, react.useEffect)(() => {
+				canvas.ensureLoaded();
+				return canvas.connect();
+			}, []);
+			if (canvasState.phase === "error") return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+				className: talk_map_module_css_default["canvas"],
+				children: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+					className: talk_map_module_css_default["emptyHint"],
+					children: [
+						t("map.loadError"),
+						" ",
+						canvasState.error
+					]
+				})
+			});
+			if (canvasState.phase !== "ready") return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+				className: talk_map_module_css_default["canvas"],
+				children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+					className: talk_map_module_css_default["emptyHint"],
+					children: t("map.loading")
+				})
+			});
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ReactFlowProvider, { children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(CanvasInner, { ...props }) });
+		}
 		//#endregion
 		//#region src/client/MapOverlay.tsx
 		/**
@@ -10791,7 +11383,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			});
 		}
 		function OpenMapOverlay(props) {
-			const dark = useDsDarkTheme();
 			const sessionCount = props.useSessions((state) => state.ids.length);
 			(0, react.useEffect)(() => {
 				const onKeyDown = (event) => {
@@ -10836,26 +11427,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(CloseIcon, {})
 						})
 					]
-				}), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
-					className: talk_map_module_css_default["canvas"],
-					children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(ReactFlowProvider, { children: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(index, {
-						nodes: [],
-						edges: [],
-						colorMode: dark ? "dark" : "light",
-						snapToGrid: true,
-						snapGrid: [16, 16],
-						proOptions: { hideAttribution: true },
-						fitView: true,
-						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(Background, {
-							variant: BackgroundVariant.Dots,
-							gap: 16,
-							size: 1
-						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(Controls, { showInteractive: false })]
-					}) }), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
-						className: talk_map_module_css_default["emptyHint"],
-						children: t("map.empty")
-					})]
-				})]
+				}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(MapCanvas, { ...props })]
 			});
 		}
 		function MapOverlay(props) {
@@ -10916,8 +11488,13 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				applied = false;
 			}, "dsh-talk-map: apply claim");
 			try {
-				ctx.sessions, ctx.workspaces;
-				ctx.effect(() => () => {}, "dsh-talk-map: services");
+				attachServices({
+					sessions: ctx.sessions,
+					workspaces: ctx.workspaces
+				});
+				ctx.effect(() => () => {
+					attachServices(void 0);
+				}, "dsh-talk-map: services");
 				ctx.slots.inject("sidebar.footer.action", () => ctx.slots.register({
 					name: "sidebar.footer.action",
 					id: "talk-map",
