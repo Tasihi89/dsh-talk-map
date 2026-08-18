@@ -131,19 +131,33 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
         ...(presetId !== '' ? { agentPreset: presetId } : {}),
       }), 'session.create')
       const sessionId = created.sessionId
-      // Card FIRST: the session hits the list feed the moment it exists, and
-      // the auto-placement effect must find a card already standing or it
-      // places a duplicate in the workspace region.
+      const cardX = snap(props.positionAbsoluteX)
+      const cardY = snap(props.positionAbsoluteY)
+      // The card's map group follows the chosen workspace (not merely the
+      // frame the draft was opened in) — and a workspace with no frame on
+      // the board gets one built around the newborn card.
       canvas.addCards({
         [newCardId()]: {
           boardId: INBOX_BOARD_ID,
           sessionId,
-          x: snap(props.positionAbsoluteX),
-          y: snap(props.positionAbsoluteY),
-          ...(data.groupId !== undefined ? { wsOverride: data.groupId } : {}),
+          x: cardX,
+          y: cardY,
+          wsOverride: targetWorkspaceId,
           createdAt: Date.now(),
         },
       })
+      if (canvas.get().global?.wsFrames?.[targetWorkspaceId] === undefined) {
+        const CARD_W = 224
+        const CARD_H = 120
+        const PAD = 32
+        const LABEL = 30
+        canvas.setWsFrameRect(targetWorkspaceId, {
+          x: cardX - PAD,
+          y: cardY - PAD - LABEL,
+          width: CARD_W + PAD * 2,
+          height: CARD_H + PAD * 2 + LABEL,
+        })
+      }
       if (modelKey !== '') {
         const [provider, model] = modelKey.split('::') as [string, string]
         unwrap(await services.connection.api.sessions.selectModel({ sessionId, provider, model }), 'session.selectModel')
