@@ -570,6 +570,15 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"spawn.confirm": "开新对话",
 			"spawn.busy": "创建中……",
 			"spawn.cancel": "取消",
+			"spawn.mode.none": "不继承",
+			"spawn.mode.digest": "摘要注入",
+			"spawn.mode.full": "完整对话",
+			"spawn.noneHint": "全新对话，只保留一条关联线。输入第一句话（回车发送）：",
+			"spawn.fullHint": "新对话将携带这段对话的完整历史继续（dsh 原生分叉）。",
+			"spawn.needText": "注入内容不能为空",
+			"spawn.needFirstMessage": "请输入第一句话",
+			"edge.none": "关联",
+			"edge.full": "完整分叉",
 			"inject.header": "【上下文注入 · 来自】",
 			"inject.summary": "摘要：",
 			"inject.findings": "关键结论：",
@@ -638,6 +647,15 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"spawn.confirm": "Start session",
 			"spawn.busy": "Creating…",
 			"spawn.cancel": "Cancel",
+			"spawn.mode.none": "No context",
+			"spawn.mode.digest": "Inject digest",
+			"spawn.mode.full": "Full history",
+			"spawn.noneHint": "A fresh conversation, linked visually only. Type the first message (Enter sends):",
+			"spawn.fullHint": "The new conversation continues with this one's FULL history (dsh-native fork).",
+			"spawn.needText": "Injection text must not be empty",
+			"spawn.needFirstMessage": "Type the first message",
+			"edge.none": "linked",
+			"edge.full": "full fork",
 			"inject.header": "[Context injected from] ",
 			"inject.summary": "Summary: ",
 			"inject.findings": "Key findings:",
@@ -11343,7 +11361,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:module:src/client/talk-map.module.css.mjs
-		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleRow{width:100%;color:var(--dsw-alias-label-secondary);cursor:pointer;text-align:left;background:0 0;border:none;border-radius:8px;align-items:center;gap:8px;padding:6px 10px;font-size:13px;display:flex}._0iu0NW_toggleRow:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleLabel{white-space:nowrap}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_hotkeyButton{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;white-space:nowrap;background:0 0;border-radius:999px;flex:none;padding:3px 10px;font-size:12px}._0iu0NW_hotkeyButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_zoomResetLabel{letter-spacing:-.5px;font-size:9px;font-weight:700}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_canvas .react-flow__nodesselection{pointer-events:none!important;display:none!important}._0iu0NW_canvas .react-flow__nodesselection-rect{pointer-events:none!important;display:none!important}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:104px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardCurrent{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardFooter{color:var(--dsw-alias-label-tertiary);justify-content:space-between;align-items:center;gap:8px;margin-top:auto;font-size:11px;display:flex}._0iu0NW_cardTime{flex:none}._0iu0NW_cardBadgeRunning{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;align-items:center;gap:5px;padding:1px 7px;font-size:10px;display:inline-flex}._0iu0NW_cardSummary{color:var(--dsw-alias-label-secondary);-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:12px;line-height:1.45;display:-webkit-box;overflow:hidden}._0iu0NW_cardBadgeWaiting{color:var(--dsw-alias-state-warn-label);background:var(--dsw-alias-state-warn-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardBadgeDone{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:none;width:8px;height:8px}._0iu0NW_cardRefresh{width:22px;height:22px;color:var(--dsw-alias-label-tertiary);cursor:pointer;opacity:0;background:0 0;border:none;border-radius:6px;flex:none;margin-left:auto;padding:0;font-size:13px;line-height:1;transition:opacity .12s}._0iu0NW_card:hover ._0iu0NW_cardRefresh{opacity:1}._0iu0NW_cardRefresh:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_cardRefreshBusy{opacity:1;animation:1s linear infinite _0iu0NW_talkmap-spin}@keyframes _0iu0NW_talkmap-spin{to{transform:rotate(360deg)}}._0iu0NW_spawnPanel{z-index:6;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:420px;max-width:calc(100% - 48px);box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:16px;display:flex;position:absolute;top:24px;right:24px}._0iu0NW_spawnHeading{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_spawnFrom{color:var(--dsw-alias-label-secondary);font-size:12px}._0iu0NW_spawnHint{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_spawnTextarea{resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:140px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_spawnError{color:var(--dsw-alias-state-error-primary);word-break:break-all;font-size:12px}._0iu0NW_spawnActions{justify-content:flex-end;gap:8px;display:flex}._0iu0NW_spawnBtnPrimary{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground);cursor:pointer;border:none;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnPrimary:hover{background:var(--dsw-alias-button-primary-hover)}._0iu0NW_spawnBtnPrimary:disabled{background:var(--dsw-alias-button-primary-dimmed);cursor:default}._0iu0NW_spawnBtnGhost{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnGhost:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_wsFrame{border:1.5px dashed var(--dsw-alias-border-l2);background:0 0;border-radius:16px;position:relative}._0iu0NW_wsFrameSelected{border-style:solid;border-color:var(--dsw-alias-brand-primary)}._0iu0NW_wsFrameLabel{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:nowrap;pointer-events:auto;cursor:grab;border-radius:999px;align-items:center;gap:6px;padding:2px 10px;font-size:12px;font-weight:600;display:flex;position:absolute;top:-12px;left:14px}._0iu0NW_wsFrameLabel:active{cursor:grabbing}._0iu0NW_wsFrameEdge{pointer-events:auto;cursor:grab;position:absolute}._0iu0NW_wsFrameEdge:active{cursor:grabbing}._0iu0NW_wsFrameResize{pointer-events:auto;cursor:nwse-resize;border-right:3px solid var(--dsw-alias-border-l3);border-bottom:3px solid var(--dsw-alias-border-l3);opacity:.7;border-bottom-right-radius:14px;width:16px;height:16px;position:absolute;bottom:-2px;right:-2px}._0iu0NW_wsFrameResize:hover{border-color:var(--dsw-alias-brand-primary);opacity:1}._0iu0NW_wsFrameCount{color:var(--dsw-alias-label-tertiary);font-weight:400}._0iu0NW_draftCard{box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);width:360px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:14px;font-size:13px;display:flex}._0iu0NW_draftHeading{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}._0iu0NW_draftRow{align-items:center;gap:8px;display:flex}._0iu0NW_draftLabel{width:52px;color:var(--dsw-alias-label-tertiary);flex:none;font-size:12px}._0iu0NW_draftSelect{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);min-width:0;color:var(--dsw-alias-label-primary);border-radius:7px;flex:1;padding:5px 8px;font-size:12px}._0iu0NW_draftGrow{flex-direction:column;flex:1;gap:3px;min-width:0;display:flex}._0iu0NW_draftInput{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;color:var(--dsw-alias-label-primary);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_draftPathPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;font-size:11px}._0iu0NW_draftTextarea{box-sizing:border-box;resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:88px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:9px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_colorToolbar{z-index:7;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 2px 10px var(--dsw-alias-bg-mask-1);border-radius:10px;align-items:center;gap:6px;padding:6px 10px;display:flex;position:absolute;top:12px;left:12px}._0iu0NW_colorToolbarLabel{color:var(--dsw-alias-label-tertiary);margin-right:2px;font-size:12px}._0iu0NW_colorSwatch{border:1px solid var(--dsw-alias-border-l2);cursor:pointer;width:18px;height:18px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;padding:0;font-size:11px;line-height:1;display:flex}._0iu0NW_colorSwatch:hover{transform:scale(1.15)}._0iu0NW_colorSwatchClear{background:0 0}._0iu0NW_menu{z-index:9;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);min-width:200px;max-width:280px;max-height:380px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:10px;flex-direction:column;padding:6px;display:flex;position:absolute;overflow-y:auto}._0iu0NW_menuTitle{color:var(--dsw-alias-label-tertiary);flex:none;padding:4px 10px 6px;font-size:11px}._0iu0NW_menuSearch{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:calc(100% - 8px);color:var(--dsw-alias-label-primary);border-radius:7px;flex:none;margin:2px 4px 6px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_menuHint{color:var(--dsw-alias-label-dimmed);font-size:11px}._0iu0NW_menuPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;flex:none;padding:0 10px 4px;font-size:11px}._0iu0NW_menuError{color:var(--dsw-alias-state-error-primary);word-break:break-all;flex:none;padding:0 10px 4px;font-size:11px}._0iu0NW_menuEmpty{color:var(--dsw-alias-label-tertiary);padding:8px 10px;font-size:12px}._0iu0NW_menuItem{text-align:left;width:100%;color:var(--dsw-alias-label-primary);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:none;border-radius:7px;flex:none;padding:6px 10px;font-size:13px;display:block;overflow:hidden}._0iu0NW_menuItem:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_menuItem:disabled{color:var(--dsw-alias-label-dimmed);cursor:default}._0iu0NW_wsFrameHidden{color:var(--dsw-alias-state-warn-primary);font-weight:400}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
+		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleRow{width:100%;color:var(--dsw-alias-label-secondary);cursor:pointer;text-align:left;background:0 0;border:none;border-radius:8px;align-items:center;gap:8px;padding:6px 10px;font-size:13px;display:flex}._0iu0NW_toggleRow:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleLabel{white-space:nowrap}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_hotkeyButton{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;white-space:nowrap;background:0 0;border-radius:999px;flex:none;padding:3px 10px;font-size:12px}._0iu0NW_hotkeyButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_zoomResetLabel{letter-spacing:-.5px;font-size:9px;font-weight:700}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_canvas .react-flow__nodesselection{pointer-events:none!important;display:none!important}._0iu0NW_canvas .react-flow__nodesselection-rect{pointer-events:none!important;display:none!important}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:104px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardCurrent{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardFooter{color:var(--dsw-alias-label-tertiary);justify-content:space-between;align-items:center;gap:8px;margin-top:auto;font-size:11px;display:flex}._0iu0NW_cardTime{flex:none}._0iu0NW_cardBadgeRunning{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;align-items:center;gap:5px;padding:1px 7px;font-size:10px;display:inline-flex}._0iu0NW_cardSummary{color:var(--dsw-alias-label-secondary);-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:12px;line-height:1.45;display:-webkit-box;overflow:hidden}._0iu0NW_cardBadgeWaiting{color:var(--dsw-alias-state-warn-label);background:var(--dsw-alias-state-warn-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardBadgeDone{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:none;width:8px;height:8px}._0iu0NW_cardRefresh{width:22px;height:22px;color:var(--dsw-alias-label-tertiary);cursor:pointer;opacity:0;background:0 0;border:none;border-radius:6px;flex:none;margin-left:auto;padding:0;font-size:13px;line-height:1;transition:opacity .12s}._0iu0NW_card:hover ._0iu0NW_cardRefresh{opacity:1}._0iu0NW_cardRefresh:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_cardRefreshBusy{opacity:1;animation:1s linear infinite _0iu0NW_talkmap-spin}@keyframes _0iu0NW_talkmap-spin{to{transform:rotate(360deg)}}._0iu0NW_spawnPanel{z-index:6;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:420px;max-width:calc(100% - 48px);box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:16px;display:flex;position:absolute;top:24px;right:24px}._0iu0NW_spawnHeading{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_spawnFrom{color:var(--dsw-alias-label-secondary);font-size:12px}._0iu0NW_spawnModes{gap:6px;display:flex}._0iu0NW_spawnModeBtn{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;flex:1;padding:5px 0;font-size:12px}._0iu0NW_spawnModeBtn:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_spawnModeActive{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary);background:var(--dsw-alias-interactive-bg-active)}._0iu0NW_spawnHint{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_spawnTextarea{resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:140px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_spawnError{color:var(--dsw-alias-state-error-primary);word-break:break-all;font-size:12px}._0iu0NW_spawnActions{justify-content:flex-end;gap:8px;display:flex}._0iu0NW_spawnBtnPrimary{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground);cursor:pointer;border:none;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnPrimary:hover{background:var(--dsw-alias-button-primary-hover)}._0iu0NW_spawnBtnPrimary:disabled{background:var(--dsw-alias-button-primary-dimmed);cursor:default}._0iu0NW_spawnBtnGhost{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnGhost:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_wsFrame{border:1.5px dashed var(--dsw-alias-border-l2);background:0 0;border-radius:16px;position:relative}._0iu0NW_wsFrameSelected{border-style:solid;border-color:var(--dsw-alias-brand-primary)}._0iu0NW_wsFrameLabel{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:nowrap;pointer-events:auto;cursor:grab;border-radius:999px;align-items:center;gap:6px;padding:2px 10px;font-size:12px;font-weight:600;display:flex;position:absolute;top:-12px;left:14px}._0iu0NW_wsFrameLabel:active{cursor:grabbing}._0iu0NW_wsFrameEdge{pointer-events:auto;cursor:grab;position:absolute}._0iu0NW_wsFrameEdge:active{cursor:grabbing}._0iu0NW_wsFrameResize{pointer-events:auto;cursor:nwse-resize;border-right:3px solid var(--dsw-alias-border-l3);border-bottom:3px solid var(--dsw-alias-border-l3);opacity:.7;border-bottom-right-radius:14px;width:16px;height:16px;position:absolute;bottom:-2px;right:-2px}._0iu0NW_wsFrameResize:hover{border-color:var(--dsw-alias-brand-primary);opacity:1}._0iu0NW_wsFrameCount{color:var(--dsw-alias-label-tertiary);font-weight:400}._0iu0NW_draftCard{box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);width:360px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:14px;font-size:13px;display:flex}._0iu0NW_draftHeading{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}._0iu0NW_draftRow{align-items:center;gap:8px;display:flex}._0iu0NW_draftLabel{width:52px;color:var(--dsw-alias-label-tertiary);flex:none;font-size:12px}._0iu0NW_draftSelect{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);min-width:0;color:var(--dsw-alias-label-primary);border-radius:7px;flex:1;padding:5px 8px;font-size:12px}._0iu0NW_draftGrow{flex-direction:column;flex:1;gap:3px;min-width:0;display:flex}._0iu0NW_draftInput{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;color:var(--dsw-alias-label-primary);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_draftPathPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;font-size:11px}._0iu0NW_draftTextarea{box-sizing:border-box;resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:88px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:9px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_colorToolbar{z-index:7;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 2px 10px var(--dsw-alias-bg-mask-1);border-radius:10px;align-items:center;gap:6px;padding:6px 10px;display:flex;position:absolute;top:12px;left:12px}._0iu0NW_colorToolbarLabel{color:var(--dsw-alias-label-tertiary);margin-right:2px;font-size:12px}._0iu0NW_colorSwatch{border:1px solid var(--dsw-alias-border-l2);cursor:pointer;width:18px;height:18px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;padding:0;font-size:11px;line-height:1;display:flex}._0iu0NW_colorSwatch:hover{transform:scale(1.15)}._0iu0NW_colorSwatchClear{background:0 0}._0iu0NW_menu{z-index:9;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);min-width:200px;max-width:280px;max-height:380px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:10px;flex-direction:column;padding:6px;display:flex;position:absolute;overflow-y:auto}._0iu0NW_menuTitle{color:var(--dsw-alias-label-tertiary);flex:none;padding:4px 10px 6px;font-size:11px}._0iu0NW_menuSearch{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:calc(100% - 8px);color:var(--dsw-alias-label-primary);border-radius:7px;flex:none;margin:2px 4px 6px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_menuHint{color:var(--dsw-alias-label-dimmed);font-size:11px}._0iu0NW_menuPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;flex:none;padding:0 10px 4px;font-size:11px}._0iu0NW_menuError{color:var(--dsw-alias-state-error-primary);word-break:break-all;flex:none;padding:0 10px 4px;font-size:11px}._0iu0NW_menuEmpty{color:var(--dsw-alias-label-tertiary);padding:8px 10px;font-size:12px}._0iu0NW_menuItem{text-align:left;width:100%;color:var(--dsw-alias-label-primary);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:none;border-radius:7px;flex:none;padding:6px 10px;font-size:13px;display:block;overflow:hidden}._0iu0NW_menuItem:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_menuItem:disabled{color:var(--dsw-alias-label-dimmed);cursor:default}._0iu0NW_wsFrameHidden{color:var(--dsw-alias-state-warn-primary);font-weight:400}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
 		const tagId = "dsh-talk-map/talk-map.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");
@@ -11353,81 +11371,84 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"draftCard": "_0iu0NW_draftCard",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"closeButton": "_0iu0NW_closeButton",
-			"menuHint": "_0iu0NW_menuHint",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
 			"menuEmpty": "_0iu0NW_menuEmpty",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"overlay": "_0iu0NW_overlay",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"cardTop": "_0iu0NW_cardTop",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"draftRow": "_0iu0NW_draftRow",
-			"canvas": "_0iu0NW_canvas",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"runningDot": "_0iu0NW_runningDot",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"cardNext": "_0iu0NW_cardNext",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"menu": "_0iu0NW_menu",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"menuItem": "_0iu0NW_menuItem",
-			"cardTime": "_0iu0NW_cardTime",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"menuError": "_0iu0NW_menuError",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
 			"cardRemove": "_0iu0NW_cardRemove",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"card": "_0iu0NW_card",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"cardStale": "_0iu0NW_cardStale",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"menuTitle": "_0iu0NW_menuTitle",
-			"cardSummary": "_0iu0NW_cardSummary",
+			"runningDot": "_0iu0NW_runningDot",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"draftRow": "_0iu0NW_draftRow",
+			"toggleLabel": "_0iu0NW_toggleLabel",
 			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"header": "_0iu0NW_header",
+			"spawnModes": "_0iu0NW_spawnModes",
+			"cardTime": "_0iu0NW_cardTime",
 			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"draftInput": "_0iu0NW_draftInput",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"canvas": "_0iu0NW_canvas",
+			"spawnModeActive": "_0iu0NW_spawnModeActive",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"cardStale": "_0iu0NW_cardStale",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"menu": "_0iu0NW_menu",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"header": "_0iu0NW_header",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"cardNext": "_0iu0NW_cardNext",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"menuItem": "_0iu0NW_menuItem",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
 			"spawnActions": "_0iu0NW_spawnActions",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"overlay": "_0iu0NW_overlay",
+			"draftCard": "_0iu0NW_draftCard",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"menuError": "_0iu0NW_menuError",
+			"menuHint": "_0iu0NW_menuHint",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"card": "_0iu0NW_card",
+			"cardTop": "_0iu0NW_cardTop",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"draftInput": "_0iu0NW_draftInput",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"closeButton": "_0iu0NW_closeButton",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"menuTitle": "_0iu0NW_menuTitle",
 			"spawnError": "_0iu0NW_spawnError",
-			"spawnFrom": "_0iu0NW_spawnFrom"
+			"emptyHint": "_0iu0NW_emptyHint",
+			"headerBadge": "_0iu0NW_headerBadge"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -11575,7 +11596,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		const NEW_WORKSPACE = "__new__";
 		const GRID$1 = 16;
 		const snap$1 = (value) => Math.round(value / GRID$1) * GRID$1;
-		function unwrap(response, what) {
+		function unwrap$1(response, what) {
 			const { result } = response;
 			if (result.ok) return result.value;
 			throw new Error(`${what}: ${result.error.code ?? ""} ${result.error.message ?? ""}`.trim());
@@ -11646,9 +11667,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					let targetWorkspaceId = workspaceId;
 					if (creatingWorkspace) {
 						await talkMapApi.ensureDir(newWsPath);
-						targetWorkspaceId = unwrap(await services.connection.api.workspace.create({ path: newWsPath }), "workspace.create").workspace.workspaceId;
+						targetWorkspaceId = unwrap$1(await services.connection.api.workspace.create({ path: newWsPath }), "workspace.create").workspace.workspaceId;
 					}
-					const sessionId = unwrap(await services.connection.api.sessions.create({
+					const sessionId = unwrap$1(await services.connection.api.sessions.create({
 						workspaceId: targetWorkspaceId,
 						...presetId !== "" ? { agentPreset: presetId } : {}
 					}), "session.create").sessionId;
@@ -11673,13 +11694,13 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					}
 					if (modelKey !== "") {
 						const [provider, model] = modelKey.split("::");
-						unwrap(await services.connection.api.sessions.selectModel({
+						unwrap$1(await services.connection.api.sessions.selectModel({
 							sessionId,
 							provider,
 							model
 						}), "session.selectModel");
 					}
-					unwrap(await services.connection.api.sessions.prompt({
+					unwrap$1(await services.connection.api.sessions.prompt({
 						sessionId,
 						mode: "queue",
 						content: [{
@@ -11957,10 +11978,13 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		//#endregion
 		//#region src/client/SpawnPreview.tsx
 		/**
-		* The injection preview: shown when a connection is dropped on empty canvas.
-		* The user sees — and can edit — exactly what will be injected into the new
-		* session before anything happens. Confirm spawns via the host route, then
-		* jumps into the new conversation.
+		* The fork panel: shown when a connection is dropped on empty canvas.
+		* Three inheritance modes for the new conversation:
+		*   none   — fresh conversation, the edge is a visual link only
+		*            (needs a first message: an empty session would be invisible)
+		*   digest — the parent's digest is injected as background (editable here)
+		*   full   — dsh-native fork: the child carries the parent's full history
+		* All modes drop the new card at the release point and jump into the chat.
 		*/
 		function buildInjectionText(title, digest) {
 			const header = `${t("inject.header")}「${title}」`;
@@ -11975,10 +11999,17 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			if (next !== "") parts.push(`${t("inject.next")}${next}`);
 			return parts.join("\n");
 		}
+		function unwrap(response, what) {
+			const { result } = response;
+			if (result.ok) return result.value;
+			throw new Error(`${what}: ${result.error.code ?? ""} ${result.error.message ?? ""}`.trim());
+		}
 		function SpawnPreview(props) {
 			const { pending } = props;
 			const digest = canvas.get().digests[pending.parent.sessionId];
+			const [mode, setMode] = (0, react.useState)("digest");
 			const [text, setText] = (0, react.useState)(() => buildInjectionText(pending.parent.title, digest));
+			const [firstMessage, setFirstMessage] = (0, react.useState)("");
 			const [busy, setBusy] = (0, react.useState)(false);
 			const [error, setError] = (0, react.useState)(void 0);
 			(0, react.useEffect)(() => {
@@ -11995,34 +12026,99 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					release();
 				};
 			}, []);
+			const addCardAndEdge = (sessionId, kind, injectedText) => {
+				const cardId = newCardId();
+				const card = {
+					boardId: INBOX_BOARD_ID,
+					sessionId,
+					x: pending.x,
+					y: pending.y,
+					createdAt: Date.now()
+				};
+				canvas.addCards({ [cardId]: card });
+				talkMapApi.upsertEdges({ [`edge-${crypto.randomUUID()}`]: {
+					boardId: INBOX_BOARD_ID,
+					fromCardId: pending.parent.cardId,
+					toCardId: cardId,
+					injection: {
+						kind,
+						...injectedText !== void 0 ? { injectedText } : {}
+					},
+					createdAt: Date.now()
+				} }).catch((edgeError) => {
+					console.error("[dsh-talk-map] edge save failed:", edgeError);
+				});
+				return cardId;
+			};
+			const jumpIn = (sessionId) => {
+				props.onClose();
+				const services = getServices();
+				if (services !== void 0) {
+					mapUi.setOpen(false);
+					services.sessions.open(sessionId);
+				}
+			};
 			const confirm = async () => {
-				if (busy || text.trim() === "") return;
+				if (busy) return;
+				const services = getServices();
+				if (services === void 0) return;
 				setBusy(true);
 				setError(void 0);
 				try {
-					const result = await talkMapApi.spawn({
-						parents: [{
-							cardId: pending.parent.cardId,
-							sessionId: pending.parent.sessionId,
-							text
-						}],
-						boardId: INBOX_BOARD_ID,
-						x: pending.x,
-						y: pending.y,
-						...pending.wsOverride !== void 0 ? { wsOverride: pending.wsOverride } : {}
-					});
-					canvas.applySpawn(result);
-					props.onClose();
-					const services = getServices();
-					if (services !== void 0) {
-						mapUi.setOpen(false);
-						services.sessions.open(result.sessionId);
+					if (mode === "digest") {
+						if (text.trim() === "") throw new Error(t("spawn.needText"));
+						const result = await talkMapApi.spawn({
+							parents: [{
+								cardId: pending.parent.cardId,
+								sessionId: pending.parent.sessionId,
+								text
+							}],
+							boardId: INBOX_BOARD_ID,
+							x: pending.x,
+							y: pending.y
+						});
+						canvas.applySpawn(result);
+						jumpIn(result.sessionId);
+						return;
 					}
+					if (mode === "full") {
+						const childId = await services.sessions.fork({ sessionId: pending.parent.sessionId });
+						addCardAndEdge(childId, "full");
+						jumpIn(childId);
+						return;
+					}
+					if (firstMessage.trim() === "") throw new Error(t("spawn.needFirstMessage"));
+					const created = unwrap(await services.connection.api.sessions.create(pending.parentWorkspaceId !== void 0 ? { workspaceId: pending.parentWorkspaceId } : {}), "session.create");
+					addCardAndEdge(created.sessionId, "none");
+					unwrap(await services.connection.api.sessions.prompt({
+						sessionId: created.sessionId,
+						mode: "queue",
+						content: [{
+							type: "text",
+							text: firstMessage
+						}],
+						clientTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+					}), "session.prompt");
+					jumpIn(created.sessionId);
 				} catch (spawnError) {
 					setError(String(spawnError));
 					setBusy(false);
 				}
 			};
+			const modes = [
+				{
+					id: "none",
+					label: t("spawn.mode.none")
+				},
+				{
+					id: "digest",
+					label: t("spawn.mode.digest")
+				},
+				{
+					id: "full",
+					label: t("spawn.mode.full")
+				}
+			];
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: talk_map_module_css_default["spawnPanel"],
 				role: "dialog",
@@ -12042,16 +12138,46 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						]
 					}),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["spawnModes"],
+						children: modes.map((entry) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+							type: "button",
+							className: `${talk_map_module_css_default["spawnModeBtn"]}${mode === entry.id ? ` ${talk_map_module_css_default["spawnModeActive"]}` : ""}`,
+							onClick: () => {
+								setMode(entry.id);
+							},
+							children: entry.label
+						}, entry.id))
+					}),
+					mode === "digest" ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: talk_map_module_css_default["spawnHint"],
 						children: t("spawn.hint")
-					}),
-					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("textarea", {
+					}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("textarea", {
 						className: `${talk_map_module_css_default["spawnTextarea"]} nodrag nowheel`,
 						value: text,
-						rows: 10,
+						rows: 9,
 						onChange: (event) => {
 							setText(event.target.value);
 						}
+					})] }) : mode === "none" ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["spawnHint"],
+						children: t("spawn.noneHint")
+					}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("textarea", {
+						className: `${talk_map_module_css_default["spawnTextarea"]} nodrag nowheel`,
+						placeholder: t("draft.placeholder"),
+						value: firstMessage,
+						rows: 5,
+						onChange: (event) => {
+							setFirstMessage(event.target.value);
+						},
+						onKeyDown: (event) => {
+							if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+								event.preventDefault();
+								confirm();
+							}
+						}
+					})] }) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["spawnHint"],
+						children: t("spawn.fullHint")
 					}),
 					error !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: talk_map_module_css_default["spawnError"],
@@ -12071,7 +12197,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							onClick: () => {
 								confirm();
 							},
-							disabled: busy || text.trim() === "",
+							disabled: busy || mode === "digest" && text.trim() === "" || mode === "none" && firstMessage.trim() === "",
 							children: busy ? t("spawn.busy") : t("spawn.confirm")
 						})]
 					})
@@ -12469,7 +12595,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						source: edge.fromCardId,
 						target: edge.toCardId,
 						type: "smoothstep",
-						label: t("edge.injected")
+						label: edge.injection.kind === "none" ? t("edge.none") : edge.injection.kind === "full" ? t("edge.full") : t("edge.injected"),
+						...edge.injection.kind === "none" ? { style: { opacity: .65 } } : {}
 					});
 				}
 				for (const [cardId, card] of Object.entries(visibleCards)) {
@@ -12589,12 +12716,14 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				} : void 0;
 				if (client === void 0) return;
 				const position = screenToFlowPosition(client);
+				const parentWorkspaceId = sessionWs.get(card.sessionId);
 				setPendingSpawn({
 					parent: {
 						cardId: fromNodeId,
 						sessionId: card.sessionId,
 						title: summary.displayTitle
 					},
+					...parentWorkspaceId !== void 0 ? { parentWorkspaceId } : {},
 					x: snap(position.x - CARD_W / 2),
 					y: snap(position.y - CARD_H / 2)
 				});

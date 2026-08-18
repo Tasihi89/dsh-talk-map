@@ -345,7 +345,12 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         source: edge.fromCardId,
         target: edge.toCardId,
         type: 'smoothstep',
-        label: t('edge.injected'),
+        label: edge.injection.kind === 'none'
+          ? t('edge.none')
+          : edge.injection.kind === 'full'
+            ? t('edge.full')
+            : t('edge.injected'),
+        ...(edge.injection.kind === 'none' ? { style: { opacity: 0.65 } } : {}),
       })
     }
     for (const [cardId, card] of Object.entries(visibleCards)) {
@@ -482,8 +487,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         : undefined
     if (client === undefined) return
     const position = screenToFlowPosition(client)
+    const parentWorkspaceId = sessionWs.get(card.sessionId)
     setPendingSpawn({
       parent: { cardId: fromNodeId, sessionId: card.sessionId, title: summary.displayTitle },
+      ...(parentWorkspaceId !== undefined ? { parentWorkspaceId } : {}),
       x: snap(position.x - CARD_W / 2),
       y: snap(position.y - CARD_H / 2),
     })

@@ -41,7 +41,7 @@ export const cardSchema = z.object({
 export type Card = z.infer<typeof cardSchema>
 
 export const edgeInjectionSchema = z.object({
-  kind: z.enum(['digest', 'full', 'selection']),
+  kind: z.enum(['digest', 'full', 'selection', 'none']),
   /** What was actually injected (post-edit), kept for provenance display. */
   injectedText: z.string().optional(),
 })

@@ -25,7 +25,7 @@ export interface Board {
 }
 
 export interface EdgeInjection {
-  kind: 'digest' | 'full' | 'selection'
+  kind: 'digest' | 'full' | 'selection' | 'none'
   injectedText?: string
 }
 
