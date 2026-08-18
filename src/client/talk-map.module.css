@@ -310,14 +310,16 @@
 }
 
 /* Connection points: fully invisible at rest (still hit-testable — opacity
- * keeps pointer events), revealed on card hover or while a drag is live. */
+ * keeps pointer events), revealed on card hover or while a drag is live.
+ * Deliberately NOT transitioned: a transition rides the animation clock,
+ * which throttled/background tabs freeze — the handles would then stay
+ * stuck invisible mid-drag. Instant toggle is timing-independent. */
 .cardHandle {
   width: 10px;
   height: 10px;
   background: var(--dsw-alias-border-l3);
   border: 2px solid var(--dsw-alias-bg-layer-1);
   opacity: 0;
-  transition: opacity 120ms ease;
 }
 
 .card:hover .cardHandle,

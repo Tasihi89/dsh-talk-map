@@ -124,6 +124,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   // Connection drag in flight → every card shows its (otherwise hidden)
   // connection points, so drop targets are visible.
   const [connecting, setConnecting] = useState(false)
+  // Esc pressed mid-drag: swallow the following release so the spawn panel
+  // does not pop on a gesture the user just cancelled.
+  const connectCancelledRef = useRef(false)
   const [toast, setToast] = useState<string | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [pendingSpawn, setPendingSpawn] = useState<PendingSpawn | null>(null)
@@ -221,7 +224,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     const onKeyDown = (event: KeyboardEvent): void => {
       // No stopPropagation: React Flow needs the key to cancel its ghost
       // line; the claim alone keeps the overlay from closing the map.
-      if (event.key === 'Escape') setConnecting(false)
+      if (event.key === 'Escape') {
+        connectCancelledRef.current = true
+        setConnecting(false)
+      }
     }
     const onPointerUp = (): void => { setConnecting(false) }
     window.addEventListener('keydown', onKeyDown, { capture: true })
@@ -624,6 +630,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     connectionState: FinalConnectionState,
   ): void => {
     setConnecting(false)
+    if (connectCancelledRef.current) {
+      connectCancelledRef.current = false
+      return
+    }
     if (connectionState.isValid === true) return // landed on a handle → onConnect
     const fromNodeId = connectionState.fromNode?.id
     if (fromNodeId === undefined) return
