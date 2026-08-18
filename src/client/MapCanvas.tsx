@@ -15,7 +15,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Background, BackgroundVariant, ControlButton, Controls, ReactFlow, ReactFlowProvider,
-  useReactFlow, type Edge, type FinalConnectionState, type NodeChange, type Viewport,
+  SelectionMode, useReactFlow, type Edge, type FinalConnectionState, type NodeChange, type Viewport,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import type { RootSlotStandardProps, SessionListState, WorkspaceListState } from './dsh.ts'
@@ -775,6 +775,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         zoomOnDoubleClick={false}
         panOnDrag={[1, 2]}
         selectionOnDrag
+        selectionMode={SelectionMode.Partial}
         deleteKeyCode={['Backspace', 'Delete']}
         minZoom={0.1}
         proOptions={{ hideAttribution: true }}

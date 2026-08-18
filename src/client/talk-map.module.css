@@ -141,6 +141,16 @@
   position: relative;
 }
 
+/* React Flow draws a huge translucent bounding rect over the whole selected
+ * set after a rubber-band select; spanning distant cards it covers half the
+ * board, LOOKS like select-all, and swallows every click underneath. Kill
+ * it — dragging any selected card still moves the whole selection. */
+.canvas :global(.react-flow__nodesselection),
+.canvas :global(.react-flow__nodesselection-rect) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 .card {
   width: 224px;
   min-height: 104px;
