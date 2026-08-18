@@ -36,6 +36,32 @@ export interface SpawnResult {
 }
 
 export class Spawner {
+  /**
+   * Inject parent digests into an EXISTING live session (created through
+   * dsh's own session.create RPC, so its composition — tools, preset,
+   * workspace binding — is exactly what a normal new chat gets). This
+   * replaced the bare agents.create spawn: a bare-created agent had no
+   * scoped tools, so the model printed its tool-call markup as text.
+   */
+  injectInto(sessionId: string, parents: readonly { sessionId: string; text: string }[]): void {
+    const agent = this.services.agents.get(sessionId)
+    if (agent === undefined) throw new Error(`session ${sessionId} is not live`)
+    for (const parent of parents) {
+      const message: UserMessageLite = {
+        id: crypto.randomUUID(),
+        role: 'user',
+        content: [{ type: 'text', text: parent.text }],
+        source: {
+          kind: 'plugin',
+          plugin: 'dsh-talk-map',
+          form: 'notice',
+          summary: `Context injected from session ${parent.sessionId}`,
+        },
+      }
+      agent.inject(message)
+    }
+  }
+
   /** Live handles: dropping one disposes the agent AND removes its session from the live store — keep them. */
   private readonly handles = new Map<string, AgentHandleLite>()
 

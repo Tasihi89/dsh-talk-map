@@ -72,6 +72,12 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			spawn(request) {
 				return postJson("/talk-map/spawn", request);
 			},
+			injectContext(sessionId, parents) {
+				return postJson("/talk-map/inject", {
+					sessionId,
+					parents
+				});
+			},
 			refreshDigest(sessionId) {
 				return postJson("/talk-map/digest/refresh", { sessionId });
 			},
@@ -11371,84 +11377,84 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"menuTitle": "_0iu0NW_menuTitle",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"cardGhost": "_0iu0NW_cardGhost",
+			"cardTime": "_0iu0NW_cardTime",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"menuItem": "_0iu0NW_menuItem",
+			"card": "_0iu0NW_card",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"overlay": "_0iu0NW_overlay",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
 			"cardRemove": "_0iu0NW_cardRemove",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"menu": "_0iu0NW_menu",
+			"menuPreview": "_0iu0NW_menuPreview",
 			"draftSelect": "_0iu0NW_draftSelect",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"canvas": "_0iu0NW_canvas",
+			"menuTitle": "_0iu0NW_menuTitle",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"spawnModeActive": "_0iu0NW_spawnModeActive",
 			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"menuHint": "_0iu0NW_menuHint",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"toggleRow": "_0iu0NW_toggleRow",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"draftInput": "_0iu0NW_draftInput",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
 			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
 			"cardSummary": "_0iu0NW_cardSummary",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"overlay": "_0iu0NW_overlay",
-			"card": "_0iu0NW_card",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"menu": "_0iu0NW_menu",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"cardStale": "_0iu0NW_cardStale",
 			"menuSearch": "_0iu0NW_menuSearch",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"canvas": "_0iu0NW_canvas",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"runningDot": "_0iu0NW_runningDot",
-			"header": "_0iu0NW_header",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"closeButton": "_0iu0NW_closeButton",
-			"draftInput": "_0iu0NW_draftInput",
-			"menuEmpty": "_0iu0NW_menuEmpty",
-			"menuItem": "_0iu0NW_menuItem",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"cardTime": "_0iu0NW_cardTime",
-			"spawnError": "_0iu0NW_spawnError",
-			"colorToolbar": "_0iu0NW_colorToolbar",
 			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"menuError": "_0iu0NW_menuError",
-			"headerTitle": "_0iu0NW_headerTitle",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"closeButton": "_0iu0NW_closeButton",
+			"headerBadge": "_0iu0NW_headerBadge",
 			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"draftCard": "_0iu0NW_draftCard",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"draftRow": "_0iu0NW_draftRow",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"spawnModeActive": "_0iu0NW_spawnModeActive",
-			"spawnModes": "_0iu0NW_spawnModes",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"menuHint": "_0iu0NW_menuHint",
+			"menuError": "_0iu0NW_menuError",
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"runningDot": "_0iu0NW_runningDot",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"cardStale": "_0iu0NW_cardStale",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"header": "_0iu0NW_header",
+			"cardFooter": "_0iu0NW_cardFooter",
 			"cardTop": "_0iu0NW_cardTop",
-			"cardNext": "_0iu0NW_cardNext",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"cardNextText": "_0iu0NW_cardNextText",
 			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"toggleButton": "_0iu0NW_toggleButton"
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"spawnError": "_0iu0NW_spawnError",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"cardNext": "_0iu0NW_cardNext",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"spawnModes": "_0iu0NW_spawnModes",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"draftRow": "_0iu0NW_draftRow",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"draftCard": "_0iu0NW_draftCard",
+			"cardCurrent": "_0iu0NW_cardCurrent"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12067,18 +12073,13 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				try {
 					if (mode === "digest") {
 						if (text.trim() === "") throw new Error(t("spawn.needText"));
-						const result = await talkMapApi.spawn({
-							parents: [{
-								cardId: pending.parent.cardId,
-								sessionId: pending.parent.sessionId,
-								text
-							}],
-							boardId: INBOX_BOARD_ID,
-							x: pending.x,
-							y: pending.y
-						});
-						canvas.applySpawn(result);
-						jumpIn(result.sessionId);
+						const created = unwrap(await services.connection.api.sessions.create(pending.parentWorkspaceId !== void 0 ? { workspaceId: pending.parentWorkspaceId } : {}), "session.create");
+						await talkMapApi.injectContext(created.sessionId, [{
+							sessionId: pending.parent.sessionId,
+							text
+						}]);
+						addCardAndEdge(created.sessionId, "digest", text);
+						jumpIn(created.sessionId);
 						return;
 					}
 					if (mode === "full") {

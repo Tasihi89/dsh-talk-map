@@ -52,6 +52,9 @@ export const talkMapApi = {
   }): Promise<{ sessionId: string; cardId: string; card: Card; edges: Record<string, MapEdgeData> }> {
     return postJson('/talk-map/spawn', request)
   },
+  injectContext(sessionId: string, parents: { sessionId: string; text: string }[]): Promise<{ ok: true }> {
+    return postJson('/talk-map/inject', { sessionId, parents })
+  },
   refreshDigest(sessionId: string): Promise<{ sessionId: string; digest: Digest }> {
     return postJson('/talk-map/digest/refresh', { sessionId })
   },

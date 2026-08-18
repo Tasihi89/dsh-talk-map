@@ -118,14 +118,17 @@ export function SpawnPreview(props: {
     try {
       if (mode === 'digest') {
         if (text.trim() === '') throw new Error(t('spawn.needText'))
-        const result = await talkMapApi.spawn({
-          parents: [{ cardId: pending.parent.cardId, sessionId: pending.parent.sessionId, text }],
-          boardId: INBOX_BOARD_ID,
-          x: pending.x,
-          y: pending.y,
-        })
-        canvas.applySpawn(result)
-        jumpIn(result.sessionId)
+        // The session comes from dsh's own create RPC — full composition
+        // (tools, preset, workspace binding) identical to a normal new chat.
+        // The plugin only injects the digest into it afterwards.
+        const created = unwrap(await services.connection.api.sessions.create(
+          pending.parentWorkspaceId !== undefined ? { workspaceId: pending.parentWorkspaceId } : {},
+        ), 'session.create')
+        await talkMapApi.injectContext(created.sessionId, [
+          { sessionId: pending.parent.sessionId, text },
+        ])
+        addCardAndEdge(created.sessionId, 'digest', text)
+        jumpIn(created.sessionId)
         return
       }
       if (mode === 'full') {

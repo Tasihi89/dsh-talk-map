@@ -97,6 +97,13 @@ const spawnBody = z.object({
 const refreshDigestBody = z.object({
   sessionId: z.string(),
 })
+const injectBody = z.object({
+  sessionId: z.string(),
+  parents: z.array(z.object({
+    sessionId: z.string(),
+    text: z.string().min(1),
+  })).min(1),
+})
 const ensureDirBody = z.object({
   path: z.string().min(1),
 })
@@ -233,6 +240,17 @@ export function mountTalkMapRoutes(
           const store = await storeReady
           const body = setGlobalBody.parse(await readJsonBody(request))
           await store.setGlobal(body.global)
+          sendJson(response, 200, { ok: true })
+          return
+        }
+
+        if (route === 'POST /talk-map/inject') {
+          if (runtime.spawner === undefined) {
+            sendJson(response, 503, { error: 'spawn layer unavailable (agents service missing)' })
+            return
+          }
+          const body = injectBody.parse(await readJsonBody(request))
+          runtime.spawner.injectInto(body.sessionId, body.parents)
           sendJson(response, 200, { ok: true })
           return
         }
