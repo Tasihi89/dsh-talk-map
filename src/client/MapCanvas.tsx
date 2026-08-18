@@ -379,6 +379,33 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   }
 
   const onNodesChange = (changes: NodeChange<TalkMapNode>[]): void => {
+    // A delete batch that empties a group takes the group's frame with it —
+    // rubber-band can't select frames, so "select everything and Backspace"
+    // must not leave empty shells behind.
+    const removedCardIds = changes
+      .filter((change): change is Extract<NodeChange<TalkMapNode>, { type: 'remove' }> => change.type === 'remove')
+      .map(change => change.id)
+      .filter(id => !id.startsWith('frame-') && id !== 'draft')
+    if (removedCardIds.length > 0) {
+      const touched = new Set<string>()
+      for (const cardId of removedCardIds) {
+        const card = canvasState.cards[cardId]
+        const groupId = card !== undefined ? sessionWs.get(card.sessionId) : undefined
+        if (groupId !== undefined) touched.add(groupId)
+      }
+      const framesNext = { ...wsFrames }
+      const colorsNext = { ...canvasState.global?.wsColors }
+      let framesChanged = false
+      for (const groupId of touched) {
+        const remaining = (membersByGroup.get(groupId) ?? []).filter(id => !removedCardIds.includes(id))
+        if (remaining.length === 0 && framesNext[groupId] !== undefined) {
+          delete framesNext[groupId]
+          delete colorsNext[groupId]
+          framesChanged = true
+        }
+      }
+      if (framesChanged) canvas.patchGlobalNow({ wsFrames: framesNext, wsColors: colorsNext })
+    }
     for (const change of changes) {
       if (change.type === 'position' && change.position !== undefined) {
         if (change.id === 'draft') {
