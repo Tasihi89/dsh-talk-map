@@ -628,12 +628,14 @@
 }
 
 .menuTitle {
+  flex: none;
   padding: 4px 10px 6px;
   font-size: 11px;
   color: var(--dsw-alias-label-tertiary);
 }
 
 .menuSearch {
+  flex: none;
   box-sizing: border-box;
   width: calc(100% - 8px);
   margin: 2px 4px 6px;
@@ -651,6 +653,22 @@
   color: var(--dsw-alias-label-dimmed);
 }
 
+.menuPreview {
+  flex: none;
+  padding: 0 10px 4px;
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  word-break: break-all;
+}
+
+.menuError {
+  flex: none;
+  padding: 0 10px 4px;
+  font-size: 11px;
+  color: var(--dsw-alias-state-error-primary);
+  word-break: break-all;
+}
+
 .menuEmpty {
   padding: 8px 10px;
   font-size: 12px;
@@ -658,6 +676,9 @@
 }
 
 .menuItem {
+  /* .menu is a flex column with max-height: without flex:none a long list
+   * SHRINKS every row and clips the text vertically */
+  flex: none;
   display: block;
   width: 100%;
   text-align: left;

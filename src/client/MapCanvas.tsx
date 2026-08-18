@@ -103,7 +103,7 @@ interface MenuContext {
   flowY: number
   kind: 'pane' | 'card' | 'frame'
   targetId?: string
-  view: 'root' | 'import-ws' | 'import-session' | 'move-group'
+  view: 'root' | 'import-ws' | 'import-session' | 'move-group' | 'new-ws'
 }
 
 function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
@@ -559,8 +559,45 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     const items: MenuItem[] = []
     let title: string | undefined
 
+    if (menu.view === 'new-ws') {
+      const parentDir = ((): string => {
+        const sample = workspaces.items[0]?.path
+        if (sample === undefined) return ''
+        const cut = sample.lastIndexOf('/')
+        return cut > 0 ? sample.slice(0, cut) : sample
+      })()
+      return {
+        left: menu.left,
+        top: menu.top,
+        title: t('menu.newWs'),
+        prompt: {
+          placeholder: t('draft.wsNamePlaceholder'),
+          submitLabel: t('menu.createAndImport'),
+          preview: (value: string) => `${parentDir}/${value}`,
+          onSubmit: async (value: string) => {
+            const services = getServices()
+            if (services === undefined || parentDir === '') throw new Error('no workspace root available')
+            const path = `${parentDir}/${value}`
+            await talkMapApi.ensureDir(path)
+            const response = await services.connection.api.workspace.create({ path })
+            if (!response.result.ok) {
+              throw new Error(`workspace.create: ${response.result.error.message ?? response.result.error.code ?? ''}`)
+            }
+            importWorkspace(response.result.value.workspace.workspaceId, menu.flowX, menu.flowY)
+            close()
+          },
+        },
+        items: [],
+      }
+    }
+
     if (menu.view === 'import-ws') {
       title = t('menu.importWs')
+      items.push({
+        key: '__new__',
+        label: t('menu.newWs'),
+        onPick: () => { setMenu({ ...menu, view: 'new-ws' }) },
+      })
       for (const item of workspaces.items) {
         const imported = wsFrames[item.workspaceId] !== undefined
         items.push({

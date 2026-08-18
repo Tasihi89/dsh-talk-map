@@ -25,13 +25,36 @@ export interface MenuState {
   title?: string
   /** Pick-list views get a filter input. */
   searchable?: boolean
+  /** Prompt views ask for one line of text instead of picking from a list. */
+  prompt?: {
+    placeholder: string
+    submitLabel: string
+    /** Live preview under the input (e.g. the resulting folder path). */
+    preview?: (value: string) => string
+    onSubmit: (value: string) => Promise<void>
+  }
   items: MenuItem[]
 }
 
 export function ContextMenu(props: { menu: MenuState; onClose: () => void }): React.JSX.Element {
   const { menu } = props
   const [query, setQuery] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | undefined>(undefined)
   const inputRef = useRef<HTMLInputElement | null>(null)
+
+  const submitPrompt = async (): Promise<void> => {
+    const prompt = menu.prompt
+    if (prompt === undefined || busy || query.trim() === '') return
+    setBusy(true)
+    setError(undefined)
+    try {
+      await prompt.onSubmit(query.trim())
+    } catch (submitError) {
+      setError(String(submitError))
+      setBusy(false)
+    }
+  }
 
   useEffect(() => {
     const release = mapUi.claimEscape('context-menu')
@@ -50,8 +73,8 @@ export function ContextMenu(props: { menu: MenuState; onClose: () => void }): Re
   }, [])
 
   useEffect(() => {
-    if (menu.searchable === true) inputRef.current?.focus()
-  }, [menu.searchable])
+    if (menu.searchable === true || menu.prompt !== undefined) inputRef.current?.focus()
+  }, [menu.searchable, menu.prompt])
 
   const normalized = query.trim().toLowerCase()
   const visible = normalized === ''
@@ -70,6 +93,37 @@ export function ContextMenu(props: { menu: MenuState; onClose: () => void }): Re
       onContextMenu={(event) => { event.preventDefault() }}
     >
       {menu.title !== undefined ? <div className={styles['menuTitle']}>{menu.title}</div> : null}
+      {menu.prompt !== undefined
+        ? (
+            <>
+              <input
+                ref={inputRef}
+                className={styles['menuSearch']}
+                placeholder={menu.prompt.placeholder}
+                value={query}
+                onChange={(event) => { setQuery(event.target.value) }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                    void submitPrompt()
+                  }
+                }}
+              />
+              {menu.prompt.preview !== undefined && query.trim() !== ''
+                ? <div className={styles['menuPreview']}>{menu.prompt.preview(query.trim())}</div>
+                : null}
+              {error !== undefined ? <div className={styles['menuError']}>{error}</div> : null}
+              <button
+                type="button"
+                className={styles['menuItem']}
+                disabled={busy || query.trim() === ''}
+                onClick={() => { void submitPrompt() }}
+              >
+                {busy ? t('menu.working') : menu.prompt.submitLabel}
+              </button>
+            </>
+          )
+        : null}
       {menu.searchable === true
         ? (
             <input
@@ -81,7 +135,9 @@ export function ContextMenu(props: { menu: MenuState; onClose: () => void }): Re
             />
           )
         : null}
-      {visible.length === 0
+      {menu.prompt !== undefined
+        ? null
+        : visible.length === 0
         ? <div className={styles['menuEmpty']}>{t('menu.empty')}</div>
         : visible.map(item => (
           <button
