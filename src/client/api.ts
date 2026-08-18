@@ -48,6 +48,12 @@ export const talkMapApi = {
   refreshDigest(sessionId: string): Promise<{ sessionId: string; digest: Digest }> {
     return postJson('/talk-map/digest/refresh', { sessionId })
   },
+  getDefaults(): Promise<{
+    model: { provider: string; model: string; reasoningEffort?: string } | null
+    preset: string | null
+  }> {
+    return requestJson('/talk-map/defaults')
+  },
   /**
    * Subscribe to host-side domain changes (multi-tab sync, digest arrivals).
    * @returns disposer closing the EventSource.

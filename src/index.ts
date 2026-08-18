@@ -75,6 +75,23 @@ export function apply(ctx: OuterContext): void {
     }, 'dsh-talk-map: digest pipeline')
   })
 
+  // Defaults for the draft composer (each optional — missing service just
+  // leaves the corresponding default unlabeled).
+  ctx.inject(['agentDefaultModel'], (injected: unknown) => {
+    const services = injected as { agentDefaultModel: { currentSelection(): { provider: string; model: string; reasoningEffort?: string } }; effect(cb: () => () => void, label?: string): void }
+    services.effect(() => {
+      runtime.modelDefault = () => services.agentDefaultModel.currentSelection()
+      return () => { delete runtime.modelDefault }
+    }, 'dsh-talk-map: model default')
+  })
+  ctx.inject(['agentPresets'], (injected: unknown) => {
+    const services = injected as { agentPresets: { defaultId: string }; effect(cb: () => () => void, label?: string): void }
+    services.effect(() => {
+      runtime.presetDefault = () => services.agentPresets.defaultId
+      return () => { delete runtime.presetDefault }
+    }, 'dsh-talk-map: preset default')
+  })
+
   // Layer 3: injection-spawn (needs the agent registry).
   ctx.inject(['agents', 'sessionQuery'], (injected: unknown) => {
     const services = injected as SpawnHostServices

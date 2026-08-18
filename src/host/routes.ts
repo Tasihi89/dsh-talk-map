@@ -20,6 +20,10 @@ import { cardSchema, globalSchema, DOMAIN_NAME, type TalkMapStore } from './stor
 export interface TalkMapRuntime {
   digest?: DigestPipeline
   spawner?: Spawner
+  /** Deployment default model route (from ctx.agentDefaultModel). */
+  modelDefault?: () => { provider: string; model: string; reasoningEffort?: string }
+  /** Deployment default agent preset id (from ctx.agentPresets). */
+  presetDefault?: () => string
 }
 
 const MAX_BODY_BYTES = 1024 * 1024
@@ -129,6 +133,19 @@ export function mountTalkMapRoutes(
             digests: tableToRecord(store.digests),
             global: store.global(),
           })
+          return
+        }
+
+        if (route === 'GET /talk-map/defaults') {
+          let model: unknown = null
+          let preset: unknown = null
+          try {
+            model = runtime.modelDefault?.() ?? null
+          } catch { /* unresolved default model config */ }
+          try {
+            preset = runtime.presetDefault?.() ?? null
+          } catch { /* no presets composed */ }
+          sendJson(response, 200, { model, preset })
           return
         }
 

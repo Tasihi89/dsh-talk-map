@@ -369,6 +369,11 @@
   background: transparent;
 }
 
+.wsFrameSelected {
+  border-style: solid;
+  border-color: var(--dsw-alias-brand-primary);
+}
+
 .wsFrameLabel {
   position: absolute;
   top: -12px;
@@ -384,6 +389,13 @@
   font-weight: 600;
   color: var(--dsw-alias-label-secondary);
   white-space: nowrap;
+  /* the frame body is click-through; the chip is the physical handle */
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.wsFrameLabel:active {
+  cursor: grabbing;
 }
 
 .wsFrameCount {
@@ -393,6 +405,7 @@
 
 .draftCard {
   width: 360px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -426,6 +439,7 @@
 .draftSelect {
   flex: 1;
   min-width: 0;
+  box-sizing: border-box;
   padding: 5px 8px;
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 7px;
@@ -434,8 +448,35 @@
   font-size: 12px;
 }
 
+.draftGrow {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.draftInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 7px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.draftPathPreview {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  word-break: break-all;
+}
+
 .draftTextarea {
   width: 100%;
+  box-sizing: border-box;
   resize: vertical;
   min-height: 88px;
   padding: 9px;
@@ -446,6 +487,50 @@
   font-size: 13px;
   line-height: 1.5;
   font-family: inherit;
+}
+
+.colorToolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 2px 10px var(--dsw-alias-bg-mask-1);
+}
+
+.colorToolbarLabel {
+  font-size: 12px;
+  color: var(--dsw-alias-label-tertiary);
+  margin-right: 2px;
+}
+
+.colorSwatch {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--dsw-alias-label-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.15);
+}
+
+.colorSwatchClear {
+  background: transparent;
 }
 
 .emptyHint {

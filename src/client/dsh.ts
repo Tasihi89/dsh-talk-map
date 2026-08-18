@@ -144,6 +144,10 @@ export interface ConnectionService {
         clientTimeZone?: string
       }): Promise<RpcEnvelope<{ accepted: true }>>
     }
+    workspace: {
+      create(payload: { path: string }):
+      Promise<RpcEnvelope<{ workspace: WorkspaceView; created: boolean }>>
+    }
     llm: {
       models(payload: Record<string, never>):
       Promise<RpcEnvelope<{ groups: ModelProviderGroup[] }>>

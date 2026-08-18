@@ -32,6 +32,10 @@ export const cardSchema = z.object({
   x: z.number(),
   y: z.number(),
   colorTag: z.string().optional(),
+  /** Map-level group override (set by dragging a card into another frame).
+   * dsh @0.1.0-rc.6 has no cross-workspace session move RPC, so this is the
+   * canvas's own organizational layer — the sidebar keeps its own truth. */
+  wsOverride: z.string().optional(),
   createdAt: z.number(),
 })
 export type Card = z.infer<typeof cardSchema>
@@ -74,6 +78,8 @@ export const globalSchema = z.object({
   cameraByBoard: z.record(z.string(), cameraSchema),
   /** Auto-placement generation; absent = v1 (pre-workspace-grouping). */
   layoutVersion: z.number().optional(),
+  /** Per-workspace color tags for the group frames. */
+  wsColors: z.record(z.string(), z.string()).optional(),
 })
 export type MapGlobal = z.infer<typeof globalSchema>
 

@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { Handle, Position, type NodeProps, type Node } from '@xyflow/react'
 import { talkMapApi } from './api.ts'
 import { canvas } from './canvas-store.ts'
+import { colorOf } from './colors.ts'
 import { t } from './i18n.ts'
 import styles from './talk-map.module.css'
 
@@ -21,6 +22,7 @@ export interface SessionCardData extends Record<string, unknown> {
   updatedAt?: number
   nextStep?: string
   stale?: boolean
+  colorTag?: string
 }
 
 export type SessionCardNodeType = Node<SessionCardData, 'sessionCard'>
@@ -57,8 +59,15 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
     }
   }
 
+  const color = colorOf(data.colorTag)
+
   return (
-    <div className={classNames.filter(Boolean).join(' ')}>
+    <div
+      className={classNames.filter(Boolean).join(' ')}
+      style={color !== undefined
+        ? { borderColor: color.border, backgroundImage: `linear-gradient(${color.fill}, ${color.fill})` }
+        : {}}
+    >
       <Handle type="target" position={Position.Left} className={styles['cardHandle'] ?? ''} />
       <div className={styles['cardTop']}>
         {data.running ? <span className={styles['runningDot']} title={t('card.running')} /> : null}

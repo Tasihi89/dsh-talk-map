@@ -39,9 +39,15 @@ const zh: Record<string, string> = {
   'draft.model': '模型',
   'draft.preset': '模式',
   'draft.default': '默认',
-  'draft.placeholder': '想聊什么？发送后会话在后台开跑，卡片留在地图上（⌘/Ctrl+Enter 发送）',
+  'draft.placeholder': '想聊什么？（⌘/Ctrl+Enter 发送）',
   'draft.send': '发送',
   'draft.sending': '发送中……',
+  'draft.newWorkspace': '＋ 新建工作区',
+  'draft.wsName': '名称',
+  'draft.wsNamePlaceholder': '新工作区文件夹名',
+  'draft.defaultSuffix': '（默认）',
+  'color.toolbar': '颜色',
+  'color.clear': '清除颜色',
 }
 
 const en: Record<string, string> = {
@@ -80,9 +86,15 @@ const en: Record<string, string> = {
   'draft.model': 'Model',
   'draft.preset': 'Preset',
   'draft.default': 'Default',
-  'draft.placeholder': 'What is this about? On send the session runs in the background; the card stays on the map (⌘/Ctrl+Enter to send)',
+  'draft.placeholder': 'What is this about? (⌘/Ctrl+Enter to send)',
   'draft.send': 'Send',
   'draft.sending': 'Sending…',
+  'draft.newWorkspace': '＋ New workspace',
+  'draft.wsName': 'Name',
+  'draft.wsNamePlaceholder': 'New workspace folder name',
+  'draft.defaultSuffix': ' (default)',
+  'color.toolbar': 'Color',
+  'color.clear': 'Clear color',
 }
 
 function isZh(): boolean {

@@ -10,6 +10,8 @@ export interface Card {
   x: number
   y: number
   colorTag?: string
+  /** Map-level group override — the canvas's own organizational layer. */
+  wsOverride?: string
   createdAt: number
 }
 
@@ -58,6 +60,8 @@ export interface MapGlobal {
   cameraByBoard: Record<string, Camera>
   /** Auto-placement generation; absent = v1 (pre-workspace-grouping). */
   layoutVersion?: number
+  /** Per-workspace color tags for the group frames. */
+  wsColors?: Record<string, string>
 }
 
 export interface MapStatePayload {

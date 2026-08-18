@@ -146,6 +146,48 @@ export const canvas = {
     })
   },
 
+  /** Recolor cards (undefined clears); persists immediately. */
+  setCardsColor(ids: readonly string[], colorTag: string | undefined): void {
+    const payload: Record<string, Card> = {}
+    const cards = { ...state.cards }
+    for (const id of ids) {
+      const card = cards[id]
+      if (card === undefined) continue
+      const next = { ...card }
+      if (colorTag === undefined) delete next.colorTag
+      else next.colorTag = colorTag
+      cards[id] = next
+      payload[id] = next
+    }
+    if (Object.keys(payload).length === 0) return
+    setState({ cards })
+    void talkMapApi.upsertCards(payload).catch((error) => {
+      console.error('[dsh-talk-map] card color save failed:', error)
+    })
+  },
+
+  /** Adopt a card into another workspace's frame (map-level membership). */
+  setCardWorkspaceOverride(id: string, wsOverride: string | undefined): void {
+    const card = state.cards[id]
+    if (card === undefined) return
+    const next = { ...card }
+    if (wsOverride === undefined) delete next.wsOverride
+    else next.wsOverride = wsOverride
+    setState({ cards: { ...state.cards, [id]: next } })
+    void talkMapApi.upsertCards({ [id]: next }).catch((error) => {
+      console.error('[dsh-talk-map] card override save failed:', error)
+    })
+  },
+
+  /** Recolor a workspace frame (undefined clears); persists immediately. */
+  setWorkspaceColor(workspaceId: string, colorTag: string | undefined): void {
+    if (state.global === null) return
+    const wsColors = { ...state.global.wsColors }
+    if (colorTag === undefined) delete wsColors[workspaceId]
+    else wsColors[workspaceId] = colorTag
+    canvas.patchGlobalNow({ wsColors })
+  },
+
   /** Immediate global patch (layout-version stamp etc.) — no debounce. */
   patchGlobalNow(patch: Partial<MapGlobal>): void {
     if (state.global === null) return

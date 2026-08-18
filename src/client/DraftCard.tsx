@@ -1,28 +1,36 @@
 /**
  * The draft card: double-clicking empty canvas opens this in-place composer
  * node instead of jumping into the conversation UI. Nothing exists until 发送
- * — then a session is created in the chosen workspace, the optional model
- * selection is applied, the first prompt is queued, and the draft turns into
- * a normal card at the same spot. The user stays on the map; the running dot
- * shows progress and double-clicking the card opens the conversation.
+ * — then (optionally) a workspace is created, a session is created in it,
+ * the optional model selection is applied, the first prompt is queued, and
+ * the draft turns into a normal card at the same spot. The user stays on the
+ * map; the running dot shows progress.
+ *
+ * Defaults are shown as real values (via /talk-map/defaults): the default
+ * model route and the deployment's default agent preset. Double-clicking
+ * inside a workspace frame preselects that workspace; anywhere else the
+ * selector defaults to creating a new workspace.
  */
 import { useEffect, useRef, useState } from 'react'
 import type { NodeProps, Node } from '@xyflow/react'
 import type { AgentPresetEntry, ModelProviderGroup } from './dsh.ts'
+import { talkMapApi } from './api.ts'
 import { canvas, INBOX_BOARD_ID, newCardId } from './canvas-store.ts'
 import { getServices, mapUi } from './map-state.ts'
 import { t } from './i18n.ts'
 import styles from './talk-map.module.css'
 
 export interface DraftCardData extends Record<string, unknown> {
-  /** Workspaces to choose from (id + display title), map-order. */
-  workspaceOptions: { id: string; title: string }[]
+  /** Workspaces to choose from (id + display title + path), map-order. */
+  workspaceOptions: { id: string; title: string; path: string }[]
+  /** Preselected workspace (set when the double-click landed inside a frame). */
   defaultWorkspaceId?: string
   onClose: () => void
 }
 
 export type DraftCardNodeType = Node<DraftCardData, 'draftCard'>
 
+const NEW_WORKSPACE = '__new__'
 const GRID = 16
 const snap = (value: number): number => Math.round(value / GRID) * GRID
 
@@ -32,14 +40,25 @@ function unwrap<T>(response: { result: { ok: true; value: T } | { ok: false; err
   throw new Error(`${what}: ${result.error.code ?? ''} ${result.error.message ?? ''}`.trim())
 }
 
+/** Parent directory new workspaces land in: alongside the existing ones. */
+function newWorkspaceParent(options: { path: string }[]): string {
+  const sample = options[0]?.path
+  if (sample === undefined) return '~'
+  const cut = sample.lastIndexOf('/')
+  return cut > 0 ? sample.slice(0, cut) : sample
+}
+
 export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.Element {
   const { data } = props
-  const [workspaceId, setWorkspaceId] = useState(data.defaultWorkspaceId ?? data.workspaceOptions[0]?.id ?? '')
+  const [workspaceId, setWorkspaceId] = useState(data.defaultWorkspaceId ?? NEW_WORKSPACE)
+  const [newWsName, setNewWsName] = useState('')
   const [modelKey, setModelKey] = useState('')
   const [presetId, setPresetId] = useState('')
   const [text, setText] = useState('')
   const [groups, setGroups] = useState<ModelProviderGroup[]>([])
   const [presets, setPresets] = useState<readonly AgentPresetEntry[]>([])
+  const [defaultModelLabel, setDefaultModelLabel] = useState('')
+  const [defaultPresetLabel, setDefaultPresetLabel] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
@@ -70,16 +89,33 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
     services.connection.api.agentPresets.list({}).then((response) => {
       if (response.result.ok) setPresets(response.result.value.presets)
     }).catch(() => undefined)
+    talkMapApi.getDefaults().then((defaults) => {
+      if (defaults.model !== null) setDefaultModelLabel(defaults.model.model)
+      if (defaults.preset !== null) setDefaultPresetLabel(defaults.preset)
+    }).catch(() => undefined)
   }, [])
+
+  const creatingWorkspace = workspaceId === NEW_WORKSPACE
+  const wsParent = newWorkspaceParent(data.workspaceOptions)
+  const newWsPath = `${wsParent}/${newWsName.trim()}`
+  const sendDisabled = busy || text.trim() === '' || (creatingWorkspace && newWsName.trim() === '')
 
   const send = async (): Promise<void> => {
     const services = getServices()
-    if (services === undefined || busy || text.trim() === '' || workspaceId === '') return
+    if (services === undefined || sendDisabled) return
     setBusy(true)
     setError(undefined)
     try {
+      let targetWorkspaceId = workspaceId
+      if (creatingWorkspace) {
+        const created = unwrap(
+          await services.connection.api.workspace.create({ path: newWsPath }),
+          'workspace.create',
+        )
+        targetWorkspaceId = created.workspace.workspaceId
+      }
       const created = unwrap(await services.connection.api.sessions.create({
-        workspaceId,
+        workspaceId: targetWorkspaceId,
         ...(presetId !== '' ? { agentPreset: presetId } : {}),
       }), 'session.create')
       const sessionId = created.sessionId
@@ -122,11 +158,30 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
           value={workspaceId}
           onChange={(event) => { setWorkspaceId(event.target.value) }}
         >
+          <option value={NEW_WORKSPACE}>{t('draft.newWorkspace')}</option>
           {data.workspaceOptions.map(option => (
             <option key={option.id} value={option.id}>{option.title}</option>
           ))}
         </select>
       </div>
+      {creatingWorkspace
+        ? (
+            <div className={styles['draftRow']}>
+              <label className={styles['draftLabel']}>{t('draft.wsName')}</label>
+              <div className={styles['draftGrow']}>
+                <input
+                  className={`${styles['draftInput']} nodrag`}
+                  value={newWsName}
+                  placeholder={t('draft.wsNamePlaceholder')}
+                  onChange={(event) => { setNewWsName(event.target.value) }}
+                />
+                {newWsName.trim() !== ''
+                  ? <div className={styles['draftPathPreview']}>{newWsPath}</div>
+                  : null}
+              </div>
+            </div>
+          )
+        : null}
       <div className={styles['draftRow']}>
         <label className={styles['draftLabel']}>{t('draft.model')}</label>
         <select
@@ -134,7 +189,9 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
           value={modelKey}
           onChange={(event) => { setModelKey(event.target.value) }}
         >
-          <option value="">{t('draft.default')}</option>
+          <option value="">
+            {defaultModelLabel !== '' ? `${defaultModelLabel}${t('draft.defaultSuffix')}` : t('draft.default')}
+          </option>
           {groups.map(group => group.models.map(model => (
             <option key={`${group.id}::${model.id}`} value={`${group.id}::${model.id}`}>
               {group.name} · {model.name}
@@ -151,7 +208,9 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
                 value={presetId}
                 onChange={(event) => { setPresetId(event.target.value) }}
               >
-                <option value="">{t('draft.default')}</option>
+                <option value="">
+                  {defaultPresetLabel !== '' ? `${defaultPresetLabel}${t('draft.defaultSuffix')}` : t('draft.default')}
+                </option>
                 {presets.map(preset => (
                   <option key={preset.id} value={preset.id}>{preset.name ?? preset.id}</option>
                 ))}
@@ -182,7 +241,7 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
           type="button"
           className={`${styles['spawnBtnPrimary']} nodrag`}
           onClick={() => { void send() }}
-          disabled={busy || text.trim() === '' || workspaceId === ''}
+          disabled={sendDisabled}
         >
           {busy ? t('draft.sending') : t('draft.send')}
         </button>
