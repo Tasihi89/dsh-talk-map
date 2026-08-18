@@ -104,7 +104,7 @@ export function apply(ctx: OuterContext): void {
   })
 
   // Layer 3: injection-spawn (needs the agent registry).
-  ctx.inject(['agents', 'sessionQuery'], (injected: unknown) => {
+  ctx.inject(['agents', 'sessionQuery', 'workspaceRegistry'], (injected: unknown) => {
     const services = injected as SpawnHostServices
     services.effect(() => {
       const spawner = new Spawner(services, storeReady)

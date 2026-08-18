@@ -168,10 +168,16 @@ export interface DigestHostServices {
   on(event: string, listener: (...args: unknown[]) => void): () => void
 }
 
+/** ctx.workspaceRegistry (subset; packages/workspace/workspace). */
+export interface WorkspaceRegistryService {
+  resolveByPath(path: string): Promise<{ attachSession(sessionId: string): Promise<void> } | undefined>
+}
+
 /** The spawn layer's injected surface. */
 export interface SpawnHostServices {
   agents: AgentsService
   sessionQuery: SessionQueryService
+  workspaceRegistry: WorkspaceRegistryService
   logger?: { info?(message: string): void; warn(message: string): void }
   effect(callback: () => (() => void | Promise<void>), label?: string): void
 }

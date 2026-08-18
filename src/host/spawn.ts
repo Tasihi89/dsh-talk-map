@@ -63,6 +63,18 @@ export class Spawner {
     })
     this.handles.set(sessionId, handle)
 
+    // Attach to the parent's workspace so the shell binds the new session
+    // immediately (same cwd → the registry's validation passes); without
+    // this the composer greys out asking to pick a workspace.
+    if (parentRecord?.header.cwd !== undefined) {
+      try {
+        const workspace = await this.services.workspaceRegistry.resolveByPath(parentRecord.header.cwd)
+        await workspace?.attachSession(sessionId)
+      } catch (error) {
+        this.services.logger?.warn(`[dsh-talk-map] workspace attach failed: ${String(error)}`)
+      }
+    }
+
     for (const parent of request.parents) {
       const message: UserMessageLite = {
         id: crypto.randomUUID(),
