@@ -210,6 +210,29 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     )
   }, [frameGeometry])
 
+  // While a connection drag is live, Esc belongs to it: React Flow cancels
+  // the in-flight line; without the claim the keypress would fall through
+  // to the overlay and close the whole map mid-gesture. A global pointerup
+  // backstops the reset — an Esc-cancelled connection never reaches
+  // onConnectEnd, and the handles must not stay force-revealed.
+  useEffect(() => {
+    if (!connecting) return
+    const release = mapUi.claimEscape('connecting')
+    const onKeyDown = (event: KeyboardEvent): void => {
+      // No stopPropagation: React Flow needs the key to cancel its ghost
+      // line; the claim alone keeps the overlay from closing the map.
+      if (event.key === 'Escape') setConnecting(false)
+    }
+    const onPointerUp = (): void => { setConnecting(false) }
+    window.addEventListener('keydown', onKeyDown, { capture: true })
+    window.addEventListener('pointerup', onPointerUp, { capture: true })
+    return () => {
+      window.removeEventListener('keydown', onKeyDown, { capture: true })
+      window.removeEventListener('pointerup', onPointerUp, { capture: true })
+      release()
+    }
+  }, [connecting])
+
   // Cmd/Ctrl+Z undoes board operations (Shift redoes); text fields keep
   // their native undo.
   useEffect(() => {
