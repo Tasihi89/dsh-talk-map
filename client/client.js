@@ -11322,81 +11322,81 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"runningDot": "_0iu0NW_runningDot",
-			"header": "_0iu0NW_header",
-			"draftInput": "_0iu0NW_draftInput",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"draftRow": "_0iu0NW_draftRow",
-			"cardStale": "_0iu0NW_cardStale",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"emptyHint": "_0iu0NW_emptyHint",
 			"toggleLabel": "_0iu0NW_toggleLabel",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"cardNext": "_0iu0NW_cardNext",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"overlay": "_0iu0NW_overlay",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"menuItem": "_0iu0NW_menuItem",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
 			"headerBadge": "_0iu0NW_headerBadge",
-			"cardTime": "_0iu0NW_cardTime",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
 			"draftCard": "_0iu0NW_draftCard",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"cardSummary": "_0iu0NW_cardSummary",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"colorSwatch": "_0iu0NW_colorSwatch",
+			"colorToolbar": "_0iu0NW_colorToolbar",
 			"spawnHeading": "_0iu0NW_spawnHeading",
-			"canvas": "_0iu0NW_canvas",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"spawnError": "_0iu0NW_spawnError",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"card": "_0iu0NW_card",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"menuTitle": "_0iu0NW_menuTitle",
-			"cardTop": "_0iu0NW_cardTop",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
 			"cardGhost": "_0iu0NW_cardGhost",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"menuHint": "_0iu0NW_menuHint",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"menu": "_0iu0NW_menu",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"headerSpace": "_0iu0NW_headerSpace",
+			"runningDot": "_0iu0NW_runningDot",
+			"colorSwatch": "_0iu0NW_colorSwatch",
 			"menuEmpty": "_0iu0NW_menuEmpty",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"closeButton": "_0iu0NW_closeButton",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"menuItem": "_0iu0NW_menuItem",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"cardRefresh": "_0iu0NW_cardRefresh",
 			"spawnHint": "_0iu0NW_spawnHint",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"cardStale": "_0iu0NW_cardStale",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"canvas": "_0iu0NW_canvas",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"closeButton": "_0iu0NW_closeButton",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"cardNext": "_0iu0NW_cardNext",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"header": "_0iu0NW_header",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"draftInput": "_0iu0NW_draftInput",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"cardTime": "_0iu0NW_cardTime",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"menu": "_0iu0NW_menu",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
 			"menuPreview": "_0iu0NW_menuPreview",
-			"menuError": "_0iu0NW_menuError"
+			"menuTitle": "_0iu0NW_menuTitle",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"cardTop": "_0iu0NW_cardTop",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"spawnError": "_0iu0NW_spawnError",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"overlay": "_0iu0NW_overlay",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"card": "_0iu0NW_card",
+			"draftRow": "_0iu0NW_draftRow",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"menuHint": "_0iu0NW_menuHint",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"menuError": "_0iu0NW_menuError",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"cardSelected": "_0iu0NW_cardSelected"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12151,7 +12151,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		*
 		* Cards drag freely; a group's frame is derived from its members and
 		* stretches after them. Dragging the frame (label chip or border) carries
-		* every member. Membership changes go through the right-click menu.
+		* every member. Membership MIRRORS the sidebar: dsh binds a session to the
+		* workspace whose directory it works in (immutable cwd), so the map offers
+		* no group-moving — what the sidebar cannot do, the map does not pretend to.
 		*
 		* Interaction: right/middle-drag pans, plain right-click opens the context
 		* menu, left-drag box-selects on the pane and drags nodes.
@@ -12224,30 +12226,14 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const layoutVersion = canvasState.global?.layoutVersion ?? 1;
 			(0, react.useEffect)(() => {
 				if (canvasState.phase !== "ready" || layoutVersion >= LAYOUT_VERSION || !workspacesReady) return;
-				const patches = {};
-				const effective = {};
-				for (const [cardId, card] of Object.entries(canvasState.cards)) {
-					let next = card;
-					if (card.wsOverride === void 0) {
-						const home = sessionWs.get(card.sessionId);
-						if (home !== void 0) {
-							next = {
-								...card,
-								wsOverride: home
-							};
-							patches[cardId] = next;
-						}
-					}
-					effective[cardId] = next;
-				}
 				const byGroup = /* @__PURE__ */ new Map();
-				for (const card of Object.values(effective)) {
-					if (card.wsOverride === void 0) continue;
-					byGroup.set(card.wsOverride, [...byGroup.get(card.wsOverride) ?? [], card]);
+				for (const card of Object.values(canvasState.cards)) {
+					const groupId = sessionWs.get(card.sessionId);
+					if (groupId === void 0) continue;
+					byGroup.set(groupId, [...byGroup.get(groupId) ?? [], card]);
 				}
 				const framesNext = { ...canvasState.global?.wsFrames };
 				for (const [groupId, members] of byGroup) if (framesNext[groupId] === void 0 && members.length > 0) framesNext[groupId] = fitRect(members);
-				if (Object.keys(patches).length > 0) canvas.addCards(patches);
 				canvas.patchGlobalNow({
 					layoutVersion: LAYOUT_VERSION,
 					wsFrames: framesNext
@@ -12271,11 +12257,12 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const membersByGroup = (0, react.useMemo)(() => {
 				const index = /* @__PURE__ */ new Map();
 				for (const [cardId, card] of Object.entries(visibleCards)) {
-					if (card.wsOverride === void 0) continue;
-					index.set(card.wsOverride, [...index.get(card.wsOverride) ?? [], cardId]);
+					const groupId = sessionWs.get(card.sessionId);
+					if (groupId === void 0) continue;
+					index.set(groupId, [...index.get(groupId) ?? [], cardId]);
 				}
 				return index;
-			}, [visibleCards]);
+			}, [visibleCards, sessionWs]);
 			const frameGeometry = (0, react.useMemo)(() => {
 				const out = {};
 				for (const [groupId, stored] of Object.entries(wsFrames)) {
@@ -12540,7 +12527,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				} : void 0;
 				if (client === void 0) return;
 				const position = screenToFlowPosition(client);
-				const group = groupAtPoint(position.x, position.y);
 				setPendingSpawn({
 					parent: {
 						cardId: fromNodeId,
@@ -12548,8 +12534,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						title: summary.displayTitle
 					},
 					x: snap(position.x - CARD_W / 2),
-					y: snap(position.y - CARD_H / 2),
-					...group !== void 0 ? { wsOverride: group } : {}
+					y: snap(position.y - CARD_H / 2)
 				});
 			};
 			const openSession = (sessionId) => {
@@ -12589,7 +12574,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						sessionId,
 						x: position.x,
 						y: position.y,
-						wsOverride: workspaceId,
 						createdAt: Date.now()
 					};
 					added[newCardId()] = card;
@@ -12605,16 +12589,13 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				canvas.setWsFrameRect(workspaceId, rect);
 			};
 			const importSession = (sessionId, atX, atY) => {
-				const groupId = groupAtPoint(atX, atY);
-				const card = {
+				canvas.addCards({ [newCardId()]: {
 					boardId: INBOX_BOARD_ID,
 					sessionId,
 					x: snap(atX),
 					y: snap(atY),
-					...groupId !== void 0 ? { wsOverride: groupId } : {},
 					createdAt: Date.now()
-				};
-				canvas.addCards({ [newCardId()]: card });
+				} });
 			};
 			const syncGroup = (groupId) => {
 				const rect = frameGeometry[groupId];
@@ -12637,14 +12618,10 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						sessionId,
 						x: position.x,
 						y: position.y,
-						wsOverride: groupId,
 						createdAt: Date.now()
 					};
 				});
 				canvas.addCards(added);
-			};
-			const moveCardToGroup = (cardId, groupId) => {
-				canvas.setCardWorkspaceOverride(cardId, groupId);
 			};
 			const removeGroup = (groupId) => {
 				for (const cardId of membersByGroup.get(groupId) ?? []) canvas.removeCard(cardId);
@@ -12748,27 +12725,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							close();
 						}
 					});
-				} else if (menu.view === "move-group") {
-					title = t("menu.moveGroup");
-					const cardId = menu.targetId;
-					if (cardId !== void 0) {
-						for (const groupId of Object.keys(wsFrames)) items.push({
-							key: groupId,
-							label: wsTitles.get(groupId) ?? t("frame.unknown"),
-							onPick: () => {
-								moveCardToGroup(cardId, groupId);
-								close();
-							}
-						});
-						items.push({
-							key: "__none__",
-							label: t("menu.noGroup"),
-							onPick: () => {
-								moveCardToGroup(cardId, void 0);
-								close();
-							}
-						});
-					}
 				} else if (menu.kind === "pane") {
 					items.push({
 						key: "draft",
@@ -12818,16 +12774,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						}
 					});
 					items.push({
-						key: "move",
-						label: `${t("menu.moveGroup")}…`,
-						onPick: () => {
-							setMenu({
-								...menu,
-								view: "move-group"
-							});
-						}
-					});
-					items.push({
 						key: "remove",
 						label: t("menu.removeCard"),
 						onPick: () => {
@@ -12854,7 +12800,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						}
 					});
 				}
-				const searchable = menu.view === "import-ws" || menu.view === "import-session" || menu.view === "move-group";
+				const searchable = menu.view === "import-ws" || menu.view === "import-session";
 				return {
 					left: menu.left,
 					top: menu.top,

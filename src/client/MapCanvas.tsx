@@ -5,7 +5,9 @@
  *
  * Cards drag freely; a group's frame is derived from its members and
  * stretches after them. Dragging the frame (label chip or border) carries
- * every member. Membership changes go through the right-click menu.
+ * every member. Membership MIRRORS the sidebar: dsh binds a session to the
+ * workspace whose directory it works in (immutable cwd), so the map offers
+ * no group-moving — what the sidebar cannot do, the map does not pretend to.
  *
  * Interaction: right/middle-drag pans, plain right-click opens the context
  * menu, left-drag box-selects on the pane and drags nodes.
@@ -103,7 +105,7 @@ interface MenuContext {
   flowY: number
   kind: 'pane' | 'card' | 'frame'
   targetId?: string
-  view: 'root' | 'import-ws' | 'import-session' | 'move-group' | 'new-ws'
+  view: 'root' | 'import-ws' | 'import-session' | 'new-ws'
 }
 
 function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
@@ -134,23 +136,11 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   // every populated group gets a stored frame. Runs once.
   useEffect(() => {
     if (canvasState.phase !== 'ready' || layoutVersion >= LAYOUT_VERSION || !workspacesReady) return
-    const patches: Record<string, Card> = {}
-    const effective: Record<string, Card> = {}
-    for (const [cardId, card] of Object.entries(canvasState.cards)) {
-      let next = card
-      if (card.wsOverride === undefined) {
-        const home = sessionWs.get(card.sessionId)
-        if (home !== undefined) {
-          next = { ...card, wsOverride: home }
-          patches[cardId] = next
-        }
-      }
-      effective[cardId] = next
-    }
     const byGroup = new Map<string, Card[]>()
-    for (const card of Object.values(effective)) {
-      if (card.wsOverride === undefined) continue
-      byGroup.set(card.wsOverride, [...byGroup.get(card.wsOverride) ?? [], card])
+    for (const card of Object.values(canvasState.cards)) {
+      const groupId = sessionWs.get(card.sessionId)
+      if (groupId === undefined) continue
+      byGroup.set(groupId, [...byGroup.get(groupId) ?? [], card])
     }
     const framesNext = { ...canvasState.global?.wsFrames }
     for (const [groupId, members] of byGroup) {
@@ -158,7 +148,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         framesNext[groupId] = fitRect(members)
       }
     }
-    if (Object.keys(patches).length > 0) canvas.addCards(patches)
     canvas.patchGlobalNow({ layoutVersion: LAYOUT_VERSION, wsFrames: framesNext })
   }, [canvasState.phase, layoutVersion, workspacesReady, canvasState.cards, canvasState.global, sessionWs])
 
@@ -172,14 +161,18 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     return out
   }, [canvasState.cards, sessions])
 
+  // Membership mirrors the sidebar truth: a card belongs to its session's
+  // real workspace (dsh binds that to the session's cwd; sessions cannot
+  // move between workspaces, so neither do cards between frames).
   const membersByGroup = useMemo(() => {
     const index = new Map<string, string[]>()
     for (const [cardId, card] of Object.entries(visibleCards)) {
-      if (card.wsOverride === undefined) continue
-      index.set(card.wsOverride, [...index.get(card.wsOverride) ?? [], cardId])
+      const groupId = sessionWs.get(card.sessionId)
+      if (groupId === undefined) continue
+      index.set(groupId, [...index.get(groupId) ?? [], cardId])
     }
     return index
-  }, [visibleCards])
+  }, [visibleCards, sessionWs])
 
   // Frame geometry FOLLOWS its members (free dragging stretches the frame);
   // the stored rect only positions a group that currently has no cards.
@@ -444,12 +437,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         : undefined
     if (client === undefined) return
     const position = screenToFlowPosition(client)
-    const group = groupAtPoint(position.x, position.y)
     setPendingSpawn({
       parent: { cardId: fromNodeId, sessionId: card.sessionId, title: summary.displayTitle },
       x: snap(position.x - CARD_W / 2),
       y: snap(position.y - CARD_H / 2),
-      ...(group !== undefined ? { wsOverride: group } : {}),
     })
   }
 
@@ -501,7 +492,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         sessionId,
         x: position.x,
         y: position.y,
-        wsOverride: workspaceId,
         createdAt: Date.now(),
       }
       added[newCardId()] = card
@@ -515,16 +505,15 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   }
 
   const importSession = (sessionId: string, atX: number, atY: number): void => {
-    const groupId = groupAtPoint(atX, atY)
-    const card: Card = {
-      boardId: INBOX_BOARD_ID,
-      sessionId,
-      x: snap(atX),
-      y: snap(atY),
-      ...(groupId !== undefined ? { wsOverride: groupId } : {}),
-      createdAt: Date.now(),
-    }
-    canvas.addCards({ [newCardId()]: card })
+    canvas.addCards({
+      [newCardId()]: {
+        boardId: INBOX_BOARD_ID,
+        sessionId,
+        x: snap(atX),
+        y: snap(atY),
+        createdAt: Date.now(),
+      },
+    })
   }
 
   const syncGroup = (groupId: string): void => {
@@ -547,17 +536,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         sessionId,
         x: position.x,
         y: position.y,
-        wsOverride: groupId,
         createdAt: Date.now(),
       }
     })
     canvas.addCards(added)
-  }
-
-  const moveCardToGroup = (cardId: string, groupId: string | undefined): void => {
-    // Frames follow their members, so membership alone is enough — the
-    // target frame stretches to wherever the card already sits.
-    canvas.setCardWorkspaceOverride(cardId, groupId)
   }
 
   const removeGroup = (groupId: string): void => {
@@ -661,29 +643,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           },
         })
       }
-    } else if (menu.view === 'move-group') {
-      title = t('menu.moveGroup')
-      const cardId = menu.targetId
-      if (cardId !== undefined) {
-        for (const groupId of Object.keys(wsFrames)) {
-          items.push({
-            key: groupId,
-            label: wsTitles.get(groupId) ?? t('frame.unknown'),
-            onPick: () => {
-              moveCardToGroup(cardId, groupId)
-              close()
-            },
-          })
-        }
-        items.push({
-          key: '__none__',
-          label: t('menu.noGroup'),
-          onPick: () => {
-            moveCardToGroup(cardId, undefined)
-            close()
-          },
-        })
-      }
     } else if (menu.kind === 'pane') {
       items.push({
         key: 'draft',
@@ -723,11 +682,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         },
       })
       items.push({
-        key: 'move',
-        label: `${t('menu.moveGroup')}…`,
-        onPick: () => { setMenu({ ...menu, view: 'move-group' }) },
-      })
-      items.push({
         key: 'remove',
         label: t('menu.removeCard'),
         onPick: () => {
@@ -754,7 +708,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         },
       })
     }
-    const searchable = menu.view === 'import-ws' || menu.view === 'import-session' || menu.view === 'move-group'
+    const searchable = menu.view === 'import-ws' || menu.view === 'import-session'
     return {
       left: menu.left,
       top: menu.top,
