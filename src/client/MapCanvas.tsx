@@ -373,6 +373,20 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           else next.delete(change.id)
           return next
         })
+      } else if (change.type === 'remove') {
+        // Backspace/Delete on a selection (React Flow ignores focused inputs).
+        // Cards leave the map (the session itself is untouched); a frame
+        // removal takes its member cards with it — same as the context menu.
+        if (change.id.startsWith('frame-')) {
+          removeGroup(change.id.slice('frame-'.length))
+        } else if (change.id !== 'draft') {
+          canvas.removeCard(change.id)
+        }
+        setSelectedIds((previous) => {
+          const next = new Set(previous)
+          next.delete(change.id)
+          return next
+        })
       }
     }
   }
@@ -721,6 +735,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         zoomOnDoubleClick={false}
         panOnDrag={[1, 2]}
         selectionOnDrag
+        deleteKeyCode={['Backspace', 'Delete']}
         minZoom={0.1}
         proOptions={{ hideAttribution: true }}
         {...(savedCamera !== undefined ? { defaultViewport: savedCamera } : { fitView: hasContent })}
