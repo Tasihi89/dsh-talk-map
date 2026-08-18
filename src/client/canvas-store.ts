@@ -193,6 +193,31 @@ export const canvas = {
     })
   },
 
+  /** Add edges: local state first, then persisted (no SSE round-trip needed). */
+  addEdges(entries: Record<string, MapEdgeData>): void {
+    pushUndo()
+    setState({ edges: { ...state.edges, ...entries } })
+    void talkMapApi.upsertEdges(entries).catch((error) => {
+      console.error('[dsh-talk-map] edge upsert failed:', error)
+    })
+  },
+
+  /** Background re-sync with the server (missed SSE while the map was
+   * closed or the server restarted). Skipped while local writes are
+   * still in flight. */
+  refresh(): void {
+    if (state.phase !== 'ready' || dirtyCards.size > 0) return
+    talkMapApi.getState().then((payload) => {
+      if (state.phase !== 'ready' || dirtyCards.size > 0) return
+      setState({
+        cards: payload.cards,
+        edges: payload.edges,
+        digests: payload.digests,
+        global: payload.global,
+      })
+    }).catch(() => undefined)
+  },
+
   /** Local mirror of a host-side spawn result (host already persisted it). */
   applySpawn(result: { cardId: string; card: Card; edges: Record<string, MapEdgeData> }): void {
     pushUndo()

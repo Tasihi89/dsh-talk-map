@@ -929,6 +929,7 @@ export function MapCanvas(props: RootSlotStandardProps): React.JSX.Element {
 
   useEffect(() => {
     canvas.ensureLoaded()
+    canvas.refresh()
     return canvas.connect()
   }, [])
 

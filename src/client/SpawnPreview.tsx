@@ -86,7 +86,7 @@ export function SpawnPreview(props: {
       createdAt: Date.now(),
     }
     canvas.addCards({ [cardId]: card })
-    void talkMapApi.upsertEdges({
+    canvas.addEdges({
       [`edge-${crypto.randomUUID()}`]: {
         boardId: INBOX_BOARD_ID,
         fromCardId: pending.parent.cardId,
@@ -94,8 +94,6 @@ export function SpawnPreview(props: {
         injection: { kind, ...(injectedText !== undefined ? { injectedText } : {}) },
         createdAt: Date.now(),
       },
-    }).catch((edgeError) => {
-      console.error('[dsh-talk-map] edge save failed:', edgeError)
     })
     return cardId
   }

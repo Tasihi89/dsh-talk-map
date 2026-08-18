@@ -298,6 +298,32 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					console.error("[dsh-talk-map] card upsert failed:", error);
 				});
 			},
+			/** Add edges: local state first, then persisted (no SSE round-trip needed). */
+			addEdges(entries) {
+				pushUndo();
+				setState({ edges: {
+					...state$1.edges,
+					...entries
+				} });
+				talkMapApi.upsertEdges(entries).catch((error) => {
+					console.error("[dsh-talk-map] edge upsert failed:", error);
+				});
+			},
+			/** Background re-sync with the server (missed SSE while the map was
+			* closed or the server restarted). Skipped while local writes are
+			* still in flight. */
+			refresh() {
+				if (state$1.phase !== "ready" || dirtyCards.size > 0) return;
+				talkMapApi.getState().then((payload) => {
+					if (state$1.phase !== "ready" || dirtyCards.size > 0) return;
+					setState({
+						cards: payload.cards,
+						edges: payload.edges,
+						digests: payload.digests,
+						global: payload.global
+					});
+				}).catch(() => void 0);
+			},
 			/** Local mirror of a host-side spawn result (host already persisted it). */
 			applySpawn(result) {
 				pushUndo();
@@ -11377,84 +11403,84 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"cardTime": "_0iu0NW_cardTime",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"menuItem": "_0iu0NW_menuItem",
-			"card": "_0iu0NW_card",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"overlay": "_0iu0NW_overlay",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"menu": "_0iu0NW_menu",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"closeButton": "_0iu0NW_closeButton",
 			"canvas": "_0iu0NW_canvas",
-			"menuTitle": "_0iu0NW_menuTitle",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"draftInput": "_0iu0NW_draftInput",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"cardTime": "_0iu0NW_cardTime",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"menu": "_0iu0NW_menu",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"cardTop": "_0iu0NW_cardTop",
+			"runningDot": "_0iu0NW_runningDot",
+			"spawnError": "_0iu0NW_spawnError",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"header": "_0iu0NW_header",
+			"card": "_0iu0NW_card",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
 			"headerTitle": "_0iu0NW_headerTitle",
 			"spawnFrom": "_0iu0NW_spawnFrom",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"spawnModeActive": "_0iu0NW_spawnModeActive",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"draftInput": "_0iu0NW_draftInput",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"cardSummary": "_0iu0NW_cardSummary",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"closeButton": "_0iu0NW_closeButton",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"overlay": "_0iu0NW_overlay",
+			"toggleButton": "_0iu0NW_toggleButton",
 			"colorSwatch": "_0iu0NW_colorSwatch",
+			"menuItem": "_0iu0NW_menuItem",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"menuTitle": "_0iu0NW_menuTitle",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
 			"menuHint": "_0iu0NW_menuHint",
+			"spawnModeActive": "_0iu0NW_spawnModeActive",
+			"menuSearch": "_0iu0NW_menuSearch",
 			"menuError": "_0iu0NW_menuError",
 			"menuEmpty": "_0iu0NW_menuEmpty",
-			"runningDot": "_0iu0NW_runningDot",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"cardStale": "_0iu0NW_cardStale",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"header": "_0iu0NW_header",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"cardTop": "_0iu0NW_cardTop",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"spawnError": "_0iu0NW_spawnError",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"cardNext": "_0iu0NW_cardNext",
-			"spawnHeading": "_0iu0NW_spawnHeading",
 			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"spawnModes": "_0iu0NW_spawnModes",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
 			"draftRow": "_0iu0NW_draftRow",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"spawnHint": "_0iu0NW_spawnHint",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
 			"draftCard": "_0iu0NW_draftCard",
-			"cardCurrent": "_0iu0NW_cardCurrent"
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"spawnModes": "_0iu0NW_spawnModes",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"cardNext": "_0iu0NW_cardNext",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"cardStale": "_0iu0NW_cardStale",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"cardRefresh": "_0iu0NW_cardRefresh"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12042,7 +12068,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					createdAt: Date.now()
 				};
 				canvas.addCards({ [cardId]: card });
-				talkMapApi.upsertEdges({ [`edge-${crypto.randomUUID()}`]: {
+				canvas.addEdges({ [`edge-${crypto.randomUUID()}`]: {
 					boardId: INBOX_BOARD_ID,
 					fromCardId: pending.parent.cardId,
 					toCardId: cardId,
@@ -12051,9 +12077,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						...injectedText !== void 0 ? { injectedText } : {}
 					},
 					createdAt: Date.now()
-				} }).catch((edgeError) => {
-					console.error("[dsh-talk-map] edge save failed:", edgeError);
-				});
+				} });
 				return cardId;
 			};
 			const jumpIn = (sessionId) => {
@@ -13181,6 +13205,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const canvasState = (0, react.useSyncExternalStore)(canvas.subscribe, canvas.get);
 			(0, react.useEffect)(() => {
 				canvas.ensureLoaded();
+				canvas.refresh();
 				return canvas.connect();
 			}, []);
 			if (canvasState.phase === "error") return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
