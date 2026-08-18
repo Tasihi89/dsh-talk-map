@@ -19,18 +19,22 @@ function MapIcon(): React.JSX.Element {
   )
 }
 
-export function MapToggleButton(_props: SidebarFooterActionOwnerProps): React.JSX.Element {
+export function MapToggleButton(props: SidebarFooterActionOwnerProps): React.JSX.Element {
   const open = useSyncExternalStore(mapUi.subscribe, () => mapUi.get().open)
+  const wide = props.wide
+  const classNames = [wide ? styles['toggleRow'] : styles['toggleButton']]
+  if (open) classNames.push(styles['toggleButtonActive'])
   return (
     <button
       type="button"
-      className={`${styles['toggleButton']}${open ? ` ${styles['toggleButtonActive']}` : ''}`}
+      className={classNames.filter(Boolean).join(' ')}
       title={t('map.toggle')}
       aria-label={t('map.toggle')}
       aria-pressed={open}
       onClick={() => { mapUi.toggle() }}
     >
       <MapIcon />
+      {wide ? <span className={styles['toggleLabel']}>{t('map.toggle')}</span> : null}
     </button>
   )
 }

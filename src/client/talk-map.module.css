@@ -26,6 +26,31 @@
   color: var(--dsw-alias-brand-primary);
 }
 
+/* Sidebar expanded: a labeled row matching the Settings trigger's footprint. */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.toggleRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.toggleLabel {
+  white-space: nowrap;
+}
+
 .toggleIcon {
   width: 18px;
   height: 18px;
