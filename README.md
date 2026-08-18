@@ -14,12 +14,11 @@ A visual conversation map plugin for DeepSeek Harness (dsh): every session becom
 ## Install
 
 ```sh
-# npm (recommended)
-dsh plugin --profile web add dsh-talk-map
-
-# or GitHub (built artifacts are committed — works without allowBuilds)
+# GitHub (built artifacts are committed — no build step, no allowBuilds needed)
 dsh plugin --profile web add github:Tasihi89/dsh-talk-map
 ```
+
+npm package (`dsh plugin --profile web add dsh-talk-map`) coming soon.
 
 Restart `dsh web`; a map button appears at the sidebar foot.
 

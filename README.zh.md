@@ -14,12 +14,11 @@ DeepSeek Harness（dsh）的可视化对话地图插件：把你的每一个会�
 ## 安装
 
 ```sh
-# npm（推荐）
-dsh plugin --profile web add dsh-talk-map
-
-# 或 GitHub（构建产物已随仓库提交，无需 allowBuilds 也能用）
+# GitHub（构建产物已随仓库提交，免构建、无需 allowBuilds）
 dsh plugin --profile web add github:Tasihi89/dsh-talk-map
 ```
+
+npm 包（`dsh plugin --profile web add dsh-talk-map`）待发布。
 
 重启 `dsh web`，侧栏底部出现地图按钮。
 
