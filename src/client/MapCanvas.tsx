@@ -451,17 +451,16 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         if (groupId !== undefined) touched.add(groupId)
       }
       const framesNext = { ...wsFrames }
-      const colorsNext = { ...canvasState.global?.wsColors }
       let framesChanged = false
       for (const groupId of touched) {
         const remaining = (membersByGroup.get(groupId) ?? []).filter(id => !removedCardIds.includes(id))
         if (remaining.length === 0 && framesNext[groupId] !== undefined) {
           delete framesNext[groupId]
-          delete colorsNext[groupId]
           framesChanged = true
         }
       }
-      if (framesChanged) canvas.patchGlobalNow({ wsFrames: framesNext, wsColors: colorsNext })
+      // wsColors is deliberately kept: a re-import brings the color back.
+      if (framesChanged) canvas.patchGlobalNow({ wsFrames: framesNext })
     }
   }
 
@@ -617,9 +616,8 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     for (const cardId of membersByGroup.get(groupId) ?? []) canvas.removeCard(cardId)
     const framesNext = { ...wsFrames }
     delete framesNext[groupId]
-    const colorsNext = { ...canvasState.global?.wsColors }
-    delete colorsNext[groupId]
-    canvas.patchGlobalNow({ wsFrames: framesNext, wsColors: colorsNext })
+    // wsColors is deliberately kept: a re-import brings the color back.
+    canvas.patchGlobalNow({ wsFrames: framesNext })
   }
 
   // ---- context menu ----------------------------------------------------
