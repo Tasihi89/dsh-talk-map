@@ -23,7 +23,7 @@
     "build": "tsdown && node scripts/normalize-client-banner.mjs",
     "watch": "tsdown --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "prepare": "npm run build"
+    "prepack": "npm run build"
   },
   "dsh": {
     "bundle": {
