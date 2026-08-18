@@ -36,6 +36,52 @@ let flushTimer: ReturnType<typeof setTimeout> | undefined
 let cameraTimer: ReturnType<typeof setTimeout> | undefined
 let frameTimer: ReturnType<typeof setTimeout> | undefined
 
+/** Undo/redo: whole-board snapshots (camera excluded on restore). Rapid
+ * operation streams (a drag emits dozens of moves) collapse into one entry. */
+interface BoardSnapshot {
+  cards: Readonly<Record<string, Card>>
+  edges: Readonly<Record<string, MapEdgeData>>
+  global: MapGlobal | null
+}
+const undoStack: BoardSnapshot[] = []
+const redoStack: BoardSnapshot[] = []
+let lastUndoPush = 0
+
+function takeSnapshot(): BoardSnapshot {
+  return { cards: state.cards, edges: state.edges, global: state.global }
+}
+
+function pushUndo(): void {
+  const now = Date.now()
+  if (now - lastUndoPush < 400 && undoStack.length > 0) return
+  lastUndoPush = now
+  undoStack.push(takeSnapshot())
+  if (undoStack.length > 50) undoStack.shift()
+  redoStack.length = 0
+}
+
+function restoreSnapshot(snapshot: BoardSnapshot): void {
+  const previousCards = state.cards
+  const previousEdges = state.edges
+  const currentCamera = state.global?.cameraByBoard
+  const global = snapshot.global === null
+    ? state.global
+    : { ...snapshot.global, cameraByBoard: currentCamera ?? snapshot.global.cameraByBoard }
+  setState({ cards: snapshot.cards, edges: snapshot.edges, ...(global !== null ? { global } : {}) })
+  // Server sync, fire-and-forget: full upserts + deletions of the leftovers.
+  const goneCards = Object.keys(previousCards).filter(id => snapshot.cards[id] === undefined)
+  const goneEdges = Object.keys(previousEdges).filter(id => snapshot.edges[id] === undefined)
+  void (async () => {
+    if (Object.keys(snapshot.cards).length > 0) await talkMapApi.upsertCards({ ...snapshot.cards })
+    if (goneCards.length > 0) await talkMapApi.deleteCards(goneCards)
+    if (Object.keys(snapshot.edges).length > 0) await talkMapApi.upsertEdges({ ...snapshot.edges })
+    if (goneEdges.length > 0) await talkMapApi.deleteEdges(goneEdges)
+    if (global !== null) await talkMapApi.setGlobal(global)
+  })().catch((error) => {
+    console.error('[dsh-talk-map] undo sync failed:', error)
+  })
+}
+
 function scheduleCardFlush(): void {
   if (flushTimer !== undefined) return
   flushTimer = setTimeout(() => {
@@ -115,6 +161,7 @@ export const canvas = {
   },
 
   moveCard(id: string, x: number, y: number): void {
+    pushUndo()
     const card = state.cards[id]
     if (card === undefined) return
     setState({ cards: { ...state.cards, [id]: { ...card, x, y } } })
@@ -124,6 +171,7 @@ export const canvas = {
 
   /** Immediate-persist upsert (new cards from double-click / auto-placement). */
   addCards(entries: Record<string, Card>): void {
+    pushUndo()
     setState({ cards: { ...state.cards, ...entries } })
     void talkMapApi.upsertCards(entries).catch((error) => {
       console.error('[dsh-talk-map] card upsert failed:', error)
@@ -132,6 +180,7 @@ export const canvas = {
 
   /** Local mirror of a host-side spawn result (host already persisted it). */
   applySpawn(result: { cardId: string; card: Card; edges: Record<string, MapEdgeData> }): void {
+    pushUndo()
     setState({
       cards: { ...state.cards, [result.cardId]: result.card },
       edges: { ...state.edges, ...result.edges },
@@ -139,6 +188,7 @@ export const canvas = {
   },
 
   removeCard(id: string): void {
+    pushUndo()
     const cards = { ...state.cards }
     delete cards[id]
     setState({ cards })
@@ -149,6 +199,7 @@ export const canvas = {
 
   /** Recolor cards (undefined clears); persists immediately. */
   setCardsColor(ids: readonly string[], colorTag: string | undefined): void {
+    pushUndo()
     const payload: Record<string, Card> = {}
     const cards = { ...state.cards }
     for (const id of ids) {
@@ -169,6 +220,7 @@ export const canvas = {
 
   /** Adopt a card into another workspace's frame (map-level membership). */
   setCardWorkspaceOverride(id: string, wsOverride: string | undefined): void {
+    pushUndo()
     const card = state.cards[id]
     if (card === undefined) return
     const next = { ...card }
@@ -182,6 +234,7 @@ export const canvas = {
 
   /** Manual frame geometry (drag/resize); local now, persisted debounced. */
   setWsFrameRect(workspaceId: string, rect: FrameGeometry): void {
+    pushUndo()
     if (state.global === null) return
     const global: MapGlobal = {
       ...state.global,
@@ -201,6 +254,7 @@ export const canvas = {
 
   /** Recolor a workspace frame (undefined clears); persists immediately. */
   setWorkspaceColor(workspaceId: string, colorTag: string | undefined): void {
+    pushUndo()
     if (state.global === null) return
     const wsColors = { ...state.global.wsColors }
     if (colorTag === undefined) delete wsColors[workspaceId]
@@ -234,6 +288,21 @@ export const canvas = {
         console.error('[dsh-talk-map] camera save failed:', error)
       })
     }, CAMERA_DELAY_MS)
+  },
+
+  /** Cmd/Ctrl+Z — board operations only (conversations are not undoable). */
+  undo(): void {
+    const snapshot = undoStack.pop()
+    if (snapshot === undefined) return
+    redoStack.push(takeSnapshot())
+    restoreSnapshot(snapshot)
+  },
+
+  redo(): void {
+    const snapshot = redoStack.pop()
+    if (snapshot === undefined) return
+    undoStack.push(takeSnapshot())
+    restoreSnapshot(snapshot)
   },
 
   savedCamera(boardId: string): Camera | undefined {

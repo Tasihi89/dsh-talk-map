@@ -64,6 +64,8 @@ export interface MapGlobal {
   wsColors?: Record<string, string>
   /** Manually sized frames (resize handle); absent = auto-fit to members. */
   wsFrames?: Record<string, FrameGeometry>
+  /** Map-toggle hotkey, e.g. "alt+KeyF" (modifiers + KeyboardEvent.code). */
+  hotkey?: string
 }
 
 export interface FrameGeometry {

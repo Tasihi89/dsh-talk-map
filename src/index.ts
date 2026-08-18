@@ -68,6 +68,17 @@ export function apply(ctx: OuterContext): void {
       const pipeline = new DigestPipeline(services, storeReady)
       const stop = pipeline.start()
       runtime.digest = pipeline
+      // Backfill: cards already on the board whose session has no digest yet
+      // (historic conversations never hit the turn/end trigger).
+      void storeReady.then((store) => {
+        if (runtime.digest !== pipeline) return
+        const missing = [...new Set([...store.cards.entries()].map(([, card]) => card.sessionId))]
+          .filter((sessionId) => {
+            const digest = store.digests.get(sessionId)
+            return digest === undefined || digest.summary === ''
+          })
+        pipeline.backfill(missing)
+      }).catch(() => undefined)
       return () => {
         stop()
         if (runtime.digest === pipeline) delete runtime.digest

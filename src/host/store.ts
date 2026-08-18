@@ -87,6 +87,8 @@ export const globalSchema = z.object({
     width: z.number(),
     height: z.number(),
   })).optional(),
+  /** Map-toggle hotkey, e.g. "alt+KeyF" (modifiers + KeyboardEvent.code). */
+  hotkey: z.string().optional(),
 })
 export type MapGlobal = z.infer<typeof globalSchema>
 

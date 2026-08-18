@@ -69,6 +69,11 @@ export class DigestPipeline {
     return await this.run(sessionId, { force: true })
   }
 
+  /** Queue sessions that have no digest yet (imported/backlog cards). */
+  backfill(sessionIds: readonly string[]): void {
+    for (const sessionId of sessionIds) this.enqueue(sessionId)
+  }
+
   private enqueue(sessionId: string): void {
     if (this.queued.has(sessionId)) return
     this.queued.add(sessionId)

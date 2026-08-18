@@ -8,6 +8,8 @@
  * GUI down (policy proven by dsh-plugin-market).
  */
 import type { TalkMapClientContext } from './dsh.ts'
+import { canvas } from './canvas-store.ts'
+import { DEFAULT_HOTKEY, hotkeyMatches } from './hotkey.ts'
 import { attachServices, mapUi } from './map-state.ts'
 import { MapOverlay } from './MapOverlay.tsx'
 import { MapToggleButton } from './MapToggleButton.tsx'
@@ -43,11 +45,15 @@ export function apply(ctx: TalkMapClientContext): void {
       label: () => t('map.title'),
     }, MapOverlay))
 
-    // Option/Alt+F toggles the map from anywhere (preventDefault stops the
-    // macOS ƒ character from landing in a focused composer).
+    // Toggle hotkey (default ⌥F, user-configurable in the map header).
+    // preventDefault stops macOS from typing the dead character (ƒ etc.)
+    // into a focused composer. State loads early so the custom binding is
+    // live before the map is first opened.
+    canvas.ensureLoaded()
     ctx.effect(() => {
       const onKeyDown = (event: KeyboardEvent): void => {
-        if (event.altKey && event.code === 'KeyF' && !event.metaKey && !event.ctrlKey) {
+        const hotkey = canvas.get().global?.hotkey ?? DEFAULT_HOTKEY
+        if (hotkeyMatches(event, hotkey)) {
           event.preventDefault()
           event.stopPropagation()
           mapUi.toggle()
@@ -55,7 +61,7 @@ export function apply(ctx: TalkMapClientContext): void {
       }
       window.addEventListener('keydown', onKeyDown, { capture: true })
       return () => { window.removeEventListener('keydown', onKeyDown, { capture: true }) }
-    }, 'dsh-talk-map: alt+f shortcut')
+    }, 'dsh-talk-map: toggle hotkey')
   } catch (error) {
     console.error('[dsh-talk-map] client apply failed:', error)
   }

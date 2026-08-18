@@ -12,7 +12,7 @@
  */
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import {
-  Background, BackgroundVariant, Controls, ReactFlow, ReactFlowProvider,
+  Background, BackgroundVariant, ControlButton, Controls, ReactFlow, ReactFlowProvider,
   useReactFlow, type Edge, type FinalConnectionState, type NodeChange, type Viewport,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
@@ -111,7 +111,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   const canvasState = useSyncExternalStore(canvas.subscribe, canvas.get)
   const sessions = props.useSessions(state => state)
   const workspaces = props.useWorkspaces(state => state)
-  const { screenToFlowPosition } = useReactFlow()
+  const { screenToFlowPosition, zoomTo } = useReactFlow()
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set())
   const [pendingSpawn, setPendingSpawn] = useState<PendingSpawn | null>(null)
   const [draft, setDraft] = useState<DraftState | null>(null)
@@ -199,6 +199,22 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       Object.entries(frameGeometry).map(([groupId, rect]) => [`frame-${groupId}`, { x: rect.x, y: rect.y }]),
     )
   }, [frameGeometry])
+
+  // Cmd/Ctrl+Z undoes board operations (Shift redoes); text fields keep
+  // their native undo.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (!(event.metaKey || event.ctrlKey) || event.code !== 'KeyZ') return
+      const target = event.target as HTMLElement | null
+      if (target?.closest('input, textarea, [contenteditable="true"]') !== null && target !== null) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.shiftKey) canvas.redo()
+      else canvas.undo()
+    }
+    window.addEventListener('keydown', onKeyDown, { capture: true })
+    return () => { window.removeEventListener('keydown', onKeyDown, { capture: true }) }
+  }, [])
 
   // With a selection active, Esc clears it instead of closing the map.
   const hasSelection = selectedIds.size > 0
@@ -367,6 +383,13 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           canvas.moveCard(change.id, change.position.x, change.position.y)
         }
       } else if (change.type === 'select') {
+        // Rubber-band selection sweeping over a huge frame should not grab
+        // the whole group: when the same batch also selects cards, frame
+        // selections are dropped (a plain click on a frame still selects it).
+        const batchSelectsCards = changes.some(other =>
+          other.type === 'select' && other.selected
+          && !other.id.startsWith('frame-') && other.id !== 'draft')
+        if (change.id.startsWith('frame-') && change.selected && batchSelectsCards) continue
         setSelectedIds((previous) => {
           const next = new Set(previous)
           if (change.selected) next.add(change.id)
@@ -778,7 +801,11 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         {...(savedCamera !== undefined ? { defaultViewport: savedCamera } : { fitView: hasContent })}
       >
         <Background variant={BackgroundVariant.Dots} gap={GRID} size={1} />
-        <Controls showInteractive={false} />
+        <Controls showInteractive={false}>
+          <ControlButton title={t('map.zoom100')} onClick={() => { void zoomTo(1, { duration: 200 }) }}>
+            <span className={styles['zoomResetLabel']}>1:1</span>
+          </ControlButton>
+        </Controls>
       </ReactFlow>
       {selectedIds.size > 0
         ? (

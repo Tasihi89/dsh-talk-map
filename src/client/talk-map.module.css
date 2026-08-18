@@ -93,6 +93,29 @@
   flex: 1;
 }
 
+.hotkeyButton {
+  flex: none;
+  padding: 3px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.hotkeyButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.zoomResetLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
 .closeButton {
   display: flex;
   align-items: center;

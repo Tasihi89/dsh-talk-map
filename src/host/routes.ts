@@ -12,7 +12,7 @@ import { z } from 'zod'
 import type { DomainChanged, TalkMapHostServices } from './dsh-host.ts'
 import type { DigestPipeline } from './digest/pipeline.ts'
 import type { Spawner } from './spawn.ts'
-import { cardSchema, globalSchema, DOMAIN_NAME, type TalkMapStore } from './store.ts'
+import { cardSchema, edgeSchema, globalSchema, DOMAIN_NAME, type TalkMapStore } from './store.ts'
 
 /**
  * Capabilities filled in by independently-injected layers: the digest layer
@@ -73,6 +73,9 @@ function tableToRecord<V>(table: { entries(): IterableIterator<[string, V]> }): 
 
 const upsertCardsBody = z.object({
   cards: z.record(z.string(), cardSchema),
+})
+const upsertEdgesBody = z.object({
+  edges: z.record(z.string(), edgeSchema),
 })
 const deleteCardsBody = z.object({
   ids: z.array(z.string()),
@@ -178,8 +181,23 @@ export function mountTalkMapRoutes(
           const body = upsertCardsBody.parse(await readJsonBody(request))
           for (const [id, card] of Object.entries(body.cards)) {
             await store.cards.put(id, card)
+            // A card without a usable digest gets one queued (hash-skip keeps it cheap).
+            const digest = store.digests.get(card.sessionId)
+            if (digest === undefined || digest.summary === '') {
+              runtime.digest?.schedule(card.sessionId)
+            }
           }
           sendJson(response, 200, { ok: true, count: Object.keys(body.cards).length })
+          return
+        }
+
+        if (route === 'POST /talk-map/edges/upsert') {
+          const store = await storeReady
+          const body = upsertEdgesBody.parse(await readJsonBody(request))
+          for (const [id, edge] of Object.entries(body.edges)) {
+            await store.edges.put(id, edge)
+          }
+          sendJson(response, 200, { ok: true, count: Object.keys(body.edges).length })
           return
         }
 

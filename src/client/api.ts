@@ -34,6 +34,12 @@ export const talkMapApi = {
   deleteCards(ids: readonly string[]): Promise<void> {
     return postJson('/talk-map/cards/delete', { ids })
   },
+  upsertEdges(edges: Record<string, MapEdgeData>): Promise<void> {
+    return postJson('/talk-map/edges/upsert', { edges })
+  },
+  deleteEdges(ids: readonly string[]): Promise<void> {
+    return postJson('/talk-map/edges/delete', { ids })
+  },
   setGlobal(global: MapGlobal): Promise<void> {
     return postJson('/talk-map/global', { global })
   },

@@ -155,6 +155,9 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
         clientTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       }), 'session.prompt')
       data.onClose()
+      // Jump straight into the running conversation.
+      mapUi.setOpen(false)
+      services.sessions.open(sessionId)
     } catch (sendError) {
       setError(String(sendError))
       setBusy(false)
@@ -254,7 +257,9 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
         rows={4}
         onChange={(event) => { setText(event.target.value) }}
         onKeyDown={(event) => {
-          if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+          // Enter sends (Shift+Enter = newline); an IME confirmation Enter
+          // (Chinese candidate pick) must never send.
+          if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
             event.preventDefault()
             void send()
           }

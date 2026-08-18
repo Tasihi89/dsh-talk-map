@@ -4,12 +4,53 @@
  * events only while open). Closed state renders null so the app underneath
  * stays fully interactive.
  */
-import { useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import type { RootSlotStandardProps } from './dsh.ts'
+import { canvas } from './canvas-store.ts'
+import { DEFAULT_HOTKEY, hotkeyFromEvent, hotkeyLabel } from './hotkey.ts'
 import { t } from './i18n.ts'
 import { mapUi } from './map-state.ts'
 import { MapCanvas } from './MapCanvas.tsx'
 import styles from './talk-map.module.css'
+
+function HotkeyButton(): React.JSX.Element {
+  const hotkey = useSyncExternalStore(canvas.subscribe, () => canvas.get().global?.hotkey ?? DEFAULT_HOTKEY)
+  const [capturing, setCapturing] = useState(false)
+
+  useEffect(() => {
+    if (!capturing) return
+    const release = mapUi.claimEscape('hotkey-capture')
+    const onKeyDown = (event: KeyboardEvent): void => {
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.key === 'Escape') {
+        setCapturing(false)
+        return
+      }
+      const captured = hotkeyFromEvent(event)
+      if (captured !== null) {
+        canvas.patchGlobalNow({ hotkey: captured })
+        setCapturing(false)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown, { capture: true })
+    return () => {
+      window.removeEventListener('keydown', onKeyDown, { capture: true })
+      release()
+    }
+  }, [capturing])
+
+  return (
+    <button
+      type="button"
+      className={styles['hotkeyButton']}
+      title={t('hotkey.title')}
+      onClick={() => { setCapturing(true) }}
+    >
+      {capturing ? t('hotkey.capturing') : hotkeyLabel(hotkey)}
+    </button>
+  )
+}
 
 function CloseIcon(): React.JSX.Element {
   return (
@@ -41,6 +82,7 @@ function OpenMapOverlay(props: RootSlotStandardProps): React.JSX.Element {
         <span className={styles['headerTitle']}>{t('map.title')}</span>
         <span className={styles['headerBadge']}>{sessionCount} {t('map.sessions')}</span>
         <span className={styles['headerSpace']} />
+        <HotkeyButton />
         <button
           type="button"
           className={styles['closeButton']}
