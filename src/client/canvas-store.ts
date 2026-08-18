@@ -82,6 +82,21 @@ function restoreSnapshot(snapshot: BoardSnapshot): void {
   })
 }
 
+let globalPersistTimer: ReturnType<typeof setTimeout> | undefined
+
+/** Debounced full-global persist (layout-memory writes batch under deletes). */
+function scheduleGlobalPersist(): void {
+  if (globalPersistTimer !== undefined) clearTimeout(globalPersistTimer)
+  globalPersistTimer = setTimeout(() => {
+    globalPersistTimer = undefined
+    const current = state.global
+    if (current === null) return
+    void talkMapApi.setGlobal(current).catch((error) => {
+      console.error('[dsh-talk-map] layout-memory save failed:', error)
+    })
+  }, 600)
+}
+
 function scheduleCardFlush(): void {
   if (flushTimer !== undefined) return
   flushTimer = setTimeout(() => {
@@ -189,9 +204,25 @@ export const canvas = {
 
   removeCard(id: string): void {
     pushUndo()
+    const card = state.cards[id]
     const cards = { ...state.cards }
     delete cards[id]
-    setState({ cards })
+    // Remember the placement so a re-import restores the arrangement.
+    if (card !== undefined && state.global !== null) {
+      const layoutMemory = {
+        ...state.global.layoutMemory,
+        [card.sessionId]: {
+          x: card.x,
+          y: card.y,
+          ...(card.colorTag !== undefined ? { colorTag: card.colorTag } : {}),
+        },
+      }
+      const global: MapGlobal = { ...state.global, layoutMemory }
+      setState({ cards, global })
+      scheduleGlobalPersist()
+    } else {
+      setState({ cards })
+    }
     void talkMapApi.deleteCards([id]).catch((error) => {
       console.error('[dsh-talk-map] card delete failed:', error)
     })

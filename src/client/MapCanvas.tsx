@@ -500,10 +500,31 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     const memberSessions = placeableSessionIds(sessions)
       .filter(id => sessionWs.get(id) === workspaceId && !boardSessionIds.has(id))
       .sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0))
-    const origin = { x: snap(atX), y: snap(atY) }
+    const memory = canvasState.global?.layoutMemory ?? {}
+    const remembered = memberSessions.filter(id => memory[id] !== undefined)
+    const fresh = memberSessions.filter(id => memory[id] === undefined)
     const added: Record<string, Card> = {}
     const placed: Card[] = []
-    memberSessions.forEach((sessionId, index) => {
+    // Sessions seen before return to their remembered spot (and color).
+    for (const sessionId of remembered) {
+      const entry = memory[sessionId]
+      if (entry === undefined) continue
+      const card: Card = {
+        boardId: INBOX_BOARD_ID,
+        sessionId,
+        x: entry.x,
+        y: entry.y,
+        ...(entry.colorTag !== undefined ? { colorTag: entry.colorTag } : {}),
+        createdAt: Date.now(),
+      }
+      added[newCardId()] = card
+      placed.push(card)
+    }
+    // New sessions grid below the restored arrangement, or at the click point.
+    const origin = placed.length > 0
+      ? { x: snap(Math.min(...placed.map(card => card.x))), y: snap(Math.max(...placed.map(card => card.y)) + CARD_H + GAP_Y) }
+      : { x: snap(atX), y: snap(atY) }
+    fresh.forEach((sessionId, index) => {
       const position = gridPosition(origin, index)
       const card: Card = {
         boardId: INBOX_BOARD_ID,
@@ -518,7 +539,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     if (placed.length > 0) canvas.addCards(added)
     const rect = placed.length > 0
       ? fitRect(placed)
-      : { x: origin.x - FRAME_PAD, y: origin.y - FRAME_PAD - FRAME_LABEL_H, width: 400, height: 260 }
+      : { x: snap(atX) - FRAME_PAD, y: snap(atY) - FRAME_PAD - FRAME_LABEL_H, width: 400, height: 260 }
     canvas.setWsFrameRect(workspaceId, rect)
   }
 
@@ -546,17 +567,21 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     const origin = members.length > 0
       ? { x: Math.min(...members.map(card => card.x)), y: Math.max(...members.map(card => card.y)) + CARD_H + GAP_Y }
       : { x: rect.x + FRAME_PAD, y: rect.y + FRAME_LABEL_H + FRAME_PAD }
+    const memory = canvasState.global?.layoutMemory ?? {}
     const added: Record<string, Card> = {}
-    fresh.forEach((sessionId, index) => {
-      const position = gridPosition(origin, index)
+    let gridIndex = 0
+    for (const sessionId of fresh) {
+      const entry = memory[sessionId]
+      const position = entry !== undefined ? { x: entry.x, y: entry.y } : gridPosition(origin, gridIndex++)
       added[newCardId()] = {
         boardId: INBOX_BOARD_ID,
         sessionId,
         x: position.x,
         y: position.y,
+        ...(entry?.colorTag !== undefined ? { colorTag: entry.colorTag } : {}),
         createdAt: Date.now(),
       }
-    })
+    }
     canvas.addCards(added)
   }
 

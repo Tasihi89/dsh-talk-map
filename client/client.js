@@ -173,6 +173,19 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				console.error("[dsh-talk-map] undo sync failed:", error);
 			});
 		}
+		let globalPersistTimer;
+		/** Debounced full-global persist (layout-memory writes batch under deletes). */
+		function scheduleGlobalPersist() {
+			if (globalPersistTimer !== void 0) clearTimeout(globalPersistTimer);
+			globalPersistTimer = setTimeout(() => {
+				globalPersistTimer = void 0;
+				const current = state$1.global;
+				if (current === null) return;
+				talkMapApi.setGlobal(current).catch((error) => {
+					console.error("[dsh-talk-map] layout-memory save failed:", error);
+				});
+			}, 600);
+		}
 		function scheduleCardFlush() {
 			if (flushTimer !== void 0) return;
 			flushTimer = setTimeout(() => {
@@ -295,9 +308,27 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			},
 			removeCard(id) {
 				pushUndo();
+				const card = state$1.cards[id];
 				const cards = { ...state$1.cards };
 				delete cards[id];
-				setState({ cards });
+				if (card !== void 0 && state$1.global !== null) {
+					const layoutMemory = {
+						...state$1.global.layoutMemory,
+						[card.sessionId]: {
+							x: card.x,
+							y: card.y,
+							...card.colorTag !== void 0 ? { colorTag: card.colorTag } : {}
+						}
+					};
+					setState({
+						cards,
+						global: {
+							...state$1.global,
+							layoutMemory
+						}
+					});
+					scheduleGlobalPersist();
+				} else setState({ cards });
 				talkMapApi.deleteCards([id]).catch((error) => {
 					console.error("[dsh-talk-map] card delete failed:", error);
 				});
@@ -11322,81 +11353,81 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"emptyHint": "_0iu0NW_emptyHint",
-			"card": "_0iu0NW_card",
-			"cardTime": "_0iu0NW_cardTime",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"overlay": "_0iu0NW_overlay",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"draftRow": "_0iu0NW_draftRow",
-			"menuError": "_0iu0NW_menuError",
-			"cardSummary": "_0iu0NW_cardSummary",
-			"draftInput": "_0iu0NW_draftInput",
-			"menuEmpty": "_0iu0NW_menuEmpty",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"menuPreview": "_0iu0NW_menuPreview",
+			"cardGhost": "_0iu0NW_cardGhost",
 			"cardHandle": "_0iu0NW_cardHandle",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"cardStale": "_0iu0NW_cardStale",
-			"menuTitle": "_0iu0NW_menuTitle",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"runningDot": "_0iu0NW_runningDot",
-			"menuHint": "_0iu0NW_menuHint",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"closeButton": "_0iu0NW_closeButton",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"header": "_0iu0NW_header",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"spawnError": "_0iu0NW_spawnError",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"menu": "_0iu0NW_menu",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"canvas": "_0iu0NW_canvas",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"cardTop": "_0iu0NW_cardTop",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"cardNext": "_0iu0NW_cardNext",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"toggleRow": "_0iu0NW_toggleRow",
 			"menuItem": "_0iu0NW_menuItem",
 			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"menuError": "_0iu0NW_menuError",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"cardTime": "_0iu0NW_cardTime",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"toggleIcon": "_0iu0NW_toggleIcon",
 			"draftCard": "_0iu0NW_draftCard",
+			"draftInput": "_0iu0NW_draftInput",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"canvas": "_0iu0NW_canvas",
 			"cardSelected": "_0iu0NW_cardSelected",
-			"draftGrow": "_0iu0NW_draftGrow"
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"closeButton": "_0iu0NW_closeButton",
+			"cardTop": "_0iu0NW_cardTop",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"cardStale": "_0iu0NW_cardStale",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"menuHint": "_0iu0NW_menuHint",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"overlay": "_0iu0NW_overlay",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"header": "_0iu0NW_header",
+			"runningDot": "_0iu0NW_runningDot",
+			"card": "_0iu0NW_card",
+			"cardNext": "_0iu0NW_cardNext",
+			"spawnError": "_0iu0NW_spawnError",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"menuTitle": "_0iu0NW_menuTitle",
+			"menu": "_0iu0NW_menu",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"draftRow": "_0iu0NW_draftRow",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"spawnTextarea": "_0iu0NW_spawnTextarea"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12576,13 +12607,33 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const boardSessionIds = (0, react.useMemo)(() => new Set(Object.values(canvasState.cards).map((card) => card.sessionId)), [canvasState.cards]);
 			const importWorkspace = (workspaceId, atX, atY) => {
 				const memberSessions = placeableSessionIds(sessions).filter((id) => sessionWs.get(id) === workspaceId && !boardSessionIds.has(id)).sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0));
-				const origin = {
+				const memory = canvasState.global?.layoutMemory ?? {};
+				const remembered = memberSessions.filter((id) => memory[id] !== void 0);
+				const fresh = memberSessions.filter((id) => memory[id] === void 0);
+				const added = {};
+				const placed = [];
+				for (const sessionId of remembered) {
+					const entry = memory[sessionId];
+					if (entry === void 0) continue;
+					const card = {
+						boardId: INBOX_BOARD_ID,
+						sessionId,
+						x: entry.x,
+						y: entry.y,
+						...entry.colorTag !== void 0 ? { colorTag: entry.colorTag } : {},
+						createdAt: Date.now()
+					};
+					added[newCardId()] = card;
+					placed.push(card);
+				}
+				const origin = placed.length > 0 ? {
+					x: snap(Math.min(...placed.map((card) => card.x))),
+					y: snap(Math.max(...placed.map((card) => card.y)) + CARD_H + GAP_Y)
+				} : {
 					x: snap(atX),
 					y: snap(atY)
 				};
-				const added = {};
-				const placed = [];
-				memberSessions.forEach((sessionId, index) => {
+				fresh.forEach((sessionId, index) => {
 					const position = gridPosition(origin, index);
 					const card = {
 						boardId: INBOX_BOARD_ID,
@@ -12596,8 +12647,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				});
 				if (placed.length > 0) canvas.addCards(added);
 				const rect = placed.length > 0 ? fitRect(placed) : {
-					x: origin.x - FRAME_PAD,
-					y: origin.y - FRAME_PAD - FRAME_LABEL_H,
+					x: snap(atX) - FRAME_PAD,
+					y: snap(atY) - FRAME_PAD - FRAME_LABEL_H,
 					width: 400,
 					height: 260
 				};
@@ -12625,17 +12676,24 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					x: rect.x + FRAME_PAD,
 					y: rect.y + FRAME_LABEL_H + FRAME_PAD
 				};
+				const memory = canvasState.global?.layoutMemory ?? {};
 				const added = {};
-				fresh.forEach((sessionId, index) => {
-					const position = gridPosition(origin, index);
+				let gridIndex = 0;
+				for (const sessionId of fresh) {
+					const entry = memory[sessionId];
+					const position = entry !== void 0 ? {
+						x: entry.x,
+						y: entry.y
+					} : gridPosition(origin, gridIndex++);
 					added[newCardId()] = {
 						boardId: INBOX_BOARD_ID,
 						sessionId,
 						x: position.x,
 						y: position.y,
+						...entry?.colorTag !== void 0 ? { colorTag: entry.colorTag } : {},
 						createdAt: Date.now()
 					};
-				});
+				}
 				canvas.addCards(added);
 			};
 			const removeGroup = (groupId) => {

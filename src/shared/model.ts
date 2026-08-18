@@ -66,6 +66,14 @@ export interface MapGlobal {
   wsFrames?: Record<string, FrameGeometry>
   /** Map-toggle hotkey, e.g. "alt+KeyF" (modifiers + KeyboardEvent.code). */
   hotkey?: string
+  /** Last known placement per session — re-imports restore the arrangement. */
+  layoutMemory?: Record<string, LayoutMemoryEntry>
+}
+
+export interface LayoutMemoryEntry {
+  x: number
+  y: number
+  colorTag?: string
 }
 
 export interface FrameGeometry {

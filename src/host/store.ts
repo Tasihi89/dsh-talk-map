@@ -89,6 +89,12 @@ export const globalSchema = z.object({
   })).optional(),
   /** Map-toggle hotkey, e.g. "alt+KeyF" (modifiers + KeyboardEvent.code). */
   hotkey: z.string().optional(),
+  /** Last known placement per session — re-imports restore the arrangement. */
+  layoutMemory: z.record(z.string(), z.object({
+    x: z.number(),
+    y: z.number(),
+    colorTag: z.string().optional(),
+  })).optional(),
 })
 export type MapGlobal = z.infer<typeof globalSchema>
 
