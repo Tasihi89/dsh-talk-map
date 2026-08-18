@@ -11353,81 +11353,81 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"cardRemove": "_0iu0NW_cardRemove",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"spawnError": "_0iu0NW_spawnError",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"draftCard": "_0iu0NW_draftCard",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"closeButton": "_0iu0NW_closeButton",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"canvas": "_0iu0NW_canvas",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"menuHint": "_0iu0NW_menuHint",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"card": "_0iu0NW_card",
-			"cardTop": "_0iu0NW_cardTop",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"menuItem": "_0iu0NW_menuItem",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"header": "_0iu0NW_header",
-			"draftInput": "_0iu0NW_draftInput",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"draftRow": "_0iu0NW_draftRow",
-			"menuTitle": "_0iu0NW_menuTitle",
-			"cardNext": "_0iu0NW_cardNext",
-			"menuError": "_0iu0NW_menuError",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"cardStale": "_0iu0NW_cardStale",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"cardTime": "_0iu0NW_cardTime",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"menu": "_0iu0NW_menu",
 			"toggleLabel": "_0iu0NW_toggleLabel",
-			"cardSummary": "_0iu0NW_cardSummary",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"overlay": "_0iu0NW_overlay",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"headerTitle": "_0iu0NW_headerTitle",
 			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"menuEmpty": "_0iu0NW_menuEmpty",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"menuHint": "_0iu0NW_menuHint",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"cardTop": "_0iu0NW_cardTop",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"overlay": "_0iu0NW_overlay",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"menuTitle": "_0iu0NW_menuTitle",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"cardTime": "_0iu0NW_cardTime",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"menuItem": "_0iu0NW_menuItem",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"cardStale": "_0iu0NW_cardStale",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"header": "_0iu0NW_header",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"closeButton": "_0iu0NW_closeButton",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"spawnError": "_0iu0NW_spawnError",
+			"draftInput": "_0iu0NW_draftInput",
+			"card": "_0iu0NW_card",
+			"menuError": "_0iu0NW_menuError",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
 			"runningDot": "_0iu0NW_runningDot",
-			"draftPathPreview": "_0iu0NW_draftPathPreview"
+			"canvas": "_0iu0NW_canvas",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"menu": "_0iu0NW_menu",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"draftCard": "_0iu0NW_draftCard",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"draftRow": "_0iu0NW_draftRow",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"cardNext": "_0iu0NW_cardNext",
+			"toggleButton": "_0iu0NW_toggleButton"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12512,26 +12512,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			};
 			const onNodesChange = (changes) => {
 				const removedCardIds = changes.filter((change) => change.type === "remove").map((change) => change.id).filter((id) => !id.startsWith("frame-") && id !== "draft");
-				if (removedCardIds.length > 0) {
-					const touched = /* @__PURE__ */ new Set();
-					for (const cardId of removedCardIds) {
-						const card = canvasState.cards[cardId];
-						const groupId = card !== void 0 ? sessionWs.get(card.sessionId) : void 0;
-						if (groupId !== void 0) touched.add(groupId);
-					}
-					const framesNext = { ...wsFrames };
-					const colorsNext = { ...canvasState.global?.wsColors };
-					let framesChanged = false;
-					for (const groupId of touched) if ((membersByGroup.get(groupId) ?? []).filter((id) => !removedCardIds.includes(id)).length === 0 && framesNext[groupId] !== void 0) {
-						delete framesNext[groupId];
-						delete colorsNext[groupId];
-						framesChanged = true;
-					}
-					if (framesChanged) canvas.patchGlobalNow({
-						wsFrames: framesNext,
-						wsColors: colorsNext
-					});
-				}
 				for (const change of changes) if (change.type === "position" && change.position !== void 0) {
 					if (change.id === "draft") setDraft((previous) => previous === null ? previous : {
 						...previous,
@@ -12574,6 +12554,26 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						const next = new Set(previous);
 						next.delete(change.id);
 						return next;
+					});
+				}
+				if (removedCardIds.length > 0) {
+					const touched = /* @__PURE__ */ new Set();
+					for (const cardId of removedCardIds) {
+						const card = canvasState.cards[cardId];
+						const groupId = card !== void 0 ? sessionWs.get(card.sessionId) : void 0;
+						if (groupId !== void 0) touched.add(groupId);
+					}
+					const framesNext = { ...wsFrames };
+					const colorsNext = { ...canvasState.global?.wsColors };
+					let framesChanged = false;
+					for (const groupId of touched) if ((membersByGroup.get(groupId) ?? []).filter((id) => !removedCardIds.includes(id)).length === 0 && framesNext[groupId] !== void 0) {
+						delete framesNext[groupId];
+						delete colorsNext[groupId];
+						framesChanged = true;
+					}
+					if (framesChanged) canvas.patchGlobalNow({
+						wsFrames: framesNext,
+						wsColors: colorsNext
 					});
 				}
 			};
