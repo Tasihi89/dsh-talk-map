@@ -17,7 +17,7 @@ export interface DigestConfig {
   idleMs: number
 }
 
-export const DIGEST_DEFAULTS: DigestConfig = { enabled: true, idleMs: 90_000 }
+export const DIGEST_DEFAULTS: DigestConfig = { enabled: true, idleMs: 30_000 }
 
 const MIN_MESSAGES = 2
 
