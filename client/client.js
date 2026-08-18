@@ -131,7 +131,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"draft.wsNamePlaceholder": "新工作区文件夹名",
 			"draft.defaultSuffix": "（默认）",
 			"color.toolbar": "颜色",
-			"color.clear": "清除颜色"
+			"color.clear": "清除颜色",
+			"card.waiting": "等你回复",
+			"card.done": "已完成"
 		};
 		const en = {
 			"map.title": "Talk Map",
@@ -177,7 +179,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"draft.wsNamePlaceholder": "New workspace folder name",
 			"draft.defaultSuffix": " (default)",
 			"color.toolbar": "Color",
-			"color.clear": "Clear color"
+			"color.clear": "Clear color",
+			"card.waiting": "needs you",
+			"card.done": "done"
 		};
 		function isZh() {
 			if (typeof document === "undefined") return false;
@@ -10907,6 +10911,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		const dirtyCards = /* @__PURE__ */ new Set();
 		let flushTimer;
 		let cameraTimer;
+		let frameTimer;
 		function scheduleCardFlush() {
 			if (flushTimer !== void 0) return;
 			flushTimer = setTimeout(() => {
@@ -11066,6 +11071,26 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					console.error("[dsh-talk-map] card override save failed:", error);
 				});
 			},
+			/** Manual frame geometry (drag/resize); local now, persisted debounced. */
+			setWsFrameRect(workspaceId, rect) {
+				if (state.global === null) return;
+				setState({ global: {
+					...state.global,
+					wsFrames: {
+						...state.global.wsFrames,
+						[workspaceId]: rect
+					}
+				} });
+				if (frameTimer !== void 0) clearTimeout(frameTimer);
+				frameTimer = setTimeout(() => {
+					frameTimer = void 0;
+					const current = state.global;
+					if (current === null) return;
+					talkMapApi.setGlobal(current).catch((error) => {
+						console.error("[dsh-talk-map] frame save failed:", error);
+					});
+				}, 600);
+			},
 			/** Recolor a workspace frame (undefined clears); persists immediately. */
 			setWorkspaceColor(workspaceId, colorTag) {
 				if (state.global === null) return;
@@ -11141,7 +11166,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:module:src/client/talk-map.module.css.mjs
-		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleRow{width:100%;color:var(--dsw-alias-label-secondary);cursor:pointer;text-align:left;background:0 0;border:none;border-radius:8px;align-items:center;gap:8px;padding:6px 10px;font-size:13px;display:flex}._0iu0NW_toggleRow:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleLabel{white-space:nowrap}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:88px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardCurrent{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardMeta{color:var(--dsw-alias-label-tertiary);font-size:11px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:none;width:8px;height:8px}._0iu0NW_cardRefresh{width:22px;height:22px;color:var(--dsw-alias-label-tertiary);cursor:pointer;opacity:0;background:0 0;border:none;border-radius:6px;flex:none;margin-left:auto;padding:0;font-size:13px;line-height:1;transition:opacity .12s}._0iu0NW_card:hover ._0iu0NW_cardRefresh{opacity:1}._0iu0NW_cardRefresh:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_cardRefreshBusy{opacity:1;animation:1s linear infinite _0iu0NW_talkmap-spin}@keyframes _0iu0NW_talkmap-spin{to{transform:rotate(360deg)}}._0iu0NW_spawnPanel{z-index:6;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:420px;max-width:calc(100% - 48px);box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:16px;display:flex;position:absolute;top:24px;right:24px}._0iu0NW_spawnHeading{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_spawnFrom{color:var(--dsw-alias-label-secondary);font-size:12px}._0iu0NW_spawnHint{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_spawnTextarea{resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:140px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_spawnError{color:var(--dsw-alias-state-error-primary);word-break:break-all;font-size:12px}._0iu0NW_spawnActions{justify-content:flex-end;gap:8px;display:flex}._0iu0NW_spawnBtnPrimary{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground);cursor:pointer;border:none;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnPrimary:hover{background:var(--dsw-alias-button-primary-hover)}._0iu0NW_spawnBtnPrimary:disabled{background:var(--dsw-alias-button-primary-dimmed);cursor:default}._0iu0NW_spawnBtnGhost{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnGhost:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_wsFrame{border:1.5px dashed var(--dsw-alias-border-l2);background:0 0;border-radius:16px;position:relative}._0iu0NW_wsFrameSelected{border-style:solid;border-color:var(--dsw-alias-brand-primary)}._0iu0NW_wsFrameLabel{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:nowrap;pointer-events:auto;cursor:grab;border-radius:999px;align-items:center;gap:6px;padding:2px 10px;font-size:12px;font-weight:600;display:flex;position:absolute;top:-12px;left:14px}._0iu0NW_wsFrameLabel:active{cursor:grabbing}._0iu0NW_wsFrameCount{color:var(--dsw-alias-label-tertiary);font-weight:400}._0iu0NW_draftCard{box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);width:360px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:14px;font-size:13px;display:flex}._0iu0NW_draftHeading{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}._0iu0NW_draftRow{align-items:center;gap:8px;display:flex}._0iu0NW_draftLabel{width:52px;color:var(--dsw-alias-label-tertiary);flex:none;font-size:12px}._0iu0NW_draftSelect{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);min-width:0;color:var(--dsw-alias-label-primary);border-radius:7px;flex:1;padding:5px 8px;font-size:12px}._0iu0NW_draftGrow{flex-direction:column;flex:1;gap:3px;min-width:0;display:flex}._0iu0NW_draftInput{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;color:var(--dsw-alias-label-primary);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_draftPathPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;font-size:11px}._0iu0NW_draftTextarea{box-sizing:border-box;resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:88px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:9px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_colorToolbar{z-index:7;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 2px 10px var(--dsw-alias-bg-mask-1);border-radius:10px;align-items:center;gap:6px;padding:6px 10px;display:flex;position:absolute;top:12px;left:12px}._0iu0NW_colorToolbarLabel{color:var(--dsw-alias-label-tertiary);margin-right:2px;font-size:12px}._0iu0NW_colorSwatch{border:1px solid var(--dsw-alias-border-l2);cursor:pointer;width:18px;height:18px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;padding:0;font-size:11px;line-height:1;display:flex}._0iu0NW_colorSwatch:hover{transform:scale(1.15)}._0iu0NW_colorSwatchClear{background:0 0}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
+		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleRow{width:100%;color:var(--dsw-alias-label-secondary);cursor:pointer;text-align:left;background:0 0;border:none;border-radius:8px;align-items:center;gap:8px;padding:6px 10px;font-size:13px;display:flex}._0iu0NW_toggleRow:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleLabel{white-space:nowrap}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:88px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardCurrent{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardMeta{color:var(--dsw-alias-label-tertiary);align-items:center;gap:8px;font-size:11px;display:flex}._0iu0NW_cardSummary{color:var(--dsw-alias-label-secondary);-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:12px;line-height:1.45;display:-webkit-box;overflow:hidden}._0iu0NW_cardBadgeWaiting{color:var(--dsw-alias-state-warn-label);background:var(--dsw-alias-state-warn-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardBadgeDone{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:none;width:8px;height:8px}._0iu0NW_cardRefresh{width:22px;height:22px;color:var(--dsw-alias-label-tertiary);cursor:pointer;opacity:0;background:0 0;border:none;border-radius:6px;flex:none;margin-left:auto;padding:0;font-size:13px;line-height:1;transition:opacity .12s}._0iu0NW_card:hover ._0iu0NW_cardRefresh{opacity:1}._0iu0NW_cardRefresh:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_cardRefreshBusy{opacity:1;animation:1s linear infinite _0iu0NW_talkmap-spin}@keyframes _0iu0NW_talkmap-spin{to{transform:rotate(360deg)}}._0iu0NW_spawnPanel{z-index:6;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:420px;max-width:calc(100% - 48px);box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:16px;display:flex;position:absolute;top:24px;right:24px}._0iu0NW_spawnHeading{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_spawnFrom{color:var(--dsw-alias-label-secondary);font-size:12px}._0iu0NW_spawnHint{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_spawnTextarea{resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:140px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_spawnError{color:var(--dsw-alias-state-error-primary);word-break:break-all;font-size:12px}._0iu0NW_spawnActions{justify-content:flex-end;gap:8px;display:flex}._0iu0NW_spawnBtnPrimary{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground);cursor:pointer;border:none;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnPrimary:hover{background:var(--dsw-alias-button-primary-hover)}._0iu0NW_spawnBtnPrimary:disabled{background:var(--dsw-alias-button-primary-dimmed);cursor:default}._0iu0NW_spawnBtnGhost{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnGhost:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_wsFrame{border:1.5px dashed var(--dsw-alias-border-l2);background:0 0;border-radius:16px;position:relative}._0iu0NW_wsFrameSelected{border-style:solid;border-color:var(--dsw-alias-brand-primary)}._0iu0NW_wsFrameLabel{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:nowrap;pointer-events:auto;cursor:grab;border-radius:999px;align-items:center;gap:6px;padding:2px 10px;font-size:12px;font-weight:600;display:flex;position:absolute;top:-12px;left:14px}._0iu0NW_wsFrameLabel:active{cursor:grabbing}._0iu0NW_wsFrameEdge{pointer-events:auto;cursor:grab;position:absolute}._0iu0NW_wsFrameEdge:active{cursor:grabbing}._0iu0NW_wsFrameResize{pointer-events:auto;cursor:nwse-resize;border-right:3px solid var(--dsw-alias-border-l3);border-bottom:3px solid var(--dsw-alias-border-l3);opacity:.7;border-bottom-right-radius:14px;width:16px;height:16px;position:absolute;bottom:-2px;right:-2px}._0iu0NW_wsFrameResize:hover{border-color:var(--dsw-alias-brand-primary);opacity:1}._0iu0NW_wsFrameCount{color:var(--dsw-alias-label-tertiary);font-weight:400}._0iu0NW_draftCard{box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);width:360px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:14px;font-size:13px;display:flex}._0iu0NW_draftHeading{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}._0iu0NW_draftRow{align-items:center;gap:8px;display:flex}._0iu0NW_draftLabel{width:52px;color:var(--dsw-alias-label-tertiary);flex:none;font-size:12px}._0iu0NW_draftSelect{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);min-width:0;color:var(--dsw-alias-label-primary);border-radius:7px;flex:1;padding:5px 8px;font-size:12px}._0iu0NW_draftGrow{flex-direction:column;flex:1;gap:3px;min-width:0;display:flex}._0iu0NW_draftInput{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;color:var(--dsw-alias-label-primary);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_draftPathPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;font-size:11px}._0iu0NW_draftTextarea{box-sizing:border-box;resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:88px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:9px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_colorToolbar{z-index:7;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 2px 10px var(--dsw-alias-bg-mask-1);border-radius:10px;align-items:center;gap:6px;padding:6px 10px;display:flex;position:absolute;top:12px;left:12px}._0iu0NW_colorToolbarLabel{color:var(--dsw-alias-label-tertiary);margin-right:2px;font-size:12px}._0iu0NW_colorSwatch{border:1px solid var(--dsw-alias-border-l2);cursor:pointer;width:18px;height:18px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;padding:0;font-size:11px;line-height:1;display:flex}._0iu0NW_colorSwatch:hover{transform:scale(1.15)}._0iu0NW_colorSwatchClear{background:0 0}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
 		const tagId = "dsh-talk-map/talk-map.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");
@@ -11151,63 +11176,68 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"overlay": "_0iu0NW_overlay",
-			"cardMeta": "_0iu0NW_cardMeta",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"cardTop": "_0iu0NW_cardTop",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"spawnError": "_0iu0NW_spawnError",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"draftCard": "_0iu0NW_draftCard",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
 			"card": "_0iu0NW_card",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"cardNext": "_0iu0NW_cardNext",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"draftInput": "_0iu0NW_draftInput",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"closeButton": "_0iu0NW_closeButton",
-			"draftSelect": "_0iu0NW_draftSelect",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
 			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
 			"draftRow": "_0iu0NW_draftRow",
-			"runningDot": "_0iu0NW_runningDot",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"header": "_0iu0NW_header",
-			"canvas": "_0iu0NW_canvas",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"cardGhost": "_0iu0NW_cardGhost",
+			"draftInput": "_0iu0NW_draftInput",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"wsFrame": "_0iu0NW_wsFrame",
 			"headerBadge": "_0iu0NW_headerBadge",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"canvas": "_0iu0NW_canvas",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"draftCard": "_0iu0NW_draftCard",
+			"overlay": "_0iu0NW_overlay",
+			"cardStale": "_0iu0NW_cardStale",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"cardMeta": "_0iu0NW_cardMeta",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
 			"colorToolbar": "_0iu0NW_colorToolbar",
-			"cardStale": "_0iu0NW_cardStale"
+			"runningDot": "_0iu0NW_runningDot",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"spawnError": "_0iu0NW_spawnError",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"cardNext": "_0iu0NW_cardNext",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"closeButton": "_0iu0NW_closeButton",
+			"header": "_0iu0NW_header",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"cardTop": "_0iu0NW_cardTop",
+			"cardCurrent": "_0iu0NW_cardCurrent"
 		};
 		//#endregion
 		//#region src/client/DraftCard.tsx
@@ -11275,7 +11305,11 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					if (response.result.ok) setGroups(response.result.value.groups ?? []);
 				}).catch(() => void 0);
 				services.connection.api.agentPresets.list({}).then((response) => {
-					if (response.result.ok) setPresets(response.result.value.presets);
+					if (response.result.ok) {
+						const list = response.result.value.presets;
+						setPresets(list);
+						if (list.some((preset) => preset.id === "standard")) setPresetId((previous) => previous === "" ? "standard" : previous);
+					}
 				}).catch(() => void 0);
 				talkMapApi.getDefaults().then((defaults) => {
 					if (defaults.model !== null) setDefaultModelLabel(defaults.model.model);
@@ -11331,6 +11365,12 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				className: talk_map_module_css_default["draftCard"],
 				role: "dialog",
 				"aria-label": t("draft.heading"),
+				onPointerDownCapture: (event) => {
+					if (event.target.closest("select, textarea, input, button") !== null) event.stopPropagation();
+				},
+				onMouseDownCapture: (event) => {
+					if (event.target.closest("select, textarea, input, button") !== null) event.stopPropagation();
+				},
 				children: [
 					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 						className: talk_map_module_css_default["draftHeading"],
@@ -11541,7 +11581,10 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							canvas.removeCard(data.cardId);
 						},
 						children: t("card.remove")
-					}) : data.nextStep !== void 0 && data.nextStep !== "" ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+					}) : /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [data.summary !== void 0 && data.summary !== "" ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["cardSummary"],
+						children: data.summary
+					}) : null, data.nextStep !== void 0 && data.nextStep !== "" ? /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: talk_map_module_css_default["cardNext"],
 						children: [
 							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
@@ -11558,10 +11601,16 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 								children: "⟳"
 							}) : null
 						]
-					}) : null,
-					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+					}) : null] }),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: talk_map_module_css_default["cardMeta"],
-						children: relativeTime(data.updatedAt)
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: relativeTime(data.updatedAt) }), data.waiting === true ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							className: talk_map_module_css_default["cardBadgeWaiting"],
+							children: t("card.waiting")
+						}) : data.done === true ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							className: talk_map_module_css_default["cardBadgeDone"],
+							children: t("card.done")
+						}) : null]
 					}),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsx)(Handle, {
 						type: "source",
@@ -11696,31 +11745,125 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		//#endregion
 		//#region src/client/WsFrame.tsx
+		/**
+		* Workspace frame: a region drawn behind the cards of one map group. The
+		* body center is pointer-transparent (pan/double-click pass through); the
+		* dashed BORDER and the label chip are the frame's physical surfaces —
+		* click either to select, drag either to move the whole group (the canvas
+		* translates every member card), and pull the bottom-right handle to give
+		* the frame a manual size (persisted; auto-fit stops for that frame).
+		*/
+		const MIN_W = 240;
+		const MIN_H = 160;
+		const EDGE = 10;
 		function WsFrameNode(props) {
 			const { data, selected } = props;
 			const color = colorOf(data.colorTag);
-			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+			const { getZoom } = useReactFlow();
+			const [liveSize, setLiveSize] = (0, react.useState)(null);
+			const resizeRef = (0, react.useRef)(null);
+			(0, react.useEffect)(() => {
+				setLiveSize(null);
+			}, [data.width, data.height]);
+			const width = liveSize?.width ?? data.width;
+			const height = liveSize?.height ?? data.height;
+			const onHandlePointerDown = (event) => {
+				event.stopPropagation();
+				event.preventDefault();
+				resizeRef.current = {
+					startX: event.clientX,
+					startY: event.clientY,
+					width,
+					height
+				};
+				event.currentTarget.setPointerCapture(event.pointerId);
+			};
+			const onHandlePointerMove = (event) => {
+				const start = resizeRef.current;
+				if (start === null) return;
+				const zoom = getZoom();
+				setLiveSize({
+					width: Math.max(MIN_W, start.width + (event.clientX - start.startX) / zoom),
+					height: Math.max(MIN_H, start.height + (event.clientY - start.startY) / zoom)
+				});
+			};
+			const onHandlePointerUp = (event) => {
+				const start = resizeRef.current;
+				if (start === null) return;
+				resizeRef.current = null;
+				event.currentTarget.releasePointerCapture(event.pointerId);
+				const zoom = getZoom();
+				data.onResizeEnd({
+					width: Math.max(MIN_W, start.width + (event.clientX - start.startX) / zoom),
+					height: Math.max(MIN_H, start.height + (event.clientY - start.startY) / zoom)
+				});
+			};
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: `${talk_map_module_css_default["wsFrame"]}${selected === true ? ` ${talk_map_module_css_default["wsFrameSelected"]}` : ""}`,
 				style: {
-					width: data.width,
-					height: data.height,
+					width,
+					height,
 					...color !== void 0 ? {
 						borderColor: color.border,
 						background: color.faint
 					} : {}
 				},
 				"data-talkmap-frame": "",
-				children: /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
-					className: talk_map_module_css_default["wsFrameLabel"],
-					style: color !== void 0 ? {
-						borderColor: color.border,
-						backgroundImage: `linear-gradient(${color.fill}, ${color.fill})`
-					} : {},
-					children: [data.title, /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-						className: talk_map_module_css_default["wsFrameCount"],
-						children: data.count
-					})]
-				})
+				children: [
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+						className: talk_map_module_css_default["wsFrameLabel"],
+						style: color !== void 0 ? {
+							borderColor: color.border,
+							backgroundImage: `linear-gradient(${color.fill}, ${color.fill})`
+						} : {},
+						children: [data.title, /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+							className: talk_map_module_css_default["wsFrameCount"],
+							children: data.count
+						})]
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["wsFrameEdge"],
+						style: {
+							top: 0,
+							left: 0,
+							right: 0,
+							height: EDGE
+						}
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["wsFrameEdge"],
+						style: {
+							bottom: 0,
+							left: 0,
+							right: 0,
+							height: EDGE
+						}
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["wsFrameEdge"],
+						style: {
+							top: 0,
+							bottom: 0,
+							left: 0,
+							width: EDGE
+						}
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["wsFrameEdge"],
+						style: {
+							top: 0,
+							bottom: 0,
+							right: 0,
+							width: EDGE
+						}
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: `${talk_map_module_css_default["wsFrameResize"]} nodrag`,
+						onPointerDown: onHandlePointerDown,
+						onPointerMove: onHandlePointerMove,
+						onPointerUp: onHandlePointerUp
+					})
+				]
 			});
 		}
 		//#endregion
@@ -11899,7 +12042,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			}
 			return plan;
 		}
-		function frameRects(cards, wsOfCard, wsList) {
+		function frameRects(cards, wsOfCard, wsList, manual) {
 			const byWs = /* @__PURE__ */ new Map();
 			for (const card of Object.values(cards)) {
 				if (card.boardId !== "inbox") continue;
@@ -11910,6 +12053,16 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const rects = [];
 			for (const [workspaceId, members] of byWs) {
 				if (members.length === 0) continue;
+				const sized = manual?.[workspaceId];
+				if (sized !== void 0) {
+					rects.push({
+						workspaceId,
+						title: titles.get(workspaceId) ?? workspaceId,
+						count: members.length,
+						...sized
+					});
+					continue;
+				}
 				const minX = Math.min(...members.map((card) => card.x));
 				const minY = Math.min(...members.map((card) => card.y));
 				const maxX = Math.max(...members.map((card) => card.x + CARD_W));
@@ -11922,6 +12075,15 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					y: minY - FRAME_PAD - FRAME_LABEL_H,
 					width: maxX - minX + 64,
 					height: maxY - minY + 64 + FRAME_LABEL_H
+				});
+			}
+			for (const [workspaceId, sized] of Object.entries(manual ?? {})) {
+				if (byWs.has(workspaceId)) continue;
+				rects.push({
+					workspaceId,
+					title: titles.get(workspaceId) ?? workspaceId,
+					count: 0,
+					...sized
 				});
 			}
 			return rects;
@@ -11987,10 +12149,11 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				for (const [cardId, card] of Object.entries(visibleCards)) if (!index.has(card.sessionId)) index.set(card.sessionId, cardId);
 				return index;
 			}, [visibleCards]);
-			const frames = (0, react.useMemo)(() => frameRects(visibleCards, wsOfCard, wsList), [
+			const frames = (0, react.useMemo)(() => frameRects(visibleCards, wsOfCard, wsList, canvasState.global?.wsFrames), [
 				visibleCards,
 				wsOfCard,
-				wsList
+				wsList,
+				canvasState.global
 			]);
 			const membersByWs = (0, react.useMemo)(() => {
 				const index = /* @__PURE__ */ new Map();
@@ -12032,11 +12195,20 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						y: frame.y
 					},
 					data: {
+						workspaceId: frame.workspaceId,
 						title: frame.title,
 						count: frame.count,
 						width: frame.width,
 						height: frame.height,
-						...wsColors[frame.workspaceId] !== void 0 ? { colorTag: wsColors[frame.workspaceId] } : {}
+						...wsColors[frame.workspaceId] !== void 0 ? { colorTag: wsColors[frame.workspaceId] } : {},
+						onResizeEnd: (size) => {
+							canvas.setWsFrameRect(frame.workspaceId, {
+								x: frame.x,
+								y: frame.y,
+								width: size.width,
+								height: size.height
+							});
+						}
 					},
 					draggable: true,
 					selectable: true,
@@ -12057,6 +12229,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						ghost: summary === void 0,
 						updatedAt: summary?.updatedAt,
 						nextStep: digest?.nextStep ?? digest?.todoNext,
+						summary: digest?.summary,
+						waiting: summary?.pendingInteraction !== void 0,
+						done: summary?.completed === true,
 						...card.colorTag !== void 0 ? { colorTag: card.colorTag } : {}
 					};
 					return {
@@ -12077,6 +12252,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						x: draft.x,
 						y: draft.y
 					},
+					selectable: false,
 					zIndex: 10,
 					data: {
 						workspaceOptions: workspaces.items.map((item) => ({
@@ -12152,21 +12328,26 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					});
 					else if (change.id.startsWith("frame-")) {
 						const previous = framePosRef.current[change.id];
+						const workspaceId = change.id.slice(6);
 						if (previous !== void 0) {
 							const dx = change.position.x - previous.x;
 							const dy = change.position.y - previous.y;
-							if (dx !== 0 || dy !== 0) {
-								const workspaceId = change.id.slice(6);
-								for (const cardId of membersByWs.get(workspaceId) ?? []) {
-									const card = canvasState.cards[cardId];
-									if (card !== void 0) canvas.moveCard(cardId, card.x + dx, card.y + dy);
-								}
+							if (dx !== 0 || dy !== 0) for (const cardId of membersByWs.get(workspaceId) ?? []) {
+								const card = canvasState.cards[cardId];
+								if (card !== void 0) canvas.moveCard(cardId, card.x + dx, card.y + dy);
 							}
 						}
 						framePosRef.current[change.id] = {
 							x: change.position.x,
 							y: change.position.y
 						};
+						const manual = canvasState.global?.wsFrames?.[workspaceId];
+						if (manual !== void 0) canvas.setWsFrameRect(workspaceId, {
+							x: change.position.x,
+							y: change.position.y,
+							width: manual.width,
+							height: manual.height
+						});
 					} else canvas.moveCard(change.id, change.position.x, change.position.y);
 				} else if (change.type === "select") setSelectedIds((previous) => {
 					const next = new Set(previous);

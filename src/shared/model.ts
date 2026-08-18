@@ -62,6 +62,15 @@ export interface MapGlobal {
   layoutVersion?: number
   /** Per-workspace color tags for the group frames. */
   wsColors?: Record<string, string>
+  /** Manually sized frames (resize handle); absent = auto-fit to members. */
+  wsFrames?: Record<string, FrameGeometry>
+}
+
+export interface FrameGeometry {
+  x: number
+  y: number
+  width: number
+  height: number
 }
 
 export interface MapStatePayload {

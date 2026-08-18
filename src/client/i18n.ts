@@ -48,6 +48,8 @@ const zh: Record<string, string> = {
   'draft.defaultSuffix': '（默认）',
   'color.toolbar': '颜色',
   'color.clear': '清除颜色',
+  'card.waiting': '等你回复',
+  'card.done': '已完成',
 }
 
 const en: Record<string, string> = {
@@ -95,6 +97,8 @@ const en: Record<string, string> = {
   'draft.defaultSuffix': ' (default)',
   'color.toolbar': 'Color',
   'color.clear': 'Clear color',
+  'card.waiting': 'needs you',
+  'card.done': 'done',
 }
 
 function isZh(): boolean {

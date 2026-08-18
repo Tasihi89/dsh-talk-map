@@ -27,6 +27,9 @@ export interface SessionSummary {
   readonly parentId?: string
   readonly origin?: 'subagent'
   readonly running: boolean
+  /** User interaction currently blocking this session (approval/question). */
+  readonly pendingInteraction?: unknown
+  /** Finished while not selected and not yet opened — the "done, unread" state. */
   readonly completed?: boolean
   readonly blank: boolean
   readonly updatedAt: number

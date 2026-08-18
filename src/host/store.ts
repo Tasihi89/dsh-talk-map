@@ -80,6 +80,13 @@ export const globalSchema = z.object({
   layoutVersion: z.number().optional(),
   /** Per-workspace color tags for the group frames. */
   wsColors: z.record(z.string(), z.string()).optional(),
+  /** Manually sized frames (resize handle); absent = auto-fit to members. */
+  wsFrames: z.record(z.string(), z.object({
+    x: z.number(),
+    y: z.number(),
+    width: z.number(),
+    height: z.number(),
+  })).optional(),
 })
 export type MapGlobal = z.infer<typeof globalSchema>
 

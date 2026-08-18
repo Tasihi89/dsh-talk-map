@@ -194,6 +194,7 @@ function frameRects(
   cards: Readonly<Record<string, Card>>,
   wsOfCard: (card: Card) => string,
   wsList: WsEntry[],
+  manual: Readonly<Record<string, { x: number; y: number; width: number; height: number }>> | undefined,
 ): FrameRect[] {
   const byWs = new Map<string, Card[]>()
   for (const card of Object.values(cards)) {
@@ -205,6 +206,16 @@ function frameRects(
   const rects: FrameRect[] = []
   for (const [workspaceId, members] of byWs) {
     if (members.length === 0) continue
+    const sized = manual?.[workspaceId]
+    if (sized !== undefined) {
+      rects.push({
+        workspaceId,
+        title: titles.get(workspaceId) ?? workspaceId,
+        count: members.length,
+        ...sized,
+      })
+      continue
+    }
     const minX = Math.min(...members.map(card => card.x))
     const minY = Math.min(...members.map(card => card.y))
     const maxX = Math.max(...members.map(card => card.x + CARD_W))
@@ -217,6 +228,16 @@ function frameRects(
       y: minY - FRAME_PAD - FRAME_LABEL_H,
       width: maxX - minX + FRAME_PAD * 2,
       height: maxY - minY + FRAME_PAD * 2 + FRAME_LABEL_H,
+    })
+  }
+  // Manually sized frames survive even with no member cards on the board.
+  for (const [workspaceId, sized] of Object.entries(manual ?? {})) {
+    if (byWs.has(workspaceId)) continue
+    rects.push({
+      workspaceId,
+      title: titles.get(workspaceId) ?? workspaceId,
+      count: 0,
+      ...sized,
     })
   }
   return rects
@@ -292,8 +313,8 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   }, [visibleCards])
 
   const frames = useMemo(
-    () => frameRects(visibleCards, wsOfCard, wsList),
-    [visibleCards, wsOfCard, wsList],
+    () => frameRects(visibleCards, wsOfCard, wsList, canvasState.global?.wsFrames),
+    [visibleCards, wsOfCard, wsList, canvasState.global],
   )
 
   const membersByWs = useMemo(() => {
@@ -336,19 +357,28 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       type: 'wsFrame' as const,
       position: { x: frame.x, y: frame.y },
       data: {
+        workspaceId: frame.workspaceId,
         title: frame.title,
         count: frame.count,
         width: frame.width,
         height: frame.height,
         ...(wsColors[frame.workspaceId] !== undefined ? { colorTag: wsColors[frame.workspaceId] } : {}),
+        onResizeEnd: (size: { width: number; height: number }) => {
+          canvas.setWsFrameRect(frame.workspaceId, {
+            x: frame.x,
+            y: frame.y,
+            width: size.width,
+            height: size.height,
+          })
+        },
       },
       draggable: true,
       selectable: true,
       focusable: false,
       selected: selectedIds.has(`frame-${frame.workspaceId}`),
       zIndex: -1,
-      // Body click-through; the label chip re-enables pointer events and is
-      // the frame's drag/select handle.
+      // Body center click-through; the label chip, border strips, and the
+      // resize handle re-enable pointer events.
       style: { pointerEvents: 'none' as const },
     }))
     const cardNodes: TalkMapNode[] = Object.entries(visibleCards)
@@ -365,6 +395,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           ghost: summary === undefined,
           updatedAt: summary?.updatedAt,
           nextStep: digest?.nextStep ?? digest?.todoNext,
+          summary: digest?.summary,
+          waiting: summary?.pendingInteraction !== undefined,
+          done: summary?.completed === true,
           ...(card.colorTag !== undefined ? { colorTag: card.colorTag } : {}),
         }
         return {
@@ -381,6 +414,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           id: 'draft',
           type: 'draftCard' as const,
           position: { x: draft.x, y: draft.y },
+          selectable: false,
           zIndex: 10,
           data: {
             workspaceOptions: workspaces.items.map(item => ({
@@ -436,11 +470,11 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         } else if (change.id.startsWith('frame-')) {
           // Frame drag: translate every member card by the same delta.
           const previous = framePosRef.current[change.id]
+          const workspaceId = change.id.slice('frame-'.length)
           if (previous !== undefined) {
             const dx = change.position.x - previous.x
             const dy = change.position.y - previous.y
             if (dx !== 0 || dy !== 0) {
-              const workspaceId = change.id.slice('frame-'.length)
               for (const cardId of membersByWs.get(workspaceId) ?? []) {
                 const card = canvasState.cards[cardId]
                 if (card !== undefined) canvas.moveCard(cardId, card.x + dx, card.y + dy)
@@ -448,6 +482,16 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
             }
           }
           framePosRef.current[change.id] = { x: change.position.x, y: change.position.y }
+          // A manually sized frame carries its own geometry.
+          const manual = canvasState.global?.wsFrames?.[workspaceId]
+          if (manual !== undefined) {
+            canvas.setWsFrameRect(workspaceId, {
+              x: change.position.x,
+              y: change.position.y,
+              width: manual.width,
+              height: manual.height,
+            })
+          }
         } else {
           canvas.moveCard(change.id, change.position.x, change.position.y)
         }

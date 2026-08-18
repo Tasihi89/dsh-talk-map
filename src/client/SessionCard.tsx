@@ -23,6 +23,12 @@ export interface SessionCardData extends Record<string, unknown> {
   nextStep?: string
   stale?: boolean
   colorTag?: string
+  /** Digest summary, shown as the card body (2-line clamp). */
+  summary?: string
+  /** Session is blocked on the user (approval / question). */
+  waiting?: boolean
+  /** Finished while unwatched and not yet opened. */
+  done?: boolean
 }
 
 export type SessionCardNodeType = Node<SessionCardData, 'sessionCard'>
@@ -99,16 +105,30 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
               {t('card.remove')}
             </button>
           )
-        : data.nextStep !== undefined && data.nextStep !== ''
-          ? (
-              <div className={styles['cardNext']}>
-                <span className={styles['cardNextLabel']}>{t('card.next')}</span>
-                <span className={styles['cardNextText']}>{data.nextStep}</span>
-                {data.stale === true ? <span className={styles['cardStale']} title={t('card.stale')}>⟳</span> : null}
-              </div>
-            )
-          : null}
-      <div className={styles['cardMeta']}>{relativeTime(data.updatedAt)}</div>
+        : (
+            <>
+              {data.summary !== undefined && data.summary !== ''
+                ? <div className={styles['cardSummary']}>{data.summary}</div>
+                : null}
+              {data.nextStep !== undefined && data.nextStep !== ''
+                ? (
+                    <div className={styles['cardNext']}>
+                      <span className={styles['cardNextLabel']}>{t('card.next')}</span>
+                      <span className={styles['cardNextText']}>{data.nextStep}</span>
+                      {data.stale === true ? <span className={styles['cardStale']} title={t('card.stale')}>⟳</span> : null}
+                    </div>
+                  )
+                : null}
+            </>
+          )}
+      <div className={styles['cardMeta']}>
+        <span>{relativeTime(data.updatedAt)}</span>
+        {data.waiting === true
+          ? <span className={styles['cardBadgeWaiting']}>{t('card.waiting')}</span>
+          : data.done === true
+            ? <span className={styles['cardBadgeDone']}>{t('card.done')}</span>
+            : null}
+      </div>
       <Handle type="source" position={Position.Right} className={styles['cardHandle'] ?? ''} />
     </div>
   )

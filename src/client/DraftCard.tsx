@@ -87,7 +87,15 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
       if (response.result.ok) setGroups(response.result.value.groups ?? [])
     }).catch(() => undefined)
     services.connection.api.agentPresets.list({}).then((response) => {
-      if (response.result.ok) setPresets(response.result.value.presets)
+      if (response.result.ok) {
+        const list = response.result.value.presets
+        setPresets(list)
+        // Prefer the plain "standard" preset for map-born conversations —
+        // the deployment default may be a specialized mode (e.g. cordis).
+        if (list.some(preset => preset.id === 'standard')) {
+          setPresetId(previous => (previous === '' ? 'standard' : previous))
+        }
+      }
     }).catch(() => undefined)
     talkMapApi.getDefaults().then((defaults) => {
       if (defaults.model !== null) setDefaultModelLabel(defaults.model.model)
@@ -149,7 +157,22 @@ export function DraftCardNode(props: NodeProps<DraftCardNodeType>): React.JSX.El
   }
 
   return (
-    <div className={styles['draftCard']} role="dialog" aria-label={t('draft.heading')}>
+    <div
+      className={styles['draftCard']}
+      role="dialog"
+      aria-label={t('draft.heading')}
+      // Form controls own their pointer events entirely: React Flow's node
+      // machinery must never see them, or the native <select> dropdown opens
+      // and instantly closes (the flash-close bug).
+      onPointerDownCapture={(event) => {
+        const target = event.target as HTMLElement
+        if (target.closest('select, textarea, input, button') !== null) event.stopPropagation()
+      }}
+      onMouseDownCapture={(event) => {
+        const target = event.target as HTMLElement
+        if (target.closest('select, textarea, input, button') !== null) event.stopPropagation()
+      }}
+    >
       <div className={styles['draftHeading']}>{t('draft.heading')}</div>
       <div className={styles['draftRow']}>
         <label className={styles['draftLabel']}>{t('draft.workspace')}</label>

@@ -6,7 +6,7 @@
  * user drag or the one-time auto-placement of a session that has no card yet.
  */
 import { talkMapApi } from './api.ts'
-import type { Card, Digest, MapEdgeData, MapGlobal, Camera } from '../shared/model.ts'
+import type { Card, Digest, FrameGeometry, MapEdgeData, MapGlobal, Camera } from '../shared/model.ts'
 import { INBOX_BOARD_ID } from '../shared/model.ts'
 
 export interface CanvasState {
@@ -34,6 +34,7 @@ function setState(next: Partial<CanvasState>): void {
 const dirtyCards = new Set<string>()
 let flushTimer: ReturnType<typeof setTimeout> | undefined
 let cameraTimer: ReturnType<typeof setTimeout> | undefined
+let frameTimer: ReturnType<typeof setTimeout> | undefined
 
 function scheduleCardFlush(): void {
   if (flushTimer !== undefined) return
@@ -177,6 +178,25 @@ export const canvas = {
     void talkMapApi.upsertCards({ [id]: next }).catch((error) => {
       console.error('[dsh-talk-map] card override save failed:', error)
     })
+  },
+
+  /** Manual frame geometry (drag/resize); local now, persisted debounced. */
+  setWsFrameRect(workspaceId: string, rect: FrameGeometry): void {
+    if (state.global === null) return
+    const global: MapGlobal = {
+      ...state.global,
+      wsFrames: { ...state.global.wsFrames, [workspaceId]: rect },
+    }
+    setState({ global })
+    if (frameTimer !== undefined) clearTimeout(frameTimer)
+    frameTimer = setTimeout(() => {
+      frameTimer = undefined
+      const current = state.global
+      if (current === null) return
+      void talkMapApi.setGlobal(current).catch((error) => {
+        console.error('[dsh-talk-map] frame save failed:', error)
+      })
+    }, 600)
   },
 
   /** Recolor a workspace frame (undefined clears); persists immediately. */
