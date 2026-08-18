@@ -11322,81 +11322,81 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"cardNext": "_0iu0NW_cardNext",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"canvas": "_0iu0NW_canvas",
-			"cardTop": "_0iu0NW_cardTop",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"menuTitle": "_0iu0NW_menuTitle",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"spawnError": "_0iu0NW_spawnError",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"menu": "_0iu0NW_menu",
-			"menuItem": "_0iu0NW_menuItem",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"cardStale": "_0iu0NW_cardStale",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"draftCard": "_0iu0NW_draftCard",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"menuEmpty": "_0iu0NW_menuEmpty",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"card": "_0iu0NW_card",
+			"cardTime": "_0iu0NW_cardTime",
 			"headerBadge": "_0iu0NW_headerBadge",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"runningDot": "_0iu0NW_runningDot",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"overlay": "_0iu0NW_overlay",
-			"cardRemove": "_0iu0NW_cardRemove",
+			"spawnHeading": "_0iu0NW_spawnHeading",
 			"cardNextLabel": "_0iu0NW_cardNextLabel",
 			"spawnActions": "_0iu0NW_spawnActions",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"header": "_0iu0NW_header",
-			"draftInput": "_0iu0NW_draftInput",
+			"overlay": "_0iu0NW_overlay",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"draftLabel": "_0iu0NW_draftLabel",
 			"draftRow": "_0iu0NW_draftRow",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"closeButton": "_0iu0NW_closeButton",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"cardSummary": "_0iu0NW_cardSummary",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
 			"menuError": "_0iu0NW_menuError",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"menuHint": "_0iu0NW_menuHint",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"card": "_0iu0NW_card",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"draftInput": "_0iu0NW_draftInput",
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"cardStale": "_0iu0NW_cardStale",
+			"menuTitle": "_0iu0NW_menuTitle",
 			"cardTitle": "_0iu0NW_cardTitle",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"cardTime": "_0iu0NW_cardTime",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"menuSearch": "_0iu0NW_menuSearch",
+			"runningDot": "_0iu0NW_runningDot",
+			"menuHint": "_0iu0NW_menuHint",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"closeButton": "_0iu0NW_closeButton",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
 			"colorToolbar": "_0iu0NW_colorToolbar",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"header": "_0iu0NW_header",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"spawnError": "_0iu0NW_spawnError",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"menu": "_0iu0NW_menu",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"canvas": "_0iu0NW_canvas",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"cardTop": "_0iu0NW_cardTop",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"cardNext": "_0iu0NW_cardNext",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"menuItem": "_0iu0NW_menuItem",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
 			"cardCurrent": "_0iu0NW_cardCurrent",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy"
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"draftCard": "_0iu0NW_draftCard",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"draftGrow": "_0iu0NW_draftGrow"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12219,6 +12219,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const [menu, setMenu] = (0, react.useState)(null);
 			const framePosRef = (0, react.useRef)({});
 			const wrapperRef = (0, react.useRef)(null);
+			const [isSelecting, setIsSelecting] = (0, react.useState)(false);
+			const frozenRef = (0, react.useRef)(null);
 			const sessionWs = (0, react.useMemo)(() => sessionWorkspaceIndex(workspaces), [workspaces]);
 			const wsTitles = (0, react.useMemo)(() => new Map(workspaces.items.map((item) => [item.workspaceId, item.title])), [workspaces]);
 			const workspacesReady = workspaces.baselinesReady !== false;
@@ -12325,7 +12327,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					release();
 				};
 			});
-			const nodes = (0, react.useMemo)(() => {
+			const liveNodes = (0, react.useMemo)(() => {
 				const wsColors = canvasState.global?.wsColors ?? {};
 				const frameNodes = Object.entries(frameGeometry).map(([groupId, rect]) => {
 					const members = membersByGroup.get(groupId) ?? [];
@@ -12424,7 +12426,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				for (const [cardId, card] of Object.entries(visibleCards)) if (!index.has(card.sessionId)) index.set(card.sessionId, cardId);
 				return index;
 			}, [visibleCards]);
-			const edges = (0, react.useMemo)(() => {
+			const liveEdges = (0, react.useMemo)(() => {
 				const out = [];
 				const present = new Set(Object.keys(visibleCards));
 				const injectionPairs = /* @__PURE__ */ new Set();
@@ -12464,6 +12466,19 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				sessions,
 				sessionIdToCardId
 			]);
+			const nodes = isSelecting && frozenRef.current !== null ? frozenRef.current.nodes : liveNodes;
+			const edges = isSelecting && frozenRef.current !== null ? frozenRef.current.edges : liveEdges;
+			const onSelectionStart = () => {
+				frozenRef.current = {
+					nodes: liveNodes,
+					edges: liveEdges
+				};
+				setIsSelecting(true);
+			};
+			const onSelectionEnd = () => {
+				frozenRef.current = null;
+				setIsSelecting(false);
+			};
 			const onNodesChange = (changes) => {
 				for (const change of changes) if (change.type === "position" && change.position !== void 0) {
 					if (change.id === "draft") setDraft((previous) => previous === null ? previous : {
@@ -12843,6 +12858,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						nodeTypes,
 						onNodesChange,
 						onConnectEnd,
+						onSelectionStart,
+						onSelectionEnd,
 						onNodeClick: (event, node) => {
 							if (node.type !== "wsFrame") return;
 							const frameId = node.id;

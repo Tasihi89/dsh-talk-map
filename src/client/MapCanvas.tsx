@@ -120,6 +120,12 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   const [menu, setMenu] = useState<MenuContext | null>(null)
   const framePosRef = useRef<Record<string, { x: number; y: number }>>({})
   const wrapperRef = useRef<HTMLDivElement | null>(null)
+  // While a rubber-band drag is running, the node/edge arrays are frozen:
+  // a mid-drag data refresh (digest SSE, running-state flip) re-renders the
+  // flow and corrupts React Flow's in-flight hit testing — the intermittent
+  // "one small box selects everything / selects nothing" reports.
+  const [isSelecting, setIsSelecting] = useState(false)
+  const frozenRef = useRef<{ nodes: TalkMapNode[]; edges: Edge[] } | null>(null)
 
   const sessionWs = useMemo(() => sessionWorkspaceIndex(workspaces), [workspaces])
   const wsTitles = useMemo(
@@ -243,7 +249,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     }
   })
 
-  const nodes = useMemo<TalkMapNode[]>(() => {
+  const liveNodes = useMemo<TalkMapNode[]>(() => {
     const wsColors = canvasState.global?.wsColors ?? {}
     const frameNodes: TalkMapNode[] = Object.entries(frameGeometry).map(([groupId, rect]) => {
       const members = membersByGroup.get(groupId) ?? []
@@ -327,7 +333,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     return index
   }, [visibleCards])
 
-  const edges = useMemo<Edge[]>(() => {
+  const liveEdges = useMemo<Edge[]>(() => {
     const out: Edge[] = []
     const present = new Set(Object.keys(visibleCards))
     const injectionPairs = new Set<string>()
@@ -359,6 +365,18 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     }
     return out
   }, [visibleCards, canvasState.edges, sessions, sessionIdToCardId])
+
+  const nodes = isSelecting && frozenRef.current !== null ? frozenRef.current.nodes : liveNodes
+  const edges = isSelecting && frozenRef.current !== null ? frozenRef.current.edges : liveEdges
+
+  const onSelectionStart = (): void => {
+    frozenRef.current = { nodes: liveNodes, edges: liveEdges }
+    setIsSelecting(true)
+  }
+  const onSelectionEnd = (): void => {
+    frozenRef.current = null
+    setIsSelecting(false)
+  }
 
   const onNodesChange = (changes: NodeChange<TalkMapNode>[]): void => {
     for (const change of changes) {
@@ -741,6 +759,8 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onConnectEnd={onConnectEnd}
+        onSelectionStart={onSelectionStart}
+        onSelectionEnd={onSelectionEnd}
         onNodeClick={(event, node) => {
           if (node.type !== 'wsFrame') return
           // Click-only frame selection (React Flow never selects frames).
