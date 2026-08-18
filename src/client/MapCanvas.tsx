@@ -216,7 +216,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     return () => { window.removeEventListener('keydown', onKeyDown, { capture: true }) }
   }, [])
 
-  // With a selection active, Esc clears it instead of closing the map.
+  // With a selection active, Esc clears it instead of closing the map, and
+  // Backspace/Delete removes selected FRAMES (React Flow no longer owns
+  // frame selection, so its deleteKeyCode cannot reach them; cards stay on
+  // the React Flow path).
   const hasSelection = selectedIds.size > 0
   useEffect(() => {
     if (!hasSelection) return
@@ -225,6 +228,19 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       if (event.key === 'Escape') {
         event.stopPropagation()
         setSelectedIds(new Set())
+        return
+      }
+      if (event.key === 'Backspace' || event.key === 'Delete') {
+        const target = event.target as HTMLElement | null
+        if (target !== null && target.closest('input, textarea, [contenteditable="true"]') !== null) return
+        const frameIds = [...selectedIds].filter(id => id.startsWith('frame-'))
+        if (frameIds.length === 0) return
+        for (const frameId of frameIds) removeGroup(frameId.slice('frame-'.length))
+        setSelectedIds((previous) => {
+          const next = new Set(previous)
+          for (const frameId of frameIds) next.delete(frameId)
+          return next
+        })
       }
     }
     window.addEventListener('keydown', onKeyDown, { capture: true })
@@ -232,7 +248,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       window.removeEventListener('keydown', onKeyDown, { capture: true })
       release()
     }
-  }, [hasSelection])
+  })
 
   const nodes = useMemo<TalkMapNode[]>(() => {
     const wsColors = canvasState.global?.wsColors ?? {}
@@ -251,7 +267,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           ...(wsColors[groupId] !== undefined ? { colorTag: wsColors[groupId] } : {}),
         },
         draggable: true,
-        selectable: true,
+        // NOT selectable by React Flow: rubber-band selection grows in
+        // batches and would sweep the huge frames in. Frame selection is
+        // click-only, managed by this component (onNodeClick).
+        selectable: false,
         focusable: false,
         selected: selectedIds.has(`frame-${groupId}`),
         zIndex: -1,
@@ -383,13 +402,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           canvas.moveCard(change.id, change.position.x, change.position.y)
         }
       } else if (change.type === 'select') {
-        // Rubber-band selection sweeping over a huge frame should not grab
-        // the whole group: when the same batch also selects cards, frame
-        // selections are dropped (a plain click on a frame still selects it).
-        const batchSelectsCards = changes.some(other =>
-          other.type === 'select' && other.selected
-          && !other.id.startsWith('frame-') && other.id !== 'draft')
-        if (change.id.startsWith('frame-') && change.selected && batchSelectsCards) continue
         setSelectedIds((previous) => {
           const next = new Set(previous)
           if (change.selected) next.add(change.id)
@@ -775,6 +787,20 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onConnectEnd={onConnectEnd}
+        onNodeClick={(event, node) => {
+          if (node.type !== 'wsFrame') return
+          // Click-only frame selection (React Flow never selects frames).
+          const frameId = node.id
+          setSelectedIds((previous) => {
+            if (event.shiftKey) {
+              const next = new Set(previous)
+              if (next.has(frameId)) next.delete(frameId)
+              else next.add(frameId)
+              return next
+            }
+            return new Set([frameId])
+          })
+        }}
         onNodeDoubleClick={(_event, node) => {
           if (node.type === 'sessionCard' && !(node as SessionCardNodeType).data.ghost) {
             openSession((node as SessionCardNodeType).data.sessionId)

@@ -11322,81 +11322,81 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"spawnHint": "_0iu0NW_spawnHint",
-			"cardNext": "_0iu0NW_cardNext",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"overlay": "_0iu0NW_overlay",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"toggleIcon": "_0iu0NW_toggleIcon",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"runningDot": "_0iu0NW_runningDot",
 			"cardGhost": "_0iu0NW_cardGhost",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"header": "_0iu0NW_header",
+			"menuHint": "_0iu0NW_menuHint",
+			"cardStale": "_0iu0NW_cardStale",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"closeButton": "_0iu0NW_closeButton",
 			"spawnPanel": "_0iu0NW_spawnPanel",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"cardTime": "_0iu0NW_cardTime",
+			"canvas": "_0iu0NW_canvas",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"draftRow": "_0iu0NW_draftRow",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"menuItem": "_0iu0NW_menuItem",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"menuEmpty": "_0iu0NW_menuEmpty",
 			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
 			"spawnActions": "_0iu0NW_spawnActions",
-			"draftSelect": "_0iu0NW_draftSelect",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"cardTop": "_0iu0NW_cardTop",
+			"overlay": "_0iu0NW_overlay",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"menuTitle": "_0iu0NW_menuTitle",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"menuError": "_0iu0NW_menuError",
+			"card": "_0iu0NW_card",
+			"cardNext": "_0iu0NW_cardNext",
+			"toggleRow": "_0iu0NW_toggleRow",
 			"draftCard": "_0iu0NW_draftCard",
 			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"draftRow": "_0iu0NW_draftRow",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
 			"cardCurrent": "_0iu0NW_cardCurrent",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"cardStale": "_0iu0NW_cardStale",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"menuItem": "_0iu0NW_menuItem",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"cardTitle": "_0iu0NW_cardTitle",
 			"spawnError": "_0iu0NW_spawnError",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"runningDot": "_0iu0NW_runningDot",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"draftInput": "_0iu0NW_draftInput",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"card": "_0iu0NW_card",
-			"menuTitle": "_0iu0NW_menuTitle",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"menu": "_0iu0NW_menu",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"header": "_0iu0NW_header",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
 			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"draftInput": "_0iu0NW_draftInput",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"menu": "_0iu0NW_menu",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"toggleIcon": "_0iu0NW_toggleIcon",
 			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
 			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"closeButton": "_0iu0NW_closeButton",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"menuError": "_0iu0NW_menuError",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"cardSummary": "_0iu0NW_cardSummary",
-			"menuEmpty": "_0iu0NW_menuEmpty",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"canvas": "_0iu0NW_canvas",
-			"cardTop": "_0iu0NW_cardTop",
-			"cardTime": "_0iu0NW_cardTime",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"menuHint": "_0iu0NW_menuHint",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"wsFrameResize": "_0iu0NW_wsFrameResize"
+			"menuPreview": "_0iu0NW_menuPreview",
+			"draftGrow": "_0iu0NW_draftGrow"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12317,6 +12317,19 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					if (event.key === "Escape") {
 						event.stopPropagation();
 						setSelectedIds(/* @__PURE__ */ new Set());
+						return;
+					}
+					if (event.key === "Backspace" || event.key === "Delete") {
+						const target = event.target;
+						if (target !== null && target.closest("input, textarea, [contenteditable=\"true\"]") !== null) return;
+						const frameIds = [...selectedIds].filter((id) => id.startsWith("frame-"));
+						if (frameIds.length === 0) return;
+						for (const frameId of frameIds) removeGroup(frameId.slice(6));
+						setSelectedIds((previous) => {
+							const next = new Set(previous);
+							for (const frameId of frameIds) next.delete(frameId);
+							return next;
+						});
 					}
 				};
 				window.addEventListener("keydown", onKeyDown, { capture: true });
@@ -12324,7 +12337,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					window.removeEventListener("keydown", onKeyDown, { capture: true });
 					release();
 				};
-			}, [hasSelection]);
+			});
 			const nodes = (0, react.useMemo)(() => {
 				const wsColors = canvasState.global?.wsColors ?? {};
 				const frameNodes = Object.entries(frameGeometry).map(([groupId, rect]) => {
@@ -12345,7 +12358,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							...wsColors[groupId] !== void 0 ? { colorTag: wsColors[groupId] } : {}
 						},
 						draggable: true,
-						selectable: true,
+						selectable: false,
 						focusable: false,
 						selected: selectedIds.has(`frame-${groupId}`),
 						zIndex: -1,
@@ -12494,16 +12507,13 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							height: rect.height
 						});
 					} else canvas.moveCard(change.id, change.position.x, change.position.y);
-				} else if (change.type === "select") {
-					const batchSelectsCards = changes.some((other) => other.type === "select" && other.selected && !other.id.startsWith("frame-") && other.id !== "draft");
-					if (change.id.startsWith("frame-") && change.selected && batchSelectsCards) continue;
-					setSelectedIds((previous) => {
-						const next = new Set(previous);
-						if (change.selected) next.add(change.id);
-						else next.delete(change.id);
-						return next;
-					});
-				} else if (change.type === "remove") {
+				} else if (change.type === "select") setSelectedIds((previous) => {
+					const next = new Set(previous);
+					if (change.selected) next.add(change.id);
+					else next.delete(change.id);
+					return next;
+				});
+				else if (change.type === "remove") {
 					if (change.id.startsWith("frame-")) removeGroup(change.id.slice(6));
 					else if (change.id !== "draft") canvas.removeCard(change.id);
 					setSelectedIds((previous) => {
@@ -12887,6 +12897,19 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						nodeTypes,
 						onNodesChange,
 						onConnectEnd,
+						onNodeClick: (event, node) => {
+							if (node.type !== "wsFrame") return;
+							const frameId = node.id;
+							setSelectedIds((previous) => {
+								if (event.shiftKey) {
+									const next = new Set(previous);
+									if (next.has(frameId)) next.delete(frameId);
+									else next.add(frameId);
+									return next;
+								}
+								return /* @__PURE__ */ new Set([frameId]);
+							});
+						},
 						onNodeDoubleClick: (_event, node) => {
 							if (node.type === "sessionCard" && !node.data.ghost) openSession(node.data.sessionId);
 						},
