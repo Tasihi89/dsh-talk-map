@@ -1,0 +1,48 @@
+/**
+ * dsh-talk-map, browser half: one sidebar footer action (toggle) plus one
+ * shell.overlay entry (the map itself). Both ride ctx.slots.inject, so the
+ * registrations wait for their slots to exist and unwind on plugin unload.
+ *
+ * Failure policy: apply() must never throw — the web shell fails the whole
+ * boot when a plugin apply throws, and an external plugin must not take the
+ * GUI down (policy proven by dsh-plugin-market).
+ */
+import type { TalkMapClientContext } from './dsh.ts'
+import { attachServices } from './map-state.ts'
+import { MapOverlay } from './MapOverlay.tsx'
+import { MapToggleButton } from './MapToggleButton.tsx'
+import { t } from './i18n.ts'
+
+export const name = 'dsh-talk-map'
+export const inject = ['slots', 'sessions', 'workspaces']
+
+let applied = false
+
+export function apply(ctx: TalkMapClientContext): void {
+  // A duplicated client injection (module factory executed twice in one page
+  // lifetime) would otherwise register a second button and overlay.
+  if (applied) return
+  applied = true
+  ctx.effect(() => () => { applied = false }, 'dsh-talk-map: apply claim')
+
+  try {
+    attachServices({ sessions: ctx.sessions, workspaces: ctx.workspaces })
+    ctx.effect(() => () => { attachServices(undefined) }, 'dsh-talk-map: services')
+
+    ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({
+      name: 'sidebar.footer.action',
+      id: 'talk-map',
+      order: 10,
+      label: () => t('map.toggle'),
+    }, MapToggleButton))
+
+    ctx.slots.inject('shell.overlay', () => ctx.slots.register({
+      name: 'shell.overlay',
+      id: 'talk-map',
+      order: 100,
+      label: () => t('map.title'),
+    }, MapOverlay))
+  } catch (error) {
+    console.error('[dsh-talk-map] client apply failed:', error)
+  }
+}

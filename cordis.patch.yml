@@ -1,0 +1,7 @@
+# dsh bundle patch: inserts this plugin into a profile's layer stack.
+# The client half needs no row here — dsh's clientModules scans loader
+# entries for packages declaring `dsh.client` and serves ./client/client.js
+# at /plugins/dsh-talk-map/client.js automatically.
+- insert:
+    - id: talk-map
+      name: dsh-talk-map
