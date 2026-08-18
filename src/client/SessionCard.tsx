@@ -4,7 +4,9 @@
  * running state. A card whose session no longer exists renders as a ghost
  * (grey, removable) — the host never auto-deletes placements.
  */
+import { useState } from 'react'
 import { Handle, Position, type NodeProps, type Node } from '@xyflow/react'
+import { talkMapApi } from './api.ts'
 import { canvas } from './canvas-store.ts'
 import { t } from './i18n.ts'
 import styles from './talk-map.module.css'
@@ -37,10 +39,23 @@ function relativeTime(timestamp: number | undefined): string {
 
 export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JSX.Element {
   const { data, selected } = props
+  const [refreshing, setRefreshing] = useState(false)
   const classNames = [styles['card']]
   if (data.ghost) classNames.push(styles['cardGhost'])
   if (selected === true) classNames.push(styles['cardSelected'])
   if (data.isCurrent) classNames.push(styles['cardCurrent'])
+
+  const refreshDigest = async (): Promise<void> => {
+    if (refreshing) return
+    setRefreshing(true)
+    try {
+      await talkMapApi.refreshDigest(data.sessionId)
+    } catch (error) {
+      console.error('[dsh-talk-map] digest refresh failed:', error)
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   return (
     <div className={classNames.filter(Boolean).join(' ')}>
@@ -48,6 +63,22 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
       <div className={styles['cardTop']}>
         {data.running ? <span className={styles['runningDot']} title={t('card.running')} /> : null}
         <span className={styles['cardTitle']}>{data.ghost ? t('card.ghostTitle') : data.title}</span>
+        {data.ghost
+          ? null
+          : (
+              <button
+                type="button"
+                className={`${styles['cardRefresh']} nodrag${refreshing ? ` ${styles['cardRefreshBusy']}` : ''}`}
+                title={t('card.refresh')}
+                aria-label={t('card.refresh')}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  void refreshDigest()
+                }}
+              >
+                ⟳
+              </button>
+            )}
       </div>
       {data.ghost
         ? (

@@ -89,7 +89,20 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"time.now": "刚刚",
 			"time.m": " 分钟前",
 			"time.h": " 小时前",
-			"time.d": " 天前"
+			"time.d": " 天前",
+			"card.refresh": "重新生成摘要",
+			"edge.injected": "注入",
+			"spawn.heading": "连线分叉：开一个带上下文的新对话",
+			"spawn.from": "来源",
+			"spawn.hint": "以下内容将注入新对话作为背景，可以编辑：",
+			"spawn.noDigest": "（这段对话还没有摘要——可以先点卡片右上角的 ⟳ 生成，或直接在这里手写要带过去的背景。）",
+			"spawn.confirm": "开新对话",
+			"spawn.busy": "创建中……",
+			"spawn.cancel": "取消",
+			"inject.header": "【上下文注入 · 来自】",
+			"inject.summary": "摘要：",
+			"inject.findings": "关键结论：",
+			"inject.next": "下一步："
 		};
 		const en = {
 			"map.title": "Talk Map",
@@ -107,7 +120,20 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"time.now": "now",
 			"time.m": "m ago",
 			"time.h": "h ago",
-			"time.d": "d ago"
+			"time.d": "d ago",
+			"card.refresh": "Regenerate digest",
+			"edge.injected": "injected",
+			"spawn.heading": "Fork with context",
+			"spawn.from": "From",
+			"spawn.hint": "This text will be injected into the new session as background — edit freely:",
+			"spawn.noDigest": "(No digest yet — hit ⟳ on the card first, or write the context to carry over by hand.)",
+			"spawn.confirm": "Start session",
+			"spawn.busy": "Creating…",
+			"spawn.cancel": "Cancel",
+			"inject.header": "[Context injected from] ",
+			"inject.summary": "Summary: ",
+			"inject.findings": "Key findings:",
+			"inject.next": "Next step: "
 		};
 		function isZh() {
 			if (typeof document === "undefined") return false;
@@ -10780,6 +10806,12 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			setGlobal(global) {
 				return postJson("/talk-map/global", { global });
 			},
+			spawn(request) {
+				return postJson("/talk-map/spawn", request);
+			},
+			refreshDigest(sessionId) {
+				return postJson("/talk-map/digest/refresh", { sessionId });
+			},
 			/**
 			* Subscribe to host-side domain changes (multi-tab sync, digest arrivals).
 			* @returns disposer closing the EventSource.
@@ -10932,6 +10964,19 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					console.error("[dsh-talk-map] card upsert failed:", error);
 				});
 			},
+			/** Local mirror of a host-side spawn result (host already persisted it). */
+			applySpawn(result) {
+				setState({
+					cards: {
+						...state.cards,
+						[result.cardId]: result.card
+					},
+					edges: {
+						...state.edges,
+						...result.edges
+					}
+				});
+			},
 			removeCard(id) {
 				const cards = { ...state.cards };
 				delete cards[id];
@@ -10972,7 +11017,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:module:src/client/talk-map.module.css.mjs
-		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:88px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardCurrent{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardMeta{color:var(--dsw-alias-label-tertiary);font-size:11px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:none;width:8px;height:8px}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
+		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:88px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardCurrent{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardMeta{color:var(--dsw-alias-label-tertiary);font-size:11px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:none;width:8px;height:8px}._0iu0NW_cardRefresh{width:22px;height:22px;color:var(--dsw-alias-label-tertiary);cursor:pointer;opacity:0;background:0 0;border:none;border-radius:6px;flex:none;margin-left:auto;padding:0;font-size:13px;line-height:1;transition:opacity .12s}._0iu0NW_card:hover ._0iu0NW_cardRefresh{opacity:1}._0iu0NW_cardRefresh:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_cardRefreshBusy{opacity:1;animation:1s linear infinite _0iu0NW_talkmap-spin}@keyframes _0iu0NW_talkmap-spin{to{transform:rotate(360deg)}}._0iu0NW_spawnPanel{z-index:6;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:420px;max-width:calc(100% - 48px);box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:16px;display:flex;position:absolute;top:24px;right:24px}._0iu0NW_spawnHeading{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_spawnFrom{color:var(--dsw-alias-label-secondary);font-size:12px}._0iu0NW_spawnHint{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_spawnTextarea{resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:140px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_spawnError{color:var(--dsw-alias-state-error-primary);word-break:break-all;font-size:12px}._0iu0NW_spawnActions{justify-content:flex-end;gap:8px;display:flex}._0iu0NW_spawnBtnPrimary{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground);cursor:pointer;border:none;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnPrimary:hover{background:var(--dsw-alias-button-primary-hover)}._0iu0NW_spawnBtnPrimary:disabled{background:var(--dsw-alias-button-primary-dimmed);cursor:default}._0iu0NW_spawnBtnGhost{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnGhost:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}";
 		const tagId = "dsh-talk-map/talk-map.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");
@@ -10982,32 +11027,44 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"cardHandle": "_0iu0NW_cardHandle",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"overlay": "_0iu0NW_overlay",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"cardTop": "_0iu0NW_cardTop",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"cardSelected": "_0iu0NW_cardSelected",
+			"runningDot": "_0iu0NW_runningDot",
 			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"cardNext": "_0iu0NW_cardNext",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"card": "_0iu0NW_card",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"header": "_0iu0NW_header",
 			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"overlay": "_0iu0NW_overlay",
+			"cardHandle": "_0iu0NW_cardHandle",
 			"cardStale": "_0iu0NW_cardStale",
-			"cardMeta": "_0iu0NW_cardMeta",
-			"canvas": "_0iu0NW_canvas",
+			"header": "_0iu0NW_header",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"cardTop": "_0iu0NW_cardTop",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"toggleButton": "_0iu0NW_toggleButton",
 			"closeButton": "_0iu0NW_closeButton",
-			"runningDot": "_0iu0NW_runningDot"
+			"cardTitle": "_0iu0NW_cardTitle",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"cardNext": "_0iu0NW_cardNext",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"cardMeta": "_0iu0NW_cardMeta",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"spawnError": "_0iu0NW_spawnError",
+			"card": "_0iu0NW_card",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"canvas": "_0iu0NW_canvas",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"spawnPanel": "_0iu0NW_spawnPanel"
 		};
 		//#endregion
 		//#region src/client/SessionCard.tsx
@@ -11029,10 +11086,22 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		function SessionCardNode(props) {
 			const { data, selected } = props;
+			const [refreshing, setRefreshing] = (0, react.useState)(false);
 			const classNames = [talk_map_module_css_default["card"]];
 			if (data.ghost) classNames.push(talk_map_module_css_default["cardGhost"]);
 			if (selected === true) classNames.push(talk_map_module_css_default["cardSelected"]);
 			if (data.isCurrent) classNames.push(talk_map_module_css_default["cardCurrent"]);
+			const refreshDigest = async () => {
+				if (refreshing) return;
+				setRefreshing(true);
+				try {
+					await talkMapApi.refreshDigest(data.sessionId);
+				} catch (error) {
+					console.error("[dsh-talk-map] digest refresh failed:", error);
+				} finally {
+					setRefreshing(false);
+				}
+			};
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: classNames.filter(Boolean).join(" "),
 				children: [
@@ -11043,13 +11112,27 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					}),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 						className: talk_map_module_css_default["cardTop"],
-						children: [data.running ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-							className: talk_map_module_css_default["runningDot"],
-							title: t("card.running")
-						}) : null, /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
-							className: talk_map_module_css_default["cardTitle"],
-							children: data.ghost ? t("card.ghostTitle") : data.title
-						})]
+						children: [
+							data.running ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+								className: talk_map_module_css_default["runningDot"],
+								title: t("card.running")
+							}) : null,
+							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+								className: talk_map_module_css_default["cardTitle"],
+								children: data.ghost ? t("card.ghostTitle") : data.title
+							}),
+							data.ghost ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+								type: "button",
+								className: `${talk_map_module_css_default["cardRefresh"]} nodrag${refreshing ? ` ${talk_map_module_css_default["cardRefreshBusy"]}` : ""}`,
+								title: t("card.refresh"),
+								"aria-label": t("card.refresh"),
+								onClick: (event) => {
+									event.stopPropagation();
+									refreshDigest();
+								},
+								children: "⟳"
+							})
+						]
 					}),
 					data.ghost ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 						type: "button",
@@ -11084,6 +11167,115 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						type: "source",
 						position: Position.Right,
 						className: talk_map_module_css_default["cardHandle"] ?? ""
+					})
+				]
+			});
+		}
+		//#endregion
+		//#region src/client/SpawnPreview.tsx
+		/**
+		* The injection preview: shown when a connection is dropped on empty canvas.
+		* The user sees — and can edit — exactly what will be injected into the new
+		* session before anything happens. Confirm spawns via the host route, then
+		* jumps into the new conversation.
+		*/
+		function buildInjectionText(title, digest) {
+			const header = `${t("inject.header")}「${title}」`;
+			if (digest === void 0 || digest.summary === "" && digest.nextStep === "" && (digest.todoNext ?? "") === "") return `${header}\n${t("spawn.noDigest")}`;
+			const parts = [header];
+			if (digest.summary !== "") parts.push(`${t("inject.summary")}${digest.summary}`);
+			if (digest.keyFindings.length > 0) {
+				parts.push(t("inject.findings"));
+				for (const finding of digest.keyFindings) parts.push(`- ${finding}`);
+			}
+			const next = digest.nextStep !== "" ? digest.nextStep : digest.todoNext ?? "";
+			if (next !== "") parts.push(`${t("inject.next")}${next}`);
+			return parts.join("\n");
+		}
+		function SpawnPreview(props) {
+			const { pending } = props;
+			const digest = canvas.get().digests[pending.parent.sessionId];
+			const [text, setText] = (0, react.useState)(() => buildInjectionText(pending.parent.title, digest));
+			const [busy, setBusy] = (0, react.useState)(false);
+			const [error, setError] = (0, react.useState)(void 0);
+			const confirm = async () => {
+				if (busy || text.trim() === "") return;
+				setBusy(true);
+				setError(void 0);
+				try {
+					const result = await talkMapApi.spawn({
+						parents: [{
+							cardId: pending.parent.cardId,
+							sessionId: pending.parent.sessionId,
+							text
+						}],
+						boardId: INBOX_BOARD_ID,
+						x: pending.x,
+						y: pending.y
+					});
+					canvas.applySpawn(result);
+					props.onClose();
+					const services = getServices();
+					if (services !== void 0) {
+						mapUi.setOpen(false);
+						services.sessions.open(result.sessionId);
+					}
+				} catch (spawnError) {
+					setError(String(spawnError));
+					setBusy(false);
+				}
+			};
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+				className: talk_map_module_css_default["spawnPanel"],
+				role: "dialog",
+				"aria-label": t("spawn.heading"),
+				children: [
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["spawnHeading"],
+						children: t("spawn.heading")
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+						className: talk_map_module_css_default["spawnFrom"],
+						children: [
+							t("spawn.from"),
+							"「",
+							pending.parent.title,
+							"」"
+						]
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["spawnHint"],
+						children: t("spawn.hint")
+					}),
+					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("textarea", {
+						className: `${talk_map_module_css_default["spawnTextarea"]} nodrag nowheel`,
+						value: text,
+						rows: 10,
+						onChange: (event) => {
+							setText(event.target.value);
+						}
+					}),
+					error !== void 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["spawnError"],
+						children: error
+					}) : null,
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+						className: talk_map_module_css_default["spawnActions"],
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+							type: "button",
+							className: talk_map_module_css_default["spawnBtnGhost"],
+							onClick: props.onClose,
+							disabled: busy,
+							children: t("spawn.cancel")
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+							type: "button",
+							className: talk_map_module_css_default["spawnBtnPrimary"],
+							onClick: () => {
+								confirm();
+							},
+							disabled: busy || text.trim() === "",
+							children: busy ? t("spawn.busy") : t("spawn.confirm")
+						})]
 					})
 				]
 			});
@@ -11167,6 +11359,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const workspaces = props.useWorkspaces((state) => state);
 			const { screenToFlowPosition } = useReactFlow();
 			const [selectedIds, setSelectedIds] = (0, react.useState)(/* @__PURE__ */ new Set());
+			const [pendingSpawn, setPendingSpawn] = (0, react.useState)(null);
 			const creatingRef = (0, react.useRef)(false);
 			(0, react.useEffect)(() => {
 				if (canvasState.phase !== "ready") return;
@@ -11217,11 +11410,23 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			]);
 			const edges = (0, react.useMemo)(() => {
 				const out = [];
+				const injectionPairs = /* @__PURE__ */ new Set();
+				for (const [edgeId, edge] of Object.entries(canvasState.edges)) {
+					injectionPairs.add(`${edge.fromCardId}->${edge.toCardId}`);
+					out.push({
+						id: edgeId,
+						source: edge.fromCardId,
+						target: edge.toCardId,
+						type: "smoothstep",
+						label: t("edge.injected")
+					});
+				}
 				for (const [cardId, card] of Object.entries(canvasState.cards)) {
 					const parentSessionId = sessions.byId[card.sessionId]?.parentId;
 					if (parentSessionId === void 0) continue;
 					const parentCardId = sessionIdToCardId.get(parentSessionId);
 					if (parentCardId === void 0) continue;
+					if (injectionPairs.has(`${parentCardId}->${cardId}`)) continue;
 					out.push({
 						id: `lineage-${parentCardId}-${cardId}`,
 						source: parentCardId,
@@ -11234,13 +11439,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						}
 					});
 				}
-				for (const [edgeId, edge] of Object.entries(canvasState.edges)) out.push({
-					id: edgeId,
-					source: edge.fromCardId,
-					target: edge.toCardId,
-					type: "smoothstep",
-					label: edge.injection.kind
-				});
 				return out;
 			}, [
 				canvasState.cards,
@@ -11248,6 +11446,33 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				sessions,
 				sessionIdToCardId
 			]);
+			const onConnectEnd = (event, connectionState) => {
+				if (connectionState.isValid === true) return;
+				const fromNodeId = connectionState.fromNode?.id;
+				if (fromNodeId === void 0) return;
+				const card = canvasState.cards[fromNodeId];
+				if (card === void 0) return;
+				const summary = sessions.byId[card.sessionId];
+				if (summary === void 0) return;
+				const client = "clientX" in event ? {
+					x: event.clientX,
+					y: event.clientY
+				} : event.changedTouches[0] !== void 0 ? {
+					x: event.changedTouches[0].clientX,
+					y: event.changedTouches[0].clientY
+				} : void 0;
+				if (client === void 0) return;
+				const position = screenToFlowPosition(client);
+				setPendingSpawn({
+					parent: {
+						cardId: fromNodeId,
+						sessionId: card.sessionId,
+						title: summary.displayTitle
+					},
+					x: snap(position.x - CARD_W / 2),
+					y: snap(position.y - CARD_H / 2)
+				});
+			};
 			const onNodesChange = (changes) => {
 				for (const change of changes) if (change.type === "position" && change.position !== void 0) canvas.moveCard(change.id, change.position.x, change.position.y);
 				else if (change.type === "select") setSelectedIds((previous) => {
@@ -11306,33 +11531,43 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					if (event.target.closest(".react-flow__pane") === null) return;
 					createSessionAt(event.clientX, event.clientY);
 				},
-				children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)(index, {
-					nodes,
-					edges,
-					nodeTypes,
-					onNodesChange,
-					onNodeDoubleClick: (_event, node) => {
-						if (!node.data.ghost) openSession(node.data.sessionId);
-					},
-					onMoveEnd: (_event, viewport) => {
-						canvas.setCamera(INBOX_BOARD_ID, viewport);
-					},
-					colorMode: dark ? "dark" : "light",
-					snapToGrid: true,
-					snapGrid: [GRID, GRID],
-					zoomOnDoubleClick: false,
-					minZoom: .1,
-					proOptions: { hideAttribution: true },
-					...savedCamera !== void 0 ? { defaultViewport: savedCamera } : { fitView: hasCards },
-					children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(Background, {
-						variant: BackgroundVariant.Dots,
-						gap: GRID,
-						size: 1
-					}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(Controls, { showInteractive: false })]
-				}), hasCards ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
-					className: talk_map_module_css_default["emptyHint"],
-					children: t("map.empty")
-				})]
+				children: [
+					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)(index, {
+						nodes,
+						edges,
+						nodeTypes,
+						onNodesChange,
+						onConnectEnd,
+						onNodeDoubleClick: (_event, node) => {
+							if (!node.data.ghost) openSession(node.data.sessionId);
+						},
+						onMoveEnd: (_event, viewport) => {
+							canvas.setCamera(INBOX_BOARD_ID, viewport);
+						},
+						colorMode: dark ? "dark" : "light",
+						snapToGrid: true,
+						snapGrid: [GRID, GRID],
+						zoomOnDoubleClick: false,
+						minZoom: .1,
+						proOptions: { hideAttribution: true },
+						...savedCamera !== void 0 ? { defaultViewport: savedCamera } : { fitView: hasCards },
+						children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(Background, {
+							variant: BackgroundVariant.Dots,
+							gap: GRID,
+							size: 1
+						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(Controls, { showInteractive: false })]
+					}),
+					hasCards ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+						className: talk_map_module_css_default["emptyHint"],
+						children: t("map.empty")
+					}),
+					pendingSpawn !== null ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(SpawnPreview, {
+						pending: pendingSpawn,
+						onClose: () => {
+							setPendingSpawn(null);
+						}
+					}) : null
+				]
 			});
 		}
 		function MapCanvas(props) {

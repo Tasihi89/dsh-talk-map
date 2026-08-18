@@ -20,6 +20,19 @@ const zh: Record<string, string> = {
   'time.m': ' 分钟前',
   'time.h': ' 小时前',
   'time.d': ' 天前',
+  'card.refresh': '重新生成摘要',
+  'edge.injected': '注入',
+  'spawn.heading': '连线分叉：开一个带上下文的新对话',
+  'spawn.from': '来源',
+  'spawn.hint': '以下内容将注入新对话作为背景，可以编辑：',
+  'spawn.noDigest': '（这段对话还没有摘要——可以先点卡片右上角的 ⟳ 生成，或直接在这里手写要带过去的背景。）',
+  'spawn.confirm': '开新对话',
+  'spawn.busy': '创建中……',
+  'spawn.cancel': '取消',
+  'inject.header': '【上下文注入 · 来自】',
+  'inject.summary': '摘要：',
+  'inject.findings': '关键结论：',
+  'inject.next': '下一步：',
 }
 
 const en: Record<string, string> = {
@@ -39,6 +52,19 @@ const en: Record<string, string> = {
   'time.m': 'm ago',
   'time.h': 'h ago',
   'time.d': 'd ago',
+  'card.refresh': 'Regenerate digest',
+  'edge.injected': 'injected',
+  'spawn.heading': 'Fork with context',
+  'spawn.from': 'From',
+  'spawn.hint': 'This text will be injected into the new session as background — edit freely:',
+  'spawn.noDigest': '(No digest yet — hit ⟳ on the card first, or write the context to carry over by hand.)',
+  'spawn.confirm': 'Start session',
+  'spawn.busy': 'Creating…',
+  'spawn.cancel': 'Cancel',
+  'inject.header': '[Context injected from] ',
+  'inject.summary': 'Summary: ',
+  'inject.findings': 'Key findings:',
+  'inject.next': 'Next step: ',
 }
 
 function isZh(): boolean {

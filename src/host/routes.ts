@@ -7,7 +7,20 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { z } from 'zod'
 import type { DomainChanged, TalkMapHostServices } from './dsh-host.ts'
+import type { DigestPipeline } from './digest/pipeline.ts'
+import type { Spawner } from './spawn.ts'
 import { cardSchema, globalSchema, DOMAIN_NAME, type TalkMapStore } from './store.ts'
+
+/**
+ * Capabilities filled in by independently-injected layers: the digest layer
+ * needs llm + sessionQuery, the spawn layer needs agents. Either can be
+ * missing in an unusual composition — routes answer 503 rather than the
+ * whole plugin refusing to mount.
+ */
+export interface TalkMapRuntime {
+  digest?: DigestPipeline
+  spawner?: Spawner
+}
 
 const MAX_BODY_BYTES = 1024 * 1024
 
@@ -60,6 +73,19 @@ const deleteCardsBody = z.object({
 const setGlobalBody = z.object({
   global: globalSchema,
 })
+const spawnBody = z.object({
+  parents: z.array(z.object({
+    cardId: z.string(),
+    sessionId: z.string(),
+    text: z.string().min(1),
+  })).min(1),
+  boardId: z.string(),
+  x: z.number(),
+  y: z.number(),
+})
+const refreshDigestBody = z.object({
+  sessionId: z.string(),
+})
 
 /**
  * Register the /talk-map/ routes.
@@ -70,6 +96,7 @@ const setGlobalBody = z.object({
 export function mountTalkMapRoutes(
   services: TalkMapHostServices,
   storeReady: Promise<TalkMapStore>,
+  runtime: TalkMapRuntime,
 ): () => void {
   const sseClients = new Set<ServerResponse>()
 
@@ -139,6 +166,23 @@ export function mountTalkMapRoutes(
           for (const id of body.ids) {
             if (await store.cards.delete(id)) removed += 1
           }
+          // A card's edges die with it — a dangling edge renders nothing anyway.
+          for (const [edgeId, edge] of [...store.edges.entries()]) {
+            if (body.ids.includes(edge.fromCardId) || body.ids.includes(edge.toCardId)) {
+              await store.edges.delete(edgeId)
+            }
+          }
+          sendJson(response, 200, { ok: true, removed })
+          return
+        }
+
+        if (route === 'POST /talk-map/edges/delete') {
+          const store = await storeReady
+          const body = deleteCardsBody.parse(await readJsonBody(request))
+          let removed = 0
+          for (const id of body.ids) {
+            if (await store.edges.delete(id)) removed += 1
+          }
           sendJson(response, 200, { ok: true, removed })
           return
         }
@@ -148,6 +192,28 @@ export function mountTalkMapRoutes(
           const body = setGlobalBody.parse(await readJsonBody(request))
           await store.setGlobal(body.global)
           sendJson(response, 200, { ok: true })
+          return
+        }
+
+        if (route === 'POST /talk-map/spawn') {
+          if (runtime.spawner === undefined) {
+            sendJson(response, 503, { error: 'spawn layer unavailable (agents service missing)' })
+            return
+          }
+          const body = spawnBody.parse(await readJsonBody(request))
+          const result = await runtime.spawner.spawn(body)
+          sendJson(response, 200, result)
+          return
+        }
+
+        if (route === 'POST /talk-map/digest/refresh') {
+          if (runtime.digest === undefined) {
+            sendJson(response, 503, { error: 'digest layer unavailable (llm service missing)' })
+            return
+          }
+          const body = refreshDigestBody.parse(await readJsonBody(request))
+          const digest = await runtime.digest.refresh(body.sessionId)
+          sendJson(response, 200, { sessionId: body.sessionId, digest })
           return
         }
 

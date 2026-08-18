@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Background, BackgroundVariant, Controls, ReactFlow, ReactFlowProvider,
-  useReactFlow, type Edge, type NodeChange, type Viewport,
+  useReactFlow, type Edge, type FinalConnectionState, type NodeChange, type Viewport,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import type { RootSlotStandardProps, SessionListState } from './dsh.ts'
@@ -18,6 +18,7 @@ import { canvas, INBOX_BOARD_ID, newCardId, type CanvasState } from './canvas-st
 import { getServices } from './map-state.ts'
 import { mapUi } from './map-state.ts'
 import { SessionCardNode, type SessionCardData, type SessionCardNodeType } from './SessionCard.tsx'
+import { SpawnPreview, type PendingSpawn } from './SpawnPreview.tsx'
 import { t } from './i18n.ts'
 import { useDsDarkTheme } from './use-dark.ts'
 import styles from './talk-map.module.css'
@@ -73,6 +74,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   const workspaces = props.useWorkspaces(state => state)
   const { screenToFlowPosition } = useReactFlow()
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set())
+  const [pendingSpawn, setPendingSpawn] = useState<PendingSpawn | null>(null)
   const creatingRef = useRef(false)
 
   // One-time placement of card-less sessions (idempotent: planned cards land
@@ -121,12 +123,25 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
 
   const edges = useMemo<Edge[]>(() => {
     const out: Edge[] = []
+    // User-drawn injection edges (persisted) win over derived lineage pairs.
+    const injectionPairs = new Set<string>()
+    for (const [edgeId, edge] of Object.entries(canvasState.edges)) {
+      injectionPairs.add(`${edge.fromCardId}->${edge.toCardId}`)
+      out.push({
+        id: edgeId,
+        source: edge.fromCardId,
+        target: edge.toCardId,
+        type: 'smoothstep',
+        label: t('edge.injected'),
+      })
+    }
     // Provenance (fork/subagent lineage) — derived, read-only, dashed.
     for (const [cardId, card] of Object.entries(canvasState.cards)) {
       const parentSessionId = sessions.byId[card.sessionId]?.parentId
       if (parentSessionId === undefined) continue
       const parentCardId = sessionIdToCardId.get(parentSessionId)
       if (parentCardId === undefined) continue
+      if (injectionPairs.has(`${parentCardId}->${cardId}`)) continue
       out.push({
         id: `lineage-${parentCardId}-${cardId}`,
         source: parentCardId,
@@ -136,18 +151,35 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         style: { strokeDasharray: '6 4', opacity: 0.5 },
       })
     }
-    // User-drawn injection edges (persisted).
-    for (const [edgeId, edge] of Object.entries(canvasState.edges)) {
-      out.push({
-        id: edgeId,
-        source: edge.fromCardId,
-        target: edge.toCardId,
-        type: 'smoothstep',
-        label: edge.injection.kind,
-      })
-    }
     return out
   }, [canvasState.cards, canvasState.edges, sessions, sessionIdToCardId])
+
+  const onConnectEnd = (
+    event: MouseEvent | TouchEvent,
+    connectionState: FinalConnectionState,
+  ): void => {
+    // Only a drop on EMPTY canvas spawns; a drop on another card is a no-op
+    // (merging context into an existing conversation is not a thing yet).
+    if (connectionState.isValid === true) return
+    const fromNodeId = connectionState.fromNode?.id
+    if (fromNodeId === undefined) return
+    const card = canvasState.cards[fromNodeId]
+    if (card === undefined) return
+    const summary = sessions.byId[card.sessionId]
+    if (summary === undefined) return // ghosts can't fork
+    const client = 'clientX' in event
+      ? { x: event.clientX, y: event.clientY }
+      : event.changedTouches[0] !== undefined
+        ? { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY }
+        : undefined
+    if (client === undefined) return
+    const position = screenToFlowPosition(client)
+    setPendingSpawn({
+      parent: { cardId: fromNodeId, sessionId: card.sessionId, title: summary.displayTitle },
+      x: snap(position.x - CARD_W / 2),
+      y: snap(position.y - CARD_H / 2),
+    })
+  }
 
   const onNodesChange = (changes: NodeChange<SessionCardNodeType>[]): void => {
     for (const change of changes) {
@@ -223,6 +255,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
+        onConnectEnd={onConnectEnd}
         onNodeDoubleClick={(_event, node) => {
           if (!node.data.ghost) openSession(node.data.sessionId)
         }}
@@ -241,6 +274,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         <Controls showInteractive={false} />
       </ReactFlow>
       {hasCards ? null : <div className={styles['emptyHint']}>{t('map.empty')}</div>}
+      {pendingSpawn !== null
+        ? <SpawnPreview pending={pendingSpawn} onClose={() => { setPendingSpawn(null) }} />
+        : null}
     </div>
   )
 }

@@ -129,6 +129,14 @@ export const canvas = {
     })
   },
 
+  /** Local mirror of a host-side spawn result (host already persisted it). */
+  applySpawn(result: { cardId: string; card: Card; edges: Record<string, MapEdgeData> }): void {
+    setState({
+      cards: { ...state.cards, [result.cardId]: result.card },
+      edges: { ...state.edges, ...result.edges },
+    })
+  },
+
   removeCard(id: string): void {
     const cards = { ...state.cards }
     delete cards[id]

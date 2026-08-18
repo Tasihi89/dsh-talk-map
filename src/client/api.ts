@@ -2,7 +2,7 @@
  * Thin fetch/EventSource layer over the host half's /talk-map/* routes.
  * Same-origin by construction (relative URLs against the serving shell).
  */
-import type { Card, MapGlobal, MapStatePayload } from '../shared/model.ts'
+import type { Card, Digest, MapEdgeData, MapGlobal, MapStatePayload } from '../shared/model.ts'
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, init)
@@ -36,6 +36,17 @@ export const talkMapApi = {
   },
   setGlobal(global: MapGlobal): Promise<void> {
     return postJson('/talk-map/global', { global })
+  },
+  spawn(request: {
+    parents: { cardId: string; sessionId: string; text: string }[]
+    boardId: string
+    x: number
+    y: number
+  }): Promise<{ sessionId: string; cardId: string; card: Card; edges: Record<string, MapEdgeData> }> {
+    return postJson('/talk-map/spawn', request)
+  },
+  refreshDigest(sessionId: string): Promise<{ sessionId: string; digest: Digest }> {
+    return postJson('/talk-map/digest/refresh', { sessionId })
   },
   /**
    * Subscribe to host-side domain changes (multi-tab sync, digest arrivals).

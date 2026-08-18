@@ -68,6 +68,87 @@ export interface DomainChanged {
   value?: unknown
 }
 
+/** One durable session event (subset we read). */
+export interface SessionEventLite {
+  type: string
+  seq: number
+  time?: number
+  data?: unknown
+}
+
+/** ctx.sessionQuery (subset; packages/session-query/session-query/src/index.ts). */
+export interface SessionRecordLite {
+  header: {
+    id: string
+    createdAt: number
+    cwd?: string
+    parentSession?: string
+    agentPreset?: string
+  }
+  live: boolean
+  persisted: boolean
+}
+export interface SessionQueryService {
+  listSessions(signal?: AbortSignal): Promise<SessionRecordLite[]>
+  readSurface(sessionId: string): Promise<{
+    capturedThroughSeq: number | null
+    events: SessionEventLite[]
+  }>
+}
+
+/** Message shapes (packages/llm/llm/src/message.ts) — constructed literally. */
+export interface TextBlock { type: 'text'; text: string }
+export interface UserMessageLite {
+  id: string
+  role: 'user'
+  content: TextBlock[]
+  source: { kind: 'plugin'; plugin: string; form?: 'notice'; summary?: string }
+}
+
+/** ctx.llm (subset; GenerateOptions requires an explicit provider/model route). */
+export interface LlmStreamChunkLite {
+  type: string
+  text?: string
+  reason?: { kind: string; failure?: { message?: string } }
+}
+export interface LlmService {
+  stream(options: {
+    provider: string
+    model: string
+    messages: unknown[]
+    system?: string
+    maxTokens?: number
+    sessionId?: string
+    signal?: AbortSignal
+  }): AsyncIterable<LlmStreamChunkLite>
+}
+
+/** ctx.agentDefaultModel (packages/core/agent-default-model). */
+export interface AgentDefaultModelService {
+  currentSelection(): { provider: string; model: string; reasoningEffort?: string }
+}
+
+/** ctx.agents (subset; packages/core/agent/src/index.ts). */
+export interface AgentLite {
+  inject(message: UserMessageLite): void
+  followup(message: UserMessageLite): void
+}
+export interface AgentHandleLite {
+  agent: AgentLite
+  dispose(): Promise<void>
+}
+export interface AgentsService {
+  create(options: {
+    sessionId: string
+    meta?: {
+      cwd?: string
+      parentSession?: string
+      agentPreset?: string
+    }
+  }): Promise<AgentHandleLite>
+  get(id: string): AgentLite | undefined
+}
+
 /** The host cordis context surface this plugin relies on (structural). */
 export interface TalkMapHostServices {
   storageDomain: StorageDomainService
@@ -75,4 +156,22 @@ export interface TalkMapHostServices {
   logger?: { info?(message: string): void; warn(message: string): void }
   effect(callback: () => (() => void | Promise<void>), label?: string): void
   on(event: string, listener: (...args: unknown[]) => void): () => void
+}
+
+/** The digest layer's injected surface. */
+export interface DigestHostServices {
+  sessionQuery: SessionQueryService
+  llm: LlmService
+  agentDefaultModel: AgentDefaultModelService
+  logger?: { info?(message: string): void; warn(message: string): void }
+  effect(callback: () => (() => void | Promise<void>), label?: string): void
+  on(event: string, listener: (...args: unknown[]) => void): () => void
+}
+
+/** The spawn layer's injected surface. */
+export interface SpawnHostServices {
+  agents: AgentsService
+  sessionQuery: SessionQueryService
+  logger?: { info?(message: string): void; warn(message: string): void }
+  effect(callback: () => (() => void | Promise<void>), label?: string): void
 }

@@ -1,13 +1,19 @@
 /**
- * dsh-talk-map host entry: opens the talk-map storage domain and mounts the
- * /talk-map/* HTTP routes once the profile composes storageDomain and
- * webServer. M2 adds the digest pipeline and the spawn endpoint on top.
+ * dsh-talk-map host entry. Three independently-injected layers over one
+ * shared store promise, so a composition missing llm or agents still serves
+ * the board (spawn/digest routes answer 503 instead):
+ *
+ *   1. storageDomain + webServer  → talk_map domain + /talk-map/* routes
+ *   2. sessionQuery + llm + agentDefaultModel + sessions → digest pipeline
+ *   3. agents + sessionQuery      → injection-spawn
  *
  * Failure policy: a broken external plugin must not take the host down —
- * open/mount failures are logged, the plugin stays inert.
+ * open/mount failures are logged and the affected layer stays inert.
  */
-import type { TalkMapHostServices } from './host/dsh-host.ts'
-import { mountTalkMapRoutes } from './host/routes.ts'
+import type { DigestHostServices, SpawnHostServices, TalkMapHostServices } from './host/dsh-host.ts'
+import { DigestPipeline } from './host/digest/pipeline.ts'
+import { mountTalkMapRoutes, type TalkMapRuntime } from './host/routes.ts'
+import { Spawner } from './host/spawn.ts'
 import { openTalkMapStore, type TalkMapStore } from './host/store.ts'
 
 export const name = 'dsh-talk-map'
@@ -19,29 +25,65 @@ interface OuterContext {
 }
 
 export function apply(ctx: OuterContext): void {
+  const runtime: TalkMapRuntime = {}
+  let resolveStore: (store: TalkMapStore) => void
+  let rejectStore: (error: unknown) => void
+  const storeReady = new Promise<TalkMapStore>((resolve, reject) => {
+    resolveStore = resolve
+    rejectStore = reject
+  })
+  storeReady.catch(() => { /* observed per-consumer; avoid unhandled rejection */ })
+
+  // Layer 1: storage domain + HTTP routes.
   ctx.inject(['storageDomain', 'webServer'], (injected: unknown) => {
     const services = injected as TalkMapHostServices
     services.effect(() => {
       let disposed = false
       let store: TalkMapStore | undefined
-      const storeReady = openTalkMapStore(services.storageDomain).then((opened) => {
+      openTalkMapStore(services.storageDomain).then((opened) => {
         if (disposed) {
           void opened.domain.close()
-          throw new Error('dsh-talk-map: disposed during open')
+          return
         }
         store = opened
+        resolveStore(opened)
         services.logger?.info?.('[dsh-talk-map] storage domain open, routes live at /talk-map/')
-        return opened
-      })
-      storeReady.catch((error) => {
+      }).catch((error) => {
         services.logger?.warn(`[dsh-talk-map] storage domain failed to open: ${String(error)}`)
+        rejectStore(error)
       })
-      const unmountRoutes = mountTalkMapRoutes(services, storeReady)
+      const unmountRoutes = mountTalkMapRoutes(services, storeReady, runtime)
       return () => {
         disposed = true
         unmountRoutes()
         void store?.domain.close()
       }
     }, 'dsh-talk-map: domain + routes')
+  })
+
+  // Layer 2: digest pipeline (needs the llm route and session surfaces).
+  ctx.inject(['sessions', 'sessionQuery', 'llm', 'agentDefaultModel'], (injected: unknown) => {
+    const services = injected as DigestHostServices
+    services.effect(() => {
+      const pipeline = new DigestPipeline(services, storeReady)
+      const stop = pipeline.start()
+      runtime.digest = pipeline
+      return () => {
+        stop()
+        if (runtime.digest === pipeline) delete runtime.digest
+      }
+    }, 'dsh-talk-map: digest pipeline')
+  })
+
+  // Layer 3: injection-spawn (needs the agent registry).
+  ctx.inject(['agents', 'sessionQuery'], (injected: unknown) => {
+    const services = injected as SpawnHostServices
+    services.effect(() => {
+      const spawner = new Spawner(services, storeReady)
+      runtime.spawner = spawner
+      return () => {
+        if (runtime.spawner === spawner) delete runtime.spawner
+      }
+    }, 'dsh-talk-map: spawner')
   })
 }

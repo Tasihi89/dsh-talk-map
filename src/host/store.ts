@@ -62,6 +62,8 @@ export const digestSchema = z.object({
   generatedAt: z.number(),
   model: z.string().optional(),
   error: z.string().optional(),
+  /** sha256 of the transcript input — unchanged input skips regeneration. */
+  inputHash: z.string().optional(),
 })
 export type Digest = z.infer<typeof digestSchema>
 

@@ -210,6 +210,133 @@
   border: none;
 }
 
+.cardRefresh {
+  flex: none;
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.card:hover .cardRefresh {
+  opacity: 1;
+}
+
+.cardRefresh:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.cardRefreshBusy {
+  opacity: 1;
+  animation: talkmap-spin 1s linear infinite;
+}
+
+@keyframes talkmap-spin {
+  to { transform: rotate(360deg); }
+}
+
+.spawnPanel {
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  z-index: 6;
+  width: 420px;
+  max-width: calc(100% - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 8px 30px var(--dsw-alias-bg-mask-2);
+}
+
+.spawnHeading {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.spawnFrom {
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.spawnHint {
+  font-size: 12px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.spawnTextarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 140px;
+  padding: 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.spawnError {
+  font-size: 12px;
+  color: var(--dsw-alias-state-error-primary);
+  word-break: break-all;
+}
+
+.spawnActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.spawnBtnPrimary {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-foreground);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.spawnBtnPrimary:hover {
+  background: var(--dsw-alias-button-primary-hover);
+}
+
+.spawnBtnPrimary:disabled {
+  background: var(--dsw-alias-button-primary-dimmed);
+  cursor: default;
+}
+
+.spawnBtnGhost {
+  padding: 6px 16px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.spawnBtnGhost:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
 .emptyHint {
   position: absolute;
   left: 50%;
