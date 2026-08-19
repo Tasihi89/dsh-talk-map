@@ -31,7 +31,7 @@ import { SessionCardNode, type SessionCardData, type SessionCardNodeType } from 
 import { SpawnPreview, type PendingSpawn } from './SpawnPreview.tsx'
 import { WsFrameNode, type WsFrameNodeType } from './WsFrame.tsx'
 import { t } from './i18n.ts'
-import { talkMapApi } from './api.ts'
+import { talkMapApi, type ApiError } from './api.ts'
 import { useDsDarkTheme } from './use-dark.ts'
 import styles from './talk-map.module.css'
 
@@ -228,12 +228,19 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     const onKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') connectCancelledRef.current = true
     }
-    const onPointerUp = (): void => { setConnecting(false) }
+    // pointercancel/blur too: a gesture the browser aborts (system touch
+    // gesture, tab switch) never produces a pointerup, and a connecting
+    // state that cannot exit would hold the Esc claim forever.
+    const onGestureEnd = (): void => { setConnecting(false) }
     window.addEventListener('keydown', onKeyDown, { capture: true })
-    window.addEventListener('pointerup', onPointerUp, { capture: true })
+    window.addEventListener('pointerup', onGestureEnd, { capture: true })
+    window.addEventListener('pointercancel', onGestureEnd, { capture: true })
+    window.addEventListener('blur', onGestureEnd)
     return () => {
       window.removeEventListener('keydown', onKeyDown, { capture: true })
-      window.removeEventListener('pointerup', onPointerUp, { capture: true })
+      window.removeEventListener('pointerup', onGestureEnd, { capture: true })
+      window.removeEventListener('pointercancel', onGestureEnd, { capture: true })
+      window.removeEventListener('blur', onGestureEnd)
       release()
     }
   }, [connecting])
@@ -261,23 +268,31 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   // Selection ids can go stale without a select:false ever firing — the
   // context menu and SSE delete straight from the store, and React Flow
   // emits no change for an element that simply vanished from a controlled
-  // array. Count only ids that still exist, or a dead id pins
-  // hasSelection true and the capture handler swallows Escape forever.
-  const liveSelectionCount = useMemo(() => {
-    let count = 0
+  // array. These existence-filtered sets are the ONLY selection surface
+  // consumers may read (Backspace, the color toolbar, node/edge selected
+  // flags): a dead id must neither pin hasSelection (swallowing Escape)
+  // nor let an action fire against a deleted frame or card. Cards are
+  // judged against visibleCards — a session turning blank drops its card
+  // from the canvas while it lingers in the store.
+  const liveSelectedIds = useMemo(() => {
+    const next = new Set<string>()
     for (const id of selectedIds) {
       if (id.startsWith('frame-')) {
-        if (wsFrames[id.slice('frame-'.length)] !== undefined) count += 1
-      } else if (canvasState.cards[id] !== undefined) {
-        count += 1
+        if (wsFrames[id.slice('frame-'.length)] !== undefined) next.add(id)
+      } else if (visibleCards[id] !== undefined) {
+        next.add(id)
       }
     }
+    return next
+  }, [selectedIds, visibleCards, wsFrames])
+  const liveSelectedEdgeIds = useMemo(() => {
+    const next = new Set<string>()
     for (const id of selectedEdgeIds) {
-      if (canvasState.edges[id] !== undefined) count += 1
+      if (canvasState.edges[id] !== undefined) next.add(id)
     }
-    return count
-  }, [selectedIds, selectedEdgeIds, canvasState.cards, canvasState.edges, wsFrames])
-  const hasSelection = liveSelectionCount > 0
+    return next
+  }, [selectedEdgeIds, canvasState.edges])
+  const hasSelection = liveSelectedIds.size > 0 || liveSelectedEdgeIds.size > 0
   useEffect(() => {
     if (!hasSelection) return
     const release = mapUi.claimEscape('selection')
@@ -291,7 +306,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       if (event.key === 'Backspace' || event.key === 'Delete') {
         const target = event.target as HTMLElement | null
         if (target !== null && target.closest('input, textarea, [contenteditable="true"]') !== null) return
-        const frameIds = [...selectedIds].filter(id => id.startsWith('frame-'))
+        const frameIds = [...liveSelectedIds].filter(id => id.startsWith('frame-'))
         if (frameIds.length === 0) return
         for (const frameId of frameIds) removeGroup(frameId.slice('frame-'.length))
         setSelectedIds((previous) => {
@@ -330,7 +345,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         // click-only, managed by this component (onNodeClick).
         selectable: false,
         focusable: false,
-        selected: selectedIds.has(`frame-${groupId}`),
+        selected: liveSelectedIds.has(`frame-${groupId}`),
         zIndex: -1,
         style: { pointerEvents: 'none' as const },
       }
@@ -358,7 +373,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           id: cardId,
           type: 'sessionCard' as const,
           position: { x: card.x, y: card.y },
-          selected: selectedIds.has(cardId),
+          selected: liveSelectedIds.has(cardId),
           data,
         }
       })
@@ -382,7 +397,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           },
         }]
     return [...frameNodes, ...cardNodes, ...draftNodes]
-  }, [frameGeometry, membersByGroup, wsTitles, visibleCards, canvasState.digests, canvasState.global, sessions, selectedIds, draft, workspaces.items])
+  }, [frameGeometry, membersByGroup, wsTitles, visibleCards, canvasState.digests, canvasState.global, sessions, liveSelectedIds, draft, workspaces.items])
 
   const sessionIdToCardId = useMemo(() => {
     const index = new Map<string, string>()
@@ -413,7 +428,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         sourceHandle: edge.fromHandle ?? 'r',
         targetHandle: edge.toHandle ?? 'l',
         type: 'smoothstep',
-        selected: selectedEdgeIds.has(edgeId),
+        selected: liveSelectedEdgeIds.has(edgeId),
         // Endpoints ride along for the edge context menu (id parsing would
         // be ambiguous — card ids contain dashes).
         data: { fromCardId: edge.fromCardId, toCardId: edge.toCardId },
@@ -449,7 +464,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       })
     }
     return out
-  }, [visibleCards, canvasState.edges, sessions, sessionIdToCardId, selectedEdgeIds])
+  }, [visibleCards, canvasState.edges, sessions, sessionIdToCardId, liveSelectedEdgeIds])
 
   const nodes = isSelecting && frozenRef.current !== null ? frozenRef.current.nodes : liveNodes
   const edges = isSelecting && frozenRef.current !== null ? frozenRef.current.edges : liveEdges
@@ -660,10 +675,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       await talkMapApi.injectContext(toCard.sessionId, [
         { sessionId: fromCard.sessionId, text: buildPushText(fromTitle, digest) },
       ])
-      // Callback form: titles can contain $-patterns replace() would expand.
-      showToast(t('toast.pushed').replace('{to}', () => toTitle))
+      showToast(t('toast.pushed', { to: toTitle }))
     } catch (error) {
-      const code = (error as { code?: string }).code
+      const code = (error as ApiError).code
       showToast(code === 'session-not-live'
         ? t('toast.notLive')
         : `${t('toast.pushFailed')}${String(error)}`)
@@ -697,8 +711,12 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     // with their digest, so a fixed-height rectangle misjudges both the
     // lower band of tall cards and the space under short ones — and the
     // DOM answers with proper stacking order for overlapping cards.
-    const hitNode = document.elementFromPoint(client.x, client.y)
-      ?.closest?.('.react-flow__node[data-id^="card-"]')
+    // elementsFromPoint (plural): overlay UI (the Controls panel, the
+    // color toolbar) floats above the canvas and would shadow a card
+    // beneath it — walk the whole stack for the topmost card node.
+    const hitNode = document.elementsFromPoint(client.x, client.y)
+      .map(el => el.closest('.react-flow__node[data-id^="card-"]'))
+      .find(el => el !== null)
     const hitId = hitNode?.getAttribute('data-id') ?? undefined
     if (hitId !== undefined && visibleCards[hitId] !== undefined) {
       if (hitId !== fromNodeId) createLinkEdge(fromNodeId, hitId)
@@ -1147,10 +1165,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           </ControlButton>
         </Controls>
       </ReactFlow>
-      {selectedIds.size > 0
+      {liveSelectedIds.size > 0
         ? (
             <ColorToolbar
-              selectedIds={selectedIds}
+              selectedIds={liveSelectedIds}
               visibleCards={visibleCards}
             />
           )

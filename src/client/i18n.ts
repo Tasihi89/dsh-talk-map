@@ -178,7 +178,16 @@ function isZh(): boolean {
   return (document.documentElement.lang ?? '').toLowerCase().startsWith('zh')
 }
 
-export function t(key: string): string {
+/**
+ * Translate, optionally interpolating {name} placeholders. Single-pass
+ * regex interpolation is the ONLY sanctioned way to fill templates:
+ * chained String.replace at call sites both expands $-patterns lurking in
+ * real values (conversation titles) and re-scans earlier insertions (a
+ * title containing a literal "{time}" would swallow the next parameter).
+ */
+export function t(key: string, params?: Record<string, string>): string {
   const dict = isZh() ? zh : en
-  return dict[key] ?? en[key] ?? key
+  const template = dict[key] ?? en[key] ?? key
+  if (params === undefined) return template
+  return template.replace(/\{(\w+)\}/g, (match, name: string) => params[name] ?? match)
 }

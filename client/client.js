@@ -39,8 +39,11 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				let code;
 				try {
 					const body = await response.json();
-					if (typeof body.code === "string") code = body.code;
 					detail = JSON.stringify(body);
+					if (typeof body === "object" && body !== null) {
+						const bodyCode = body.code;
+						if (typeof bodyCode === "string") code = bodyCode;
+					}
 				} catch {}
 				const error = /* @__PURE__ */ new Error(`${path} → ${response.status} ${detail}`);
 				if (code !== void 0) error.code = code;
@@ -278,9 +281,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				});
 			},
 			moveCard(id, x, y) {
-				pushUndo();
 				const card = state$1.cards[id];
 				if (card === void 0) return;
+				pushUndo();
 				setState({ cards: {
 					...state$1.cards,
 					[id]: {
@@ -355,11 +358,12 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				});
 			},
 			removeCard(id) {
-				pushUndo();
 				const card = state$1.cards[id];
+				if (card === void 0) return;
+				pushUndo();
 				const cards = { ...state$1.cards };
 				delete cards[id];
-				if (card !== void 0 && state$1.global !== null) {
+				if (state$1.global !== null) {
 					const layoutMemory = {
 						...state$1.global.layoutMemory,
 						[card.sessionId]: {
@@ -383,7 +387,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			},
 			/** Recolor cards (undefined clears); persists immediately. */
 			setCardsColor(ids, colorTag) {
-				pushUndo();
 				const payload = {};
 				const cards = { ...state$1.cards };
 				for (const id of ids) {
@@ -396,6 +399,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					payload[id] = next;
 				}
 				if (Object.keys(payload).length === 0) return;
+				pushUndo();
 				setState({ cards });
 				talkMapApi.upsertCards(payload).catch((error) => {
 					console.error("[dsh-talk-map] card color save failed:", error);
@@ -403,9 +407,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			},
 			/** Adopt a card into another workspace's frame (map-level membership). */
 			setCardWorkspaceOverride(id, wsOverride) {
-				pushUndo();
 				const card = state$1.cards[id];
 				if (card === void 0) return;
+				pushUndo();
 				const next = { ...card };
 				if (wsOverride === void 0) delete next.wsOverride;
 				else next.wsOverride = wsOverride;
@@ -419,8 +423,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			},
 			/** Manual frame geometry (drag/resize); local now, persisted debounced. */
 			setWsFrameRect(workspaceId, rect) {
-				pushUndo();
 				if (state$1.global === null) return;
+				pushUndo();
 				setState({ global: {
 					...state$1.global,
 					wsFrames: {
@@ -440,8 +444,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			},
 			/** Recolor a workspace frame (undefined clears); persists immediately. */
 			setWorkspaceColor(workspaceId, colorTag) {
-				pushUndo();
 				if (state$1.global === null) return;
+				pushUndo();
 				const wsColors = { ...state$1.global.wsColors };
 				if (colorTag === void 0) delete wsColors[workspaceId];
 				else wsColors[workspaceId] = colorTag;
@@ -764,8 +768,17 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			if (typeof document === "undefined") return false;
 			return (document.documentElement.lang ?? "").toLowerCase().startsWith("zh");
 		}
-		function t(key) {
-			return (isZh() ? zh : en)[key] ?? en[key] ?? key;
+		/**
+		* Translate, optionally interpolating {name} placeholders. Single-pass
+		* regex interpolation is the ONLY sanctioned way to fill templates:
+		* chained String.replace at call sites both expands $-patterns lurking in
+		* real values (conversation titles) and re-scans earlier insertions (a
+		* title containing a literal "{time}" would swallow the next parameter).
+		*/
+		function t(key, params) {
+			const template = (isZh() ? zh : en)[key] ?? en[key] ?? key;
+			if (params === void 0) return template;
+			return template.replace(/\{(\w+)\}/g, (match, name) => params[name] ?? match);
 		}
 		//#endregion
 		//#region node_modules/.pnpm/classcat@5.0.5/node_modules/classcat/index.js
@@ -11435,7 +11448,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			return parts;
 		}
 		function digestIsEmpty(digest) {
-			return digest === void 0 || digest.summary === "" && digest.nextStep === "" && (digest.todoNext ?? "") === "" && digest.keyFindings.length === 0;
+			return digest === void 0 || digestBody(digest).length === 0;
 		}
 		function buildInjectionText(title, digest) {
 			const header = `${t("inject.header")}「${title}」`;
@@ -11445,8 +11458,10 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		/** The pipe push: latest digest of the source, stamped with origin + time. */
 		function buildPushText(title, digest) {
 			const now = /* @__PURE__ */ new Date();
-			const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-			return [t("push.header").replace("{from}", () => title).replace("{time}", () => time), ...digestBody(digest)].join("\n");
+			return [t("push.header", {
+				from: title,
+				time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+			}), ...digestBody(digest)].join("\n");
 		}
 		//#endregion
 		//#region \0dsh-css:module:src/client/talk-map.module.css.mjs
@@ -11460,86 +11475,86 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"canvas": "_0iu0NW_canvas",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"draftCard": "_0iu0NW_draftCard",
-			"closeButton": "_0iu0NW_closeButton",
 			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"cardTop": "_0iu0NW_cardTop",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"draftRow": "_0iu0NW_draftRow",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
-			"spawnModeActive": "_0iu0NW_spawnModeActive",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"cardTime": "_0iu0NW_cardTime",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"menuHint": "_0iu0NW_menuHint",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"header": "_0iu0NW_header",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"cardFooter": "_0iu0NW_cardFooter",
 			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"toast": "_0iu0NW_toast",
-			"menuError": "_0iu0NW_menuError",
-			"draftInput": "_0iu0NW_draftInput",
-			"menuItem": "_0iu0NW_menuItem",
 			"cardNextText": "_0iu0NW_cardNextText",
-			"overlay": "_0iu0NW_overlay",
-			"spawnModes": "_0iu0NW_spawnModes",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"cardNext": "_0iu0NW_cardNext",
-			"cardSummary": "_0iu0NW_cardSummary",
-			"runningDot": "_0iu0NW_runningDot",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"cardStale": "_0iu0NW_cardStale",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"spawnHeading": "_0iu0NW_spawnHeading",
 			"menuSearch": "_0iu0NW_menuSearch",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"menu": "_0iu0NW_menu",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"menuTitle": "_0iu0NW_menuTitle",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"canvasConnecting": "_0iu0NW_canvasConnecting",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"menuEmpty": "_0iu0NW_menuEmpty",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
 			"spawnError": "_0iu0NW_spawnError",
+			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
+			"spawnModes": "_0iu0NW_spawnModes",
+			"header": "_0iu0NW_header",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"toast": "_0iu0NW_toast",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"canvas": "_0iu0NW_canvas",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"spawnModeActive": "_0iu0NW_spawnModeActive",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"menuItem": "_0iu0NW_menuItem",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"cardNext": "_0iu0NW_cardNext",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
 			"headerTitle": "_0iu0NW_headerTitle",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"overlay": "_0iu0NW_overlay",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"menuHint": "_0iu0NW_menuHint",
+			"cardStale": "_0iu0NW_cardStale",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"toggleRow": "_0iu0NW_toggleRow",
 			"hotkeyButton": "_0iu0NW_hotkeyButton",
 			"card": "_0iu0NW_card",
-			"colorSwatch": "_0iu0NW_colorSwatch"
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"draftInput": "_0iu0NW_draftInput",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"menu": "_0iu0NW_menu",
+			"menuTitle": "_0iu0NW_menuTitle",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"menuError": "_0iu0NW_menuError",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"canvasConnecting": "_0iu0NW_canvasConnecting",
+			"runningDot": "_0iu0NW_runningDot",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"cardTop": "_0iu0NW_cardTop",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"cardTime": "_0iu0NW_cardTime",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"draftRow": "_0iu0NW_draftRow",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"draftCard": "_0iu0NW_draftCard",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"closeButton": "_0iu0NW_closeButton",
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"spawnHeading": "_0iu0NW_spawnHeading"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12536,14 +12551,18 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				const onKeyDown = (event) => {
 					if (event.key === "Escape") connectCancelledRef.current = true;
 				};
-				const onPointerUp = () => {
+				const onGestureEnd = () => {
 					setConnecting(false);
 				};
 				window.addEventListener("keydown", onKeyDown, { capture: true });
-				window.addEventListener("pointerup", onPointerUp, { capture: true });
+				window.addEventListener("pointerup", onGestureEnd, { capture: true });
+				window.addEventListener("pointercancel", onGestureEnd, { capture: true });
+				window.addEventListener("blur", onGestureEnd);
 				return () => {
 					window.removeEventListener("keydown", onKeyDown, { capture: true });
-					window.removeEventListener("pointerup", onPointerUp, { capture: true });
+					window.removeEventListener("pointerup", onGestureEnd, { capture: true });
+					window.removeEventListener("pointercancel", onGestureEnd, { capture: true });
+					window.removeEventListener("blur", onGestureEnd);
 					release();
 				};
 			}, [connecting]);
@@ -12562,20 +12581,23 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					window.removeEventListener("keydown", onKeyDown, { capture: true });
 				};
 			}, []);
-			const hasSelection = (0, react.useMemo)(() => {
-				let count = 0;
+			const liveSelectedIds = (0, react.useMemo)(() => {
+				const next = /* @__PURE__ */ new Set();
 				for (const id of selectedIds) if (id.startsWith("frame-")) {
-					if (wsFrames[id.slice(6)] !== void 0) count += 1;
-				} else if (canvasState.cards[id] !== void 0) count += 1;
-				for (const id of selectedEdgeIds) if (canvasState.edges[id] !== void 0) count += 1;
-				return count;
+					if (wsFrames[id.slice(6)] !== void 0) next.add(id);
+				} else if (visibleCards[id] !== void 0) next.add(id);
+				return next;
 			}, [
 				selectedIds,
-				selectedEdgeIds,
-				canvasState.cards,
-				canvasState.edges,
+				visibleCards,
 				wsFrames
-			]) > 0;
+			]);
+			const liveSelectedEdgeIds = (0, react.useMemo)(() => {
+				const next = /* @__PURE__ */ new Set();
+				for (const id of selectedEdgeIds) if (canvasState.edges[id] !== void 0) next.add(id);
+				return next;
+			}, [selectedEdgeIds, canvasState.edges]);
+			const hasSelection = liveSelectedIds.size > 0 || liveSelectedEdgeIds.size > 0;
 			(0, react.useEffect)(() => {
 				if (!hasSelection) return;
 				const release = mapUi.claimEscape("selection");
@@ -12589,7 +12611,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					if (event.key === "Backspace" || event.key === "Delete") {
 						const target = event.target;
 						if (target !== null && target.closest("input, textarea, [contenteditable=\"true\"]") !== null) return;
-						const frameIds = [...selectedIds].filter((id) => id.startsWith("frame-"));
+						const frameIds = [...liveSelectedIds].filter((id) => id.startsWith("frame-"));
 						if (frameIds.length === 0) return;
 						for (const frameId of frameIds) removeGroup(frameId.slice(6));
 						setSelectedIds((previous) => {
@@ -12627,7 +12649,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						draggable: true,
 						selectable: false,
 						focusable: false,
-						selected: selectedIds.has(`frame-${groupId}`),
+						selected: liveSelectedIds.has(`frame-${groupId}`),
 						zIndex: -1,
 						style: { pointerEvents: "none" }
 					};
@@ -12656,7 +12678,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							x: card.x,
 							y: card.y
 						},
-						selected: selectedIds.has(cardId),
+						selected: liveSelectedIds.has(cardId),
 						data
 					};
 				});
@@ -12695,7 +12717,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				canvasState.digests,
 				canvasState.global,
 				sessions,
-				selectedIds,
+				liveSelectedIds,
 				draft,
 				workspaces.items
 			]);
@@ -12720,7 +12742,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						sourceHandle: edge.fromHandle ?? "r",
 						targetHandle: edge.toHandle ?? "l",
 						type: "smoothstep",
-						selected: selectedEdgeIds.has(edgeId),
+						selected: liveSelectedEdgeIds.has(edgeId),
 						data: {
 							fromCardId: edge.fromCardId,
 							toCardId: edge.toCardId
@@ -12761,7 +12783,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				canvasState.edges,
 				sessions,
 				sessionIdToCardId,
-				selectedEdgeIds
+				liveSelectedEdgeIds
 			]);
 			const nodes = isSelecting && frozenRef.current !== null ? frozenRef.current.nodes : liveNodes;
 			const edges = isSelecting && frozenRef.current !== null ? frozenRef.current.edges : liveEdges;
@@ -12934,7 +12956,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						sessionId: fromCard.sessionId,
 						text: buildPushText(fromTitle, digest)
 					}]);
-					showToast(t("toast.pushed").replace("{to}", () => toTitle));
+					showToast(t("toast.pushed", { to: toTitle }));
 				} catch (error) {
 					const code = error.code;
 					showToast(code === "session-not-live" ? t("toast.notLive") : `${t("toast.pushFailed")}${String(error)}`);
@@ -12960,7 +12982,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				} : void 0;
 				if (client === void 0) return;
 				const position = screenToFlowPosition(client);
-				const hitId = (document.elementFromPoint(client.x, client.y)?.closest?.(".react-flow__node[data-id^=\"card-\"]"))?.getAttribute("data-id") ?? void 0;
+				const hitId = document.elementsFromPoint(client.x, client.y).map((el) => el.closest(".react-flow__node[data-id^=\"card-\"]")).find((el) => el !== null)?.getAttribute("data-id") ?? void 0;
 				if (hitId !== void 0 && visibleCards[hitId] !== void 0) {
 					if (hitId !== fromNodeId) createLinkEdge(fromNodeId, hitId);
 					return;
@@ -13416,8 +13438,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							})
 						})]
 					}),
-					selectedIds.size > 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ColorToolbar, {
-						selectedIds,
+					liveSelectedIds.size > 0 ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ColorToolbar, {
+						selectedIds: liveSelectedIds,
 						visibleCards
 					}) : null,
 					hasContent || draft !== null ? null : /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {

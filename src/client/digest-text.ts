@@ -19,14 +19,11 @@ function digestBody(digest: Digest): string[] {
 }
 
 export function digestIsEmpty(digest: Digest | undefined): boolean {
-  // keyFindings counts: the host parser accepts digests whose summary and
-  // next-step are blank but whose findings are real (exploratory sessions)
-  // — those must stay pushable and injectable.
-  return digest === undefined
-    || (digest.summary === ''
-      && digest.nextStep === ''
-      && (digest.todoNext ?? '') === ''
-      && digest.keyFindings.length === 0)
+  // Derived from digestBody so the two can never drift apart — a digest
+  // that renders no body IS the definition of empty. (The drift already
+  // happened once: a hand-copied field list here forgot keyFindings and
+  // findings-only digests went unpushable.)
+  return digest === undefined || digestBody(digest).length === 0
 }
 
 export function buildInjectionText(title: string, digest: Digest | undefined): string {
@@ -41,8 +38,6 @@ export function buildInjectionText(title: string, digest: Digest | undefined): s
 export function buildPushText(title: string, digest: Digest): string {
   const now = new Date()
   const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-  // Callback form: a literal replacement string would expand $-patterns
-  // ($&, $') lurking in real conversation titles.
-  const header = t('push.header').replace('{from}', () => title).replace('{time}', () => time)
+  const header = t('push.header', { from: title, time })
   return [header, ...digestBody(digest)].join('\n')
 }

@@ -176,9 +176,12 @@ export const canvas = {
   },
 
   moveCard(id: string, x: number, y: number): void {
-    pushUndo()
+    // Existence FIRST, undo frame after — a no-op must not push an
+    // identical snapshot (pushUndo clears the redo stack). Same order in
+    // every mutator below.
     const card = state.cards[id]
     if (card === undefined) return
+    pushUndo()
     setState({ cards: { ...state.cards, [id]: { ...card, x, y } } })
     dirtyCards.add(id)
     scheduleCardFlush()
@@ -242,12 +245,13 @@ export const canvas = {
   },
 
   removeCard(id: string): void {
-    pushUndo()
     const card = state.cards[id]
+    if (card === undefined) return
+    pushUndo()
     const cards = { ...state.cards }
     delete cards[id]
     // Remember the placement so a re-import restores the arrangement.
-    if (card !== undefined && state.global !== null) {
+    if (state.global !== null) {
       const layoutMemory = {
         ...state.global.layoutMemory,
         [card.sessionId]: {
@@ -269,7 +273,6 @@ export const canvas = {
 
   /** Recolor cards (undefined clears); persists immediately. */
   setCardsColor(ids: readonly string[], colorTag: string | undefined): void {
-    pushUndo()
     const payload: Record<string, Card> = {}
     const cards = { ...state.cards }
     for (const id of ids) {
@@ -282,6 +285,7 @@ export const canvas = {
       payload[id] = next
     }
     if (Object.keys(payload).length === 0) return
+    pushUndo()
     setState({ cards })
     void talkMapApi.upsertCards(payload).catch((error) => {
       console.error('[dsh-talk-map] card color save failed:', error)
@@ -290,9 +294,9 @@ export const canvas = {
 
   /** Adopt a card into another workspace's frame (map-level membership). */
   setCardWorkspaceOverride(id: string, wsOverride: string | undefined): void {
-    pushUndo()
     const card = state.cards[id]
     if (card === undefined) return
+    pushUndo()
     const next = { ...card }
     if (wsOverride === undefined) delete next.wsOverride
     else next.wsOverride = wsOverride
@@ -304,8 +308,8 @@ export const canvas = {
 
   /** Manual frame geometry (drag/resize); local now, persisted debounced. */
   setWsFrameRect(workspaceId: string, rect: FrameGeometry): void {
-    pushUndo()
     if (state.global === null) return
+    pushUndo()
     const global: MapGlobal = {
       ...state.global,
       wsFrames: { ...state.global.wsFrames, [workspaceId]: rect },
@@ -324,8 +328,8 @@ export const canvas = {
 
   /** Recolor a workspace frame (undefined clears); persists immediately. */
   setWorkspaceColor(workspaceId: string, colorTag: string | undefined): void {
-    pushUndo()
     if (state.global === null) return
+    pushUndo()
     const wsColors = { ...state.global.wsColors }
     if (colorTag === undefined) delete wsColors[workspaceId]
     else wsColors[workspaceId] = colorTag

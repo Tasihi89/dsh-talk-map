@@ -16,9 +16,14 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
     let detail = ''
     let code: string | undefined
     try {
-      const body = await response.json() as { code?: string }
-      if (typeof body.code === 'string') code = body.code
+      // Stringify before reading .code: a legal JSON body of `null` must
+      // still land in the error message.
+      const body = await response.json() as unknown
       detail = JSON.stringify(body)
+      if (typeof body === 'object' && body !== null) {
+        const bodyCode = (body as { code?: unknown }).code
+        if (typeof bodyCode === 'string') code = bodyCode
+      }
     } catch { /* body not json */ }
     const error: ApiError = new Error(`${path} → ${response.status} ${detail}`)
     if (code !== undefined) error.code = code
