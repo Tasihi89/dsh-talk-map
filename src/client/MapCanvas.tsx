@@ -405,8 +405,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
                   : t('edge.injected'),
               ...(kind === 'none' ? { style: { opacity: 0.65 } } : {}),
             }),
-        // Auto-sync pipes animate — the moving dashes ARE the on-state.
-        ...(edge.autoSync === true ? { animated: true } : {}),
       })
     }
     for (const [cardId, card] of Object.entries(visibleCards)) {
@@ -968,25 +966,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         },
       })
       // Stored edges only — lineage lines are derived, nothing to persist on.
+      // (Auto-sync is shelved: schema + host fan-out exist but stay
+      // unwired until the feature is wanted — see the handover doc.)
       if (stored !== undefined) {
-        const syncOn = stored.autoSync === true
-        items.push({
-          key: 'auto-sync',
-          label: syncOn ? t('edge.autoSyncOff') : t('edge.autoSyncOn'),
-          ...(syncOn ? {} : { hint: t('edge.autoSyncHint') }),
-          onPick: () => {
-            close()
-            const next = { ...stored }
-            if (syncOn) delete next.autoSync
-            else next.autoSync = true
-            // Refresh the title snapshot the host uses in push headers.
-            const liveTitle = fromCard !== undefined
-              ? sessions.byId[fromCard.sessionId]?.displayTitle
-              : undefined
-            if (liveTitle !== undefined) next.fromTitle = liveTitle
-            canvas.addEdges({ [edgeId]: next })
-          },
-        })
         items.push({
           key: 'delete-edge',
           label: t('edge.delete'),

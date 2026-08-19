@@ -668,9 +668,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"edge.push": "推送最新摘要",
 			"edge.pushNoDigest": "来源还没有摘要",
 			"edge.delete": "删除连线",
-			"edge.autoSyncOn": "开启自动同步",
-			"edge.autoSyncOff": "关闭自动同步",
-			"edge.autoSyncHint": "来源摘要变化时自动推送",
 			"toast.pushed": "已推送给「{to}」",
 			"toast.notLive": "目标对话未激活——先打开它一次再推送",
 			"toast.pushFailed": "推送失败：",
@@ -755,9 +752,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			"edge.push": "Push latest digest",
 			"edge.pushNoDigest": "source has no digest yet",
 			"edge.delete": "Delete edge",
-			"edge.autoSyncOn": "Enable auto-sync",
-			"edge.autoSyncOff": "Disable auto-sync",
-			"edge.autoSyncHint": "push automatically when the source digest changes",
 			"toast.pushed": "Pushed to \"{to}\"",
 			"toast.notLive": "Target conversation is not active — open it once, then push again",
 			"toast.pushFailed": "Push failed: ",
@@ -11465,86 +11459,86 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"card": "_0iu0NW_card",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"spawnModeActive": "_0iu0NW_spawnModeActive",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"canvas": "_0iu0NW_canvas",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"menuError": "_0iu0NW_menuError",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"draftLabel": "_0iu0NW_draftLabel",
 			"menuTitle": "_0iu0NW_menuTitle",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
+			"draftRow": "_0iu0NW_draftRow",
+			"cardTop": "_0iu0NW_cardTop",
+			"header": "_0iu0NW_header",
+			"closeButton": "_0iu0NW_closeButton",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"menuHint": "_0iu0NW_menuHint",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"cardStale": "_0iu0NW_cardStale",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"canvasConnecting": "_0iu0NW_canvasConnecting",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"runningDot": "_0iu0NW_runningDot",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"cardCurrent": "_0iu0NW_cardCurrent",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"toast": "_0iu0NW_toast",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
 			"headerSpace": "_0iu0NW_headerSpace",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"menu": "_0iu0NW_menu",
+			"overlay": "_0iu0NW_overlay",
+			"spawnModes": "_0iu0NW_spawnModes",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"draftCard": "_0iu0NW_draftCard",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"draftInput": "_0iu0NW_draftInput",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"spawnModeActive": "_0iu0NW_spawnModeActive",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"cardNext": "_0iu0NW_cardNext",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"card": "_0iu0NW_card",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"cardTime": "_0iu0NW_cardTime",
 			"menuItem": "_0iu0NW_menuItem",
 			"cardSummary": "_0iu0NW_cardSummary",
-			"spawnModes": "_0iu0NW_spawnModes",
-			"draftCard": "_0iu0NW_draftCard",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"header": "_0iu0NW_header",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"cardTop": "_0iu0NW_cardTop",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"cardTime": "_0iu0NW_cardTime",
-			"canvasConnecting": "_0iu0NW_canvasConnecting",
-			"menuHint": "_0iu0NW_menuHint",
-			"spawnError": "_0iu0NW_spawnError",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"runningDot": "_0iu0NW_runningDot",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"cardStale": "_0iu0NW_cardStale",
-			"closeButton": "_0iu0NW_closeButton",
 			"spawnFrom": "_0iu0NW_spawnFrom",
-			"draftInput": "_0iu0NW_draftInput",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"menu": "_0iu0NW_menu",
-			"cardNext": "_0iu0NW_cardNext",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"menuEmpty": "_0iu0NW_menuEmpty",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"overlay": "_0iu0NW_overlay",
+			"canvas": "_0iu0NW_canvas",
 			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"toast": "_0iu0NW_toast",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"draftRow": "_0iu0NW_draftRow",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
 			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"menuError": "_0iu0NW_menuError",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary"
+			"headerBadge": "_0iu0NW_headerBadge",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"spawnError": "_0iu0NW_spawnError",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"cardNextText": "_0iu0NW_cardNextText"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12722,8 +12716,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						...kind === "link" ? { style: { opacity: .4 } } : {
 							label: kind === "none" ? t("edge.none") : kind === "full" ? t("edge.full") : t("edge.injected"),
 							...kind === "none" ? { style: { opacity: .65 } } : {}
-						},
-						...edge.autoSync === true ? { animated: true } : {}
+						}
 					});
 				}
 				for (const [cardId, card] of Object.entries(visibleCards)) {
@@ -13254,31 +13247,14 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							pushAlongEdge(edgeFrom, edgeTo);
 						}
 					});
-					if (stored !== void 0) {
-						const syncOn = stored.autoSync === true;
-						items.push({
-							key: "auto-sync",
-							label: syncOn ? t("edge.autoSyncOff") : t("edge.autoSyncOn"),
-							...syncOn ? {} : { hint: t("edge.autoSyncHint") },
-							onPick: () => {
-								close();
-								const next = { ...stored };
-								if (syncOn) delete next.autoSync;
-								else next.autoSync = true;
-								const liveTitle = fromCard !== void 0 ? sessions.byId[fromCard.sessionId]?.displayTitle : void 0;
-								if (liveTitle !== void 0) next.fromTitle = liveTitle;
-								canvas.addEdges({ [edgeId]: next });
-							}
-						});
-						items.push({
-							key: "delete-edge",
-							label: t("edge.delete"),
-							onPick: () => {
-								canvas.removeEdges([edgeId]);
-								close();
-							}
-						});
-					}
+					if (stored !== void 0) items.push({
+						key: "delete-edge",
+						label: t("edge.delete"),
+						onPick: () => {
+							canvas.removeEdges([edgeId]);
+							close();
+						}
+					});
 				} else if (menu.kind === "frame" && menu.targetId !== void 0) {
 					const groupId = menu.targetId;
 					items.push({
