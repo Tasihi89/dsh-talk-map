@@ -35,6 +35,15 @@ export interface SpawnResult {
   edges: Record<string, MapEdge>
 }
 
+/** Typed so the HTTP layer can answer with a structured code instead of
+ * clients substring-matching a stringified error. */
+export class SessionNotLiveError extends Error {
+  constructor(sessionId: string) {
+    super(`session ${sessionId} is not live`)
+    this.name = 'SessionNotLiveError'
+  }
+}
+
 export class Spawner {
   /**
    * Inject parent digests into an EXISTING live session (created through
@@ -45,7 +54,7 @@ export class Spawner {
    */
   injectInto(sessionId: string, parents: readonly { sessionId: string; text: string }[]): void {
     const agent = this.services.agents.get(sessionId)
-    if (agent === undefined) throw new Error(`session ${sessionId} is not live`)
+    if (agent === undefined) throw new SessionNotLiveError(sessionId)
     for (const parent of parents) {
       // Guard rails around the digest: without them the agent treats the
       // summary's 下一步 as a command and sprints off executing the parent

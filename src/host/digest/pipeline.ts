@@ -144,7 +144,15 @@ export class DigestPipeline {
         inputHash,
       }
       await store.digests.put(sessionId, digest)
-      if (previous?.inputHash !== inputHash) this.onFresh?.(sessionId, digest)
+      if (previous?.inputHash !== inputHash) {
+        // Isolated: a throwing consumer must not fall into the outer catch,
+        // which would overwrite the just-persisted digest with an error one.
+        try {
+          this.onFresh?.(sessionId, digest)
+        } catch (hookError) {
+          this.services.logger?.warn(`[dsh-talk-map] onFresh hook failed: ${String(hookError)}`)
+        }
+      }
       return digest
     } catch (error) {
       const digest: Digest = {

@@ -4,14 +4,25 @@
  */
 import type { Card, Digest, MapEdgeData, MapGlobal, MapStatePayload } from '../shared/model.ts'
 
+/** Error shape thrown on non-2xx: `code` carries the host's structured
+ * error code (e.g. 'session-not-live') when the body provides one. */
+export interface ApiError extends Error {
+  code?: string
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, init)
   if (!response.ok) {
     let detail = ''
+    let code: string | undefined
     try {
-      detail = JSON.stringify(await response.json())
+      const body = await response.json() as { code?: string }
+      if (typeof body.code === 'string') code = body.code
+      detail = JSON.stringify(body)
     } catch { /* body not json */ }
-    throw new Error(`${path} → ${response.status} ${detail}`)
+    const error: ApiError = new Error(`${path} → ${response.status} ${detail}`)
+    if (code !== undefined) error.code = code
+    throw error
   }
   return await response.json() as T
 }

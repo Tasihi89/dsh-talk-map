@@ -11,7 +11,7 @@ import { resolve as resolvePath, sep } from 'node:path'
 import { z } from 'zod'
 import type { DomainChanged, TalkMapHostServices } from './dsh-host.ts'
 import type { DigestPipeline } from './digest/pipeline.ts'
-import type { Spawner } from './spawn.ts'
+import { SessionNotLiveError, type Spawner } from './spawn.ts'
 import { cardSchema, edgeSchema, globalSchema, DOMAIN_NAME, type TalkMapStore } from './store.ts'
 
 /**
@@ -250,7 +250,17 @@ export function mountTalkMapRoutes(
             return
           }
           const body = injectBody.parse(await readJsonBody(request))
-          runtime.spawner.injectInto(body.sessionId, body.parents)
+          try {
+            runtime.spawner.injectInto(body.sessionId, body.parents)
+          } catch (error) {
+            // Structured code — clients branch on it instead of substring-
+            // matching a quadruple-stringified error message.
+            if (error instanceof SessionNotLiveError) {
+              sendJson(response, 409, { error: String(error), code: 'session-not-live' })
+              return
+            }
+            throw error
+          }
           sendJson(response, 200, { ok: true })
           return
         }

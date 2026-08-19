@@ -36,10 +36,15 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const response = await fetch(path, init);
 			if (!response.ok) {
 				let detail = "";
+				let code;
 				try {
-					detail = JSON.stringify(await response.json());
+					const body = await response.json();
+					if (typeof body.code === "string") code = body.code;
+					detail = JSON.stringify(body);
 				} catch {}
-				throw new Error(`${path} → ${response.status} ${detail}`);
+				const error = /* @__PURE__ */ new Error(`${path} → ${response.status} ${detail}`);
+				if (code !== void 0) error.code = code;
+				throw error;
 			}
 			return await response.json();
 		}
@@ -310,17 +315,13 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				});
 			},
 			removeEdges(ids) {
+				const present = ids.filter((id) => state$1.edges[id] !== void 0);
+				if (present.length === 0) return;
 				pushUndo();
 				const edges = { ...state$1.edges };
-				let changed = false;
-				for (const id of ids) {
-					if (edges[id] === void 0) continue;
-					delete edges[id];
-					changed = true;
-				}
-				if (!changed) return;
+				for (const id of present) delete edges[id];
 				setState({ edges });
-				talkMapApi.deleteEdges(ids).catch((error) => {
+				talkMapApi.deleteEdges(present).catch((error) => {
 					console.error("[dsh-talk-map] edge delete failed:", error);
 				});
 			},
@@ -11434,7 +11435,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			return parts;
 		}
 		function digestIsEmpty(digest) {
-			return digest === void 0 || digest.summary === "" && digest.nextStep === "" && (digest.todoNext ?? "") === "";
+			return digest === void 0 || digest.summary === "" && digest.nextStep === "" && (digest.todoNext ?? "") === "" && digest.keyFindings.length === 0;
 		}
 		function buildInjectionText(title, digest) {
 			const header = `${t("inject.header")}「${title}」`;
@@ -11445,7 +11446,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		function buildPushText(title, digest) {
 			const now = /* @__PURE__ */ new Date();
 			const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-			return [t("push.header").replace("{from}", title).replace("{time}", time), ...digestBody(digest)].join("\n");
+			return [t("push.header").replace("{from}", () => title).replace("{time}", () => time), ...digestBody(digest)].join("\n");
 		}
 		//#endregion
 		//#region \0dsh-css:module:src/client/talk-map.module.css.mjs
@@ -11459,86 +11460,86 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"draftSelect": "_0iu0NW_draftSelect",
-			"menuError": "_0iu0NW_menuError",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"draftLabel": "_0iu0NW_draftLabel",
-			"menuTitle": "_0iu0NW_menuTitle",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
-			"draftRow": "_0iu0NW_draftRow",
-			"cardTop": "_0iu0NW_cardTop",
-			"header": "_0iu0NW_header",
-			"closeButton": "_0iu0NW_closeButton",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"menuHint": "_0iu0NW_menuHint",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"cardStale": "_0iu0NW_cardStale",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"canvasConnecting": "_0iu0NW_canvasConnecting",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"runningDot": "_0iu0NW_runningDot",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"cardCurrent": "_0iu0NW_cardCurrent",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"toast": "_0iu0NW_toast",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
 			"headerSpace": "_0iu0NW_headerSpace",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"canvas": "_0iu0NW_canvas",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"draftCard": "_0iu0NW_draftCard",
+			"closeButton": "_0iu0NW_closeButton",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"cardTop": "_0iu0NW_cardTop",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"draftRow": "_0iu0NW_draftRow",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
+			"spawnModeActive": "_0iu0NW_spawnModeActive",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"cardTime": "_0iu0NW_cardTime",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"menuHint": "_0iu0NW_menuHint",
+			"toggleLabel": "_0iu0NW_toggleLabel",
 			"toggleIcon": "_0iu0NW_toggleIcon",
-			"menu": "_0iu0NW_menu",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"header": "_0iu0NW_header",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"toast": "_0iu0NW_toast",
+			"menuError": "_0iu0NW_menuError",
+			"draftInput": "_0iu0NW_draftInput",
+			"menuItem": "_0iu0NW_menuItem",
+			"cardNextText": "_0iu0NW_cardNextText",
 			"overlay": "_0iu0NW_overlay",
 			"spawnModes": "_0iu0NW_spawnModes",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"draftCard": "_0iu0NW_draftCard",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"draftInput": "_0iu0NW_draftInput",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"spawnModeActive": "_0iu0NW_spawnModeActive",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"emptyHint": "_0iu0NW_emptyHint",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
 			"cardNext": "_0iu0NW_cardNext",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"card": "_0iu0NW_card",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"menuEmpty": "_0iu0NW_menuEmpty",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"cardTime": "_0iu0NW_cardTime",
-			"menuItem": "_0iu0NW_menuItem",
 			"cardSummary": "_0iu0NW_cardSummary",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"canvas": "_0iu0NW_canvas",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"runningDot": "_0iu0NW_runningDot",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"spawnPanel": "_0iu0NW_spawnPanel",
+			"cardStale": "_0iu0NW_cardStale",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"cardCurrent": "_0iu0NW_cardCurrent",
 			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"headerBadge": "_0iu0NW_headerBadge",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"spawnActions": "_0iu0NW_spawnActions",
 			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"menu": "_0iu0NW_menu",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"menuTitle": "_0iu0NW_menuTitle",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"canvasConnecting": "_0iu0NW_canvasConnecting",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
 			"spawnError": "_0iu0NW_spawnError",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"cardNextText": "_0iu0NW_cardNextText"
+			"headerTitle": "_0iu0NW_headerTitle",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"card": "_0iu0NW_card",
+			"colorSwatch": "_0iu0NW_colorSwatch"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12533,10 +12534,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				if (!connecting) return;
 				const release = mapUi.claimEscape("connecting");
 				const onKeyDown = (event) => {
-					if (event.key === "Escape") {
-						connectCancelledRef.current = true;
-						setConnecting(false);
-					}
+					if (event.key === "Escape") connectCancelledRef.current = true;
 				};
 				const onPointerUp = () => {
 					setConnecting(false);
@@ -12564,7 +12562,20 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					window.removeEventListener("keydown", onKeyDown, { capture: true });
 				};
 			}, []);
-			const hasSelection = selectedIds.size > 0 || selectedEdgeIds.size > 0;
+			const hasSelection = (0, react.useMemo)(() => {
+				let count = 0;
+				for (const id of selectedIds) if (id.startsWith("frame-")) {
+					if (wsFrames[id.slice(6)] !== void 0) count += 1;
+				} else if (canvasState.cards[id] !== void 0) count += 1;
+				for (const id of selectedEdgeIds) if (canvasState.edges[id] !== void 0) count += 1;
+				return count;
+			}, [
+				selectedIds,
+				selectedEdgeIds,
+				canvasState.cards,
+				canvasState.edges,
+				wsFrames
+			]) > 0;
 			(0, react.useEffect)(() => {
 				if (!hasSelection) return;
 				const release = mapUi.claimEscape("selection");
@@ -12696,9 +12707,10 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const liveEdges = (0, react.useMemo)(() => {
 				const out = [];
 				const present = new Set(Object.keys(visibleCards));
-				const injectionPairs = /* @__PURE__ */ new Set();
+				const explicitPairs = /* @__PURE__ */ new Set();
 				for (const [edgeId, edge] of Object.entries(canvasState.edges)) {
-					injectionPairs.add(`${edge.fromCardId}->${edge.toCardId}`);
+					explicitPairs.add(`${edge.fromCardId}->${edge.toCardId}`);
+					explicitPairs.add(`${edge.toCardId}->${edge.fromCardId}`);
 					if (!present.has(edge.fromCardId) || !present.has(edge.toCardId)) continue;
 					const kind = edge.injection.kind;
 					out.push({
@@ -12724,7 +12736,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					if (parentSessionId === void 0) continue;
 					const parentCardId = sessionIdToCardId.get(parentSessionId);
 					if (parentCardId === void 0) continue;
-					if (injectionPairs.has(`${parentCardId}->${cardId}`)) continue;
+					if (explicitPairs.has(`${parentCardId}->${cardId}`)) continue;
 					out.push({
 						id: `lineage-${parentCardId}-${cardId}`,
 						source: parentCardId,
@@ -12827,6 +12839,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				}
 			};
 			const onEdgesChange = (changes) => {
+				const removedIds = [];
 				for (const change of changes) if (change.type === "select") setSelectedEdgeIds((previous) => {
 					const next = new Set(previous);
 					if (change.selected) next.add(change.id);
@@ -12834,15 +12847,25 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					return next;
 				});
 				else if (change.type === "remove") {
-					if (!change.id.startsWith("lineage-")) canvas.removeEdges([change.id]);
+					if (!change.id.startsWith("lineage-")) removedIds.push(change.id);
 					setSelectedEdgeIds((previous) => {
 						const next = new Set(previous);
 						next.delete(change.id);
 						return next;
 					});
 				}
+				if (removedIds.length > 0) canvas.removeEdges(removedIds);
 			};
+			const mountedRef = (0, react.useRef)(true);
+			(0, react.useEffect)(() => {
+				mountedRef.current = true;
+				return () => {
+					mountedRef.current = false;
+					if (toastTimer.current !== void 0) clearTimeout(toastTimer.current);
+				};
+			}, []);
 			const showToast = (message) => {
+				if (!mountedRef.current) return;
 				setToast(message);
 				if (toastTimer.current !== void 0) clearTimeout(toastTimer.current);
 				toastTimer.current = setTimeout(() => {
@@ -12891,6 +12914,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			};
 			/** Handle-to-handle drop on another card (ConnectionMode.Loose). */
 			const onConnect = (connection) => {
+				if (connectCancelledRef.current) return;
 				createLinkEdge(connection.source, connection.target, {
 					fromHandle: connection.sourceHandle,
 					toHandle: connection.targetHandle
@@ -12910,10 +12934,10 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						sessionId: fromCard.sessionId,
 						text: buildPushText(fromTitle, digest)
 					}]);
-					showToast(t("toast.pushed").replace("{to}", toTitle));
+					showToast(t("toast.pushed").replace("{to}", () => toTitle));
 				} catch (error) {
-					const message = String(error);
-					showToast(message.includes("not live") ? t("toast.notLive") : `${t("toast.pushFailed")}${message}`);
+					const code = error.code;
+					showToast(code === "session-not-live" ? t("toast.notLive") : `${t("toast.pushFailed")}${String(error)}`);
 				}
 			};
 			const onConnectEnd = (event, connectionState) => {
@@ -12936,9 +12960,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				} : void 0;
 				if (client === void 0) return;
 				const position = screenToFlowPosition(client);
-				const hit = Object.entries(visibleCards).find(([, target]) => position.x >= target.x && position.x <= target.x + CARD_W && position.y >= target.y && position.y <= target.y + CARD_H);
-				if (hit !== void 0) {
-					if (hit[0] !== fromNodeId) createLinkEdge(fromNodeId, hit[0]);
+				const hitId = (document.elementFromPoint(client.x, client.y)?.closest?.(".react-flow__node[data-id^=\"card-\"]"))?.getAttribute("data-id") ?? void 0;
+				if (hitId !== void 0 && visibleCards[hitId] !== void 0) {
+					if (hitId !== fromNodeId) createLinkEdge(fromNodeId, hitId);
 					return;
 				}
 				const summary = sessions.byId[card.sessionId];
@@ -13321,6 +13345,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 						onEdgesChange,
 						onConnect,
 						onConnectStart: () => {
+							connectCancelledRef.current = false;
 							setConnecting(true);
 						},
 						onConnectEnd,

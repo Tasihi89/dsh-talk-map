@@ -203,17 +203,15 @@ export const canvas = {
   },
 
   removeEdges(ids: readonly string[]): void {
+    const present = ids.filter(id => state.edges[id] !== undefined)
+    // No-op deletes (already gone via SSE, double Backspace) must not
+    // push an identical undo frame — pushUndo clears the redo stack.
+    if (present.length === 0) return
     pushUndo()
     const edges = { ...state.edges }
-    let changed = false
-    for (const id of ids) {
-      if (edges[id] === undefined) continue
-      delete edges[id]
-      changed = true
-    }
-    if (!changed) return
+    for (const id of present) delete edges[id]
     setState({ edges })
-    void talkMapApi.deleteEdges(ids).catch((error) => {
+    void talkMapApi.deleteEdges(present).catch((error) => {
       console.error('[dsh-talk-map] edge delete failed:', error)
     })
   },

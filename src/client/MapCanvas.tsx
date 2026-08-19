@@ -213,21 +213,20 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     )
   }, [frameGeometry])
 
-  // While a connection drag is live, Esc belongs to it: React Flow cancels
-  // the in-flight line; without the claim the keypress would fall through
-  // to the overlay and close the whole map mid-gesture. A global pointerup
-  // backstops the reset — an Esc-cancelled connection never reaches
-  // onConnectEnd, and the handles must not stay force-revealed.
+  // While a connection drag is live, Esc belongs to it. React Flow (this
+  // @xyflow version) has NO Escape handling of its own and exposes no
+  // cancelConnection API — the ghost line follows the pointer until
+  // release regardless. So Esc only arms the cancel flag; the drag state
+  // (handles revealed, Esc claimed) deliberately survives until pointerup,
+  // matching the still-visible ghost line and keeping a second Esc from
+  // falling through to the overlay and closing the map. onConnect and
+  // onConnectEnd both honor the flag, so a cancelled gesture creates
+  // nothing no matter where it is released.
   useEffect(() => {
     if (!connecting) return
     const release = mapUi.claimEscape('connecting')
     const onKeyDown = (event: KeyboardEvent): void => {
-      // No stopPropagation: React Flow needs the key to cancel its ghost
-      // line; the claim alone keeps the overlay from closing the map.
-      if (event.key === 'Escape') {
-        connectCancelledRef.current = true
-        setConnecting(false)
-      }
+      if (event.key === 'Escape') connectCancelledRef.current = true
     }
     const onPointerUp = (): void => { setConnecting(false) }
     window.addEventListener('keydown', onKeyDown, { capture: true })
@@ -259,7 +258,26 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   // Backspace/Delete removes selected FRAMES (React Flow no longer owns
   // frame selection, so its deleteKeyCode cannot reach them; cards stay on
   // the React Flow path).
-  const hasSelection = selectedIds.size > 0 || selectedEdgeIds.size > 0
+  // Selection ids can go stale without a select:false ever firing — the
+  // context menu and SSE delete straight from the store, and React Flow
+  // emits no change for an element that simply vanished from a controlled
+  // array. Count only ids that still exist, or a dead id pins
+  // hasSelection true and the capture handler swallows Escape forever.
+  const liveSelectionCount = useMemo(() => {
+    let count = 0
+    for (const id of selectedIds) {
+      if (id.startsWith('frame-')) {
+        if (wsFrames[id.slice('frame-'.length)] !== undefined) count += 1
+      } else if (canvasState.cards[id] !== undefined) {
+        count += 1
+      }
+    }
+    for (const id of selectedEdgeIds) {
+      if (canvasState.edges[id] !== undefined) count += 1
+    }
+    return count
+  }, [selectedIds, selectedEdgeIds, canvasState.cards, canvasState.edges, wsFrames])
+  const hasSelection = liveSelectionCount > 0
   useEffect(() => {
     if (!hasSelection) return
     const release = mapUi.claimEscape('selection')
@@ -377,9 +395,14 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   const liveEdges = useMemo<Edge[]>(() => {
     const out: Edge[] = []
     const present = new Set(Object.keys(visibleCards))
-    const injectionPairs = new Set<string>()
+    // Card pairs with an explicit user-drawn edge, registered in BOTH
+    // directions: the derived lineage dashes yield to a stored edge no
+    // matter which way it was drawn — otherwise the two lines overlap on
+    // the same handles and a deleted edge looks like it survived.
+    const explicitPairs = new Set<string>()
     for (const [edgeId, edge] of Object.entries(canvasState.edges)) {
-      injectionPairs.add(`${edge.fromCardId}->${edge.toCardId}`)
+      explicitPairs.add(`${edge.fromCardId}->${edge.toCardId}`)
+      explicitPairs.add(`${edge.toCardId}->${edge.fromCardId}`)
       if (!present.has(edge.fromCardId) || !present.has(edge.toCardId)) continue
       const kind = edge.injection.kind
       out.push({
@@ -412,7 +435,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       if (parentSessionId === undefined) continue
       const parentCardId = sessionIdToCardId.get(parentSessionId)
       if (parentCardId === undefined) continue
-      if (injectionPairs.has(`${parentCardId}->${cardId}`)) continue
+      if (explicitPairs.has(`${parentCardId}->${cardId}`)) continue
       out.push({
         id: `lineage-${parentCardId}-${cardId}`,
         source: parentCardId,
@@ -527,6 +550,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   }
 
   const onEdgesChange = (changes: EdgeChange[]): void => {
+    // Removals batch into ONE store call: a hub card's Backspace emits one
+    // remove per connected edge, and per-edge calls would mean one undo
+    // frame, one state copy, and one POST each.
+    const removedIds: string[] = []
     for (const change of changes) {
       if (change.type === 'select') {
         setSelectedEdgeIds((previous) => {
@@ -536,9 +563,8 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           return next
         })
       } else if (change.type === 'remove') {
-        // Backspace/Delete on a selected edge, or the edges of a removed
-        // node. Lineage edges are derived — nothing to delete.
-        if (!change.id.startsWith('lineage-')) canvas.removeEdges([change.id])
+        // Lineage edges are derived — nothing to delete.
+        if (!change.id.startsWith('lineage-')) removedIds.push(change.id)
         setSelectedEdgeIds((previous) => {
           const next = new Set(previous)
           next.delete(change.id)
@@ -546,9 +572,23 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         })
       }
     }
+    if (removedIds.length > 0) canvas.removeEdges(removedIds)
   }
 
+  // Mount guard + timer cleanup: a push settling after the map closed must
+  // not set state on the unmounted component or park a timer holding the
+  // render closure alive.
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      if (toastTimer.current !== undefined) clearTimeout(toastTimer.current)
+    }
+  }, [])
+
   const showToast = (message: string): void => {
+    if (!mountedRef.current) return
     setToast(message)
     if (toastTimer.current !== undefined) clearTimeout(toastTimer.current)
     toastTimer.current = setTimeout(() => { setToast(null) }, 4000)
@@ -597,6 +637,10 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
 
   /** Handle-to-handle drop on another card (ConnectionMode.Loose). */
   const onConnect = (connection: Connection): void => {
+    // An Esc-cancelled gesture must not create an edge even when released
+    // on a handle (React Flow calls onConnect BEFORE onConnectEnd; the
+    // flag is reset there).
+    if (connectCancelledRef.current) return
     createLinkEdge(connection.source, connection.target, {
       fromHandle: connection.sourceHandle,
       toHandle: connection.targetHandle,
@@ -616,10 +660,13 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       await talkMapApi.injectContext(toCard.sessionId, [
         { sessionId: fromCard.sessionId, text: buildPushText(fromTitle, digest) },
       ])
-      showToast(t('toast.pushed').replace('{to}', toTitle))
+      // Callback form: titles can contain $-patterns replace() would expand.
+      showToast(t('toast.pushed').replace('{to}', () => toTitle))
     } catch (error) {
-      const message = String(error)
-      showToast(message.includes('not live') ? t('toast.notLive') : `${t('toast.pushFailed')}${message}`)
+      const code = (error as { code?: string }).code
+      showToast(code === 'session-not-live'
+        ? t('toast.notLive')
+        : `${t('toast.pushFailed')}${String(error)}`)
     }
   }
 
@@ -646,11 +693,15 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     const position = screenToFlowPosition(client)
     // Dropped on an existing card's BODY (between handles)? That's a link,
     // not a fork — only a drop on empty canvas opens the spawn panel.
-    const hit = Object.entries(visibleCards).find(([, target]) =>
-      position.x >= target.x && position.x <= target.x + CARD_W
-      && position.y >= target.y && position.y <= target.y + CARD_H)
-    if (hit !== undefined) {
-      if (hit[0] !== fromNodeId) createLinkEdge(fromNodeId, hit[0])
+    // DOM hit-testing, not card-rect math: cards are min-height and grow
+    // with their digest, so a fixed-height rectangle misjudges both the
+    // lower band of tall cards and the space under short ones — and the
+    // DOM answers with proper stacking order for overlapping cards.
+    const hitNode = document.elementFromPoint(client.x, client.y)
+      ?.closest?.('.react-flow__node[data-id^="card-"]')
+    const hitId = hitNode?.getAttribute('data-id') ?? undefined
+    if (hitId !== undefined && visibleCards[hitId] !== undefined) {
+      if (hitId !== fromNodeId) createLinkEdge(fromNodeId, hitId)
       return
     }
     const summary = sessions.byId[card.sessionId]
@@ -1031,7 +1082,12 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onConnectStart={() => { setConnecting(true) }}
+        onConnectStart={() => {
+          // A fresh drag always starts clean — a cancel flag left over from
+          // a path that never reached onConnectEnd must not eat this one.
+          connectCancelledRef.current = false
+          setConnecting(true)
+        }}
         onConnectEnd={onConnectEnd}
         connectionMode={ConnectionMode.Loose}
         onSelectionStart={onSelectionStart}

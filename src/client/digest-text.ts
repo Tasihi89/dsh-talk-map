@@ -19,8 +19,14 @@ function digestBody(digest: Digest): string[] {
 }
 
 export function digestIsEmpty(digest: Digest | undefined): boolean {
+  // keyFindings counts: the host parser accepts digests whose summary and
+  // next-step are blank but whose findings are real (exploratory sessions)
+  // — those must stay pushable and injectable.
   return digest === undefined
-    || (digest.summary === '' && digest.nextStep === '' && (digest.todoNext ?? '') === '')
+    || (digest.summary === ''
+      && digest.nextStep === ''
+      && (digest.todoNext ?? '') === ''
+      && digest.keyFindings.length === 0)
 }
 
 export function buildInjectionText(title: string, digest: Digest | undefined): string {
@@ -35,6 +41,8 @@ export function buildInjectionText(title: string, digest: Digest | undefined): s
 export function buildPushText(title: string, digest: Digest): string {
   const now = new Date()
   const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-  const header = t('push.header').replace('{from}', title).replace('{time}', time)
+  // Callback form: a literal replacement string would expand $-patterns
+  // ($&, $') lurking in real conversation titles.
+  const header = t('push.header').replace('{from}', () => title).replace('{time}', () => time)
   return [header, ...digestBody(digest)].join('\n')
 }
