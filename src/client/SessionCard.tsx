@@ -17,7 +17,6 @@ export interface SessionCardData extends Record<string, unknown> {
   sessionId: string
   title: string
   running: boolean
-  isCurrent: boolean
   ghost: boolean
   updatedAt?: number
   nextStep?: string
@@ -51,7 +50,6 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
   const classNames = [styles['card']]
   if (data.ghost) classNames.push(styles['cardGhost'])
   if (selected === true) classNames.push(styles['cardSelected'])
-  if (data.isCurrent) classNames.push(styles['cardCurrent'])
 
   const refreshDigest = async (): Promise<void> => {
     if (refreshing) return

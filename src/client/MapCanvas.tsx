@@ -360,7 +360,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           sessionId: card.sessionId,
           title: summary?.displayTitle ?? card.sessionId,
           running: summary?.running ?? false,
-          isCurrent: sessions.current === card.sessionId,
           ghost: summary === undefined,
           updatedAt: summary?.updatedAt,
           nextStep: digest?.nextStep ?? digest?.todoNext,

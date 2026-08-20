@@ -170,11 +170,6 @@
   border-color: var(--dsw-alias-brand-primary);
 }
 
-.cardCurrent {
-  outline: 2px solid var(--dsw-alias-brand-primary);
-  outline-offset: 1px;
-}
-
 .cardGhost {
   opacity: 0.55;
   border-style: dashed;
