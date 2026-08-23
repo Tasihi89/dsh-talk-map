@@ -405,9 +405,24 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				if (goneCards.length > 0) await talkMapApi.deleteCards(goneCards);
 				if (Object.keys(snapshot.edges).length > 0) await talkMapApi.upsertEdges({ ...snapshot.edges });
 				if (goneEdges.length > 0) await talkMapApi.deleteEdges(goneEdges);
-				if (global !== null) await talkMapApi.setGlobal(global);
+				if (global !== null) await persistGlobal(global, "undo");
 			})().catch((error) => {
 				console.error("[dsh-talk-map] undo sync failed:", error);
+			});
+		}
+		/**
+		* Count of global writes whose POST has not answered yet. refresh() reads
+		* the server's copy wholesale, so without this a patch that is still in
+		* flight (a language switch, a hotkey rebind) is silently rolled back by
+		* the next refresh — the same protection dirtyCards gives card positions.
+		*/
+		let globalWritesInFlight = 0;
+		function persistGlobal(value, label) {
+			globalWritesInFlight += 1;
+			return talkMapApi.setGlobal(value).catch((error) => {
+				console.error(`[dsh-talk-map] ${label} save failed:`, error);
+			}).finally(() => {
+				globalWritesInFlight -= 1;
 			});
 		}
 		let globalPersistTimer;
@@ -418,9 +433,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				globalPersistTimer = void 0;
 				const current = state$1.global;
 				if (current === null) return;
-				talkMapApi.setGlobal(current).catch((error) => {
-					console.error("[dsh-talk-map] layout-memory save failed:", error);
-				});
+				persistGlobal(current, "layout-memory");
 			}, 600);
 		}
 		function scheduleCardFlush() {
@@ -552,12 +565,12 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				});
 			},
 			/** Background re-sync with the server (missed SSE while the map was
-			* closed or the server restarted). Skipped while local writes are
-			* still in flight. */
+			* closed or the server restarted). Skipped while local writes — card
+			* positions or a global patch — are still in flight. */
 			refresh() {
-				if (state$1.phase !== "ready" || dirtyCards.size > 0) return;
+				if (state$1.phase !== "ready" || dirtyCards.size > 0 || globalWritesInFlight > 0) return;
 				talkMapApi.getState().then((payload) => {
-					if (state$1.phase !== "ready" || dirtyCards.size > 0) return;
+					if (state$1.phase !== "ready" || dirtyCards.size > 0 || globalWritesInFlight > 0) return;
 					setState({
 						cards: payload.cards,
 						edges: payload.edges,
@@ -660,9 +673,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					frameTimer = void 0;
 					const current = state$1.global;
 					if (current === null) return;
-					talkMapApi.setGlobal(current).catch((error) => {
-						console.error("[dsh-talk-map] frame save failed:", error);
-					});
+					persistGlobal(current, "frame");
 				}, 600);
 			},
 			/** Recolor a workspace frame (undefined clears); persists immediately. */
@@ -682,9 +693,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					...patch
 				};
 				setState({ global });
-				talkMapApi.setGlobal(global).catch((error) => {
-					console.error("[dsh-talk-map] global save failed:", error);
-				});
+				persistGlobal(global, "global");
 			},
 			setCamera(boardId, camera) {
 				if (state$1.global === null) return;
@@ -700,9 +709,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 					cameraTimer = void 0;
 					const current = state$1.global;
 					if (current === null) return;
-					talkMapApi.setGlobal(current).catch((error) => {
-						console.error("[dsh-talk-map] camera save failed:", error);
-					});
+					persistGlobal(current, "camera");
 				}, CAMERA_DELAY_MS);
 			},
 			/** Cmd/Ctrl+Z — board operations only (conversations are not undoable). */
@@ -11507,86 +11514,86 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"draftLabel": "_0iu0NW_draftLabel",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"cardTop": "_0iu0NW_cardTop",
-			"spawnModes": "_0iu0NW_spawnModes",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"overlay": "_0iu0NW_overlay",
-			"card": "_0iu0NW_card",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
-			"spawnError": "_0iu0NW_spawnError",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"canvasConnecting": "_0iu0NW_canvasConnecting",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"emptyHint": "_0iu0NW_emptyHint",
-			"menuHint": "_0iu0NW_menuHint",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"headerTitle": "_0iu0NW_headerTitle",
+			"runningDot": "_0iu0NW_runningDot",
 			"langButton": "_0iu0NW_langButton",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"emptyHint": "_0iu0NW_emptyHint",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"spawnModes": "_0iu0NW_spawnModes",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"cardNext": "_0iu0NW_cardNext",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"draftInput": "_0iu0NW_draftInput",
+			"menuTitle": "_0iu0NW_menuTitle",
+			"spawnModeActive": "_0iu0NW_spawnModeActive",
+			"toast": "_0iu0NW_toast",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"menuHint": "_0iu0NW_menuHint",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
 			"cardSummary": "_0iu0NW_cardSummary",
 			"cardTime": "_0iu0NW_cardTime",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"draftInput": "_0iu0NW_draftInput",
-			"cardNextText": "_0iu0NW_cardNextText",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"draftRow": "_0iu0NW_draftRow",
-			"spawnHint": "_0iu0NW_spawnHint",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"spawnPanel": "_0iu0NW_spawnPanel",
 			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"cardNext": "_0iu0NW_cardNext",
-			"menuError": "_0iu0NW_menuError",
-			"header": "_0iu0NW_header",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"toast": "_0iu0NW_toast",
-			"closeButton": "_0iu0NW_closeButton",
-			"spawnModeActive": "_0iu0NW_spawnModeActive",
-			"draftCard": "_0iu0NW_draftCard",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"canvas": "_0iu0NW_canvas",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"menu": "_0iu0NW_menu",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"runningDot": "_0iu0NW_runningDot",
-			"menuEmpty": "_0iu0NW_menuEmpty",
 			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"spawnError": "_0iu0NW_spawnError",
+			"draftRow": "_0iu0NW_draftRow",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"draftLabel": "_0iu0NW_draftLabel",
+			"menuError": "_0iu0NW_menuError",
+			"menu": "_0iu0NW_menu",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"header": "_0iu0NW_header",
+			"card": "_0iu0NW_card",
+			"spawnActions": "_0iu0NW_spawnActions",
 			"menuItem": "_0iu0NW_menuItem",
+			"overlay": "_0iu0NW_overlay",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"closeButton": "_0iu0NW_closeButton",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"canvasConnecting": "_0iu0NW_canvasConnecting",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"draftCard": "_0iu0NW_draftCard",
 			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"cardTop": "_0iu0NW_cardTop",
+			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
 			"cardStale": "_0iu0NW_cardStale",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"menuTitle": "_0iu0NW_menuTitle"
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"canvas": "_0iu0NW_canvas",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"spawnFrom": "_0iu0NW_spawnFrom"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -12514,6 +12521,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			const wrapperRef = (0, react.useRef)(null);
 			const [isSelecting, setIsSelecting] = (0, react.useState)(false);
 			const frozenRef = (0, react.useRef)(null);
+			const locale = (0, react.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
 			const sessionWs = (0, react.useMemo)(() => sessionWorkspaceIndex(workspaces), [workspaces]);
 			const wsTitles = (0, react.useMemo)(() => new Map(workspaces.items.map((item) => [item.workspaceId, item.title])), [workspaces]);
 			const workspacesReady = workspaces.baselinesReady !== false;
@@ -12749,7 +12757,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				sessions,
 				liveSelectedIds,
 				draft,
-				workspaces.items
+				workspaces.items,
+				locale
 			]);
 			const sessionIdToCardId = (0, react.useMemo)(() => {
 				const index = /* @__PURE__ */ new Map();
@@ -12813,7 +12822,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				canvasState.edges,
 				sessions,
 				sessionIdToCardId,
-				liveSelectedEdgeIds
+				liveSelectedEdgeIds,
+				locale
 			]);
 			const nodes = isSelecting && frozenRef.current !== null ? frozenRef.current.nodes : liveNodes;
 			const edges = isSelecting && frozenRef.current !== null ? frozenRef.current.edges : liveEdges;
@@ -13367,7 +13377,8 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				wsTitles,
 				canvasState.cards,
 				canvasState.edges,
-				canvasState.digests
+				canvasState.digests,
+				locale
 			]);
 			const savedCamera = canvas.savedCamera(INBOX_BOARD_ID);
 			const hasContent = Object.keys(visibleCards).length > 0 || Object.keys(wsFrames).length > 0;
@@ -13692,9 +13703,9 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		function MapOverlay(props) {
 			const open = (0, react.useSyncExternalStore)(mapUi.subscribe, () => mapUi.get().open);
-			const locale = (0, react.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
+			(0, react.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
 			if (!open) return null;
-			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(OpenMapOverlay, { ...props }, locale);
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(OpenMapOverlay, { ...props });
 		}
 		//#endregion
 		//#region src/client/MapToggleButton.tsx

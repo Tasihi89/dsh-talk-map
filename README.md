@@ -9,6 +9,7 @@ A visual conversation map plugin for DeepSeek Harness (dsh): every session becom
 - **Draw an edge to fork**: drag a line from a card onto empty space, preview (and edit) the context digest to inject, confirm — a new session starts *knowing* the old conversation.
 - **Card front = resume surface**: title, the digest's "next step", relative time, running state. One glance tells you what to do next.
 - **Automatic digests**: after a session goes idle, a three-field digest (summary / key findings / next step) is generated with your deployment's default model; hit ⟳ on a card to regenerate manually.
+- **Bilingual interface**: the map's own copy renders in Chinese or English. The pill in the map header cycles Auto → 中文 → English; Auto follows dsh's own language, and the choice is remembered across restarts. (Digests stay in the language of the conversation they summarise.)
 - **Provenance visible**: dsh's native fork/subagent lineage renders as dashed edges; your injection edges are solid.
 
 ## Install
@@ -32,6 +33,7 @@ Restart `dsh web`; a map button appears at the sidebar foot.
 | Double-click a card | open that session |
 | Drag from a card's right handle to empty space | preview injection → fork a new session |
 | ⟳ on a card | regenerate the digest |
+| Language pill in the map header | cycle Auto → 中文 → English |
 
 ## Where data lives
 

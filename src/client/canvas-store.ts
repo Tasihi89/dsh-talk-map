@@ -80,9 +80,26 @@ function restoreSnapshot(snapshot: BoardSnapshot): void {
     if (goneCards.length > 0) await talkMapApi.deleteCards(goneCards)
     if (Object.keys(snapshot.edges).length > 0) await talkMapApi.upsertEdges({ ...snapshot.edges })
     if (goneEdges.length > 0) await talkMapApi.deleteEdges(goneEdges)
-    if (global !== null) await talkMapApi.setGlobal(global)
+    if (global !== null) await persistGlobal(global, 'undo')
   })().catch((error) => {
     console.error('[dsh-talk-map] undo sync failed:', error)
+  })
+}
+
+/**
+ * Count of global writes whose POST has not answered yet. refresh() reads
+ * the server's copy wholesale, so without this a patch that is still in
+ * flight (a language switch, a hotkey rebind) is silently rolled back by
+ * the next refresh — the same protection dirtyCards gives card positions.
+ */
+let globalWritesInFlight = 0
+
+function persistGlobal(value: MapGlobal, label: string): Promise<void> {
+  globalWritesInFlight += 1
+  return talkMapApi.setGlobal(value).catch((error) => {
+    console.error(`[dsh-talk-map] ${label} save failed:`, error)
+  }).finally(() => {
+    globalWritesInFlight -= 1
   })
 }
 
@@ -95,9 +112,7 @@ function scheduleGlobalPersist(): void {
     globalPersistTimer = undefined
     const current = state.global
     if (current === null) return
-    void talkMapApi.setGlobal(current).catch((error) => {
-      console.error('[dsh-talk-map] layout-memory save failed:', error)
-    })
+    void persistGlobal(current, 'layout-memory')
   }, 600)
 }
 
@@ -224,12 +239,12 @@ export const canvas = {
   },
 
   /** Background re-sync with the server (missed SSE while the map was
-   * closed or the server restarted). Skipped while local writes are
-   * still in flight. */
+   * closed or the server restarted). Skipped while local writes — card
+   * positions or a global patch — are still in flight. */
   refresh(): void {
-    if (state.phase !== 'ready' || dirtyCards.size > 0) return
+    if (state.phase !== 'ready' || dirtyCards.size > 0 || globalWritesInFlight > 0) return
     talkMapApi.getState().then((payload) => {
-      if (state.phase !== 'ready' || dirtyCards.size > 0) return
+      if (state.phase !== 'ready' || dirtyCards.size > 0 || globalWritesInFlight > 0) return
       setState({
         cards: payload.cards,
         edges: payload.edges,
@@ -324,9 +339,7 @@ export const canvas = {
       frameTimer = undefined
       const current = state.global
       if (current === null) return
-      void talkMapApi.setGlobal(current).catch((error) => {
-        console.error('[dsh-talk-map] frame save failed:', error)
-      })
+      void persistGlobal(current, 'frame')
     }, 600)
   },
 
@@ -345,9 +358,7 @@ export const canvas = {
     if (state.global === null) return
     const global: MapGlobal = { ...state.global, ...patch }
     setState({ global })
-    void talkMapApi.setGlobal(global).catch((error) => {
-      console.error('[dsh-talk-map] global save failed:', error)
-    })
+    void persistGlobal(global, 'global')
   },
 
   setCamera(boardId: string, camera: Camera): void {
@@ -362,9 +373,7 @@ export const canvas = {
       cameraTimer = undefined
       const current = state.global
       if (current === null) return
-      void talkMapApi.setGlobal(current).catch((error) => {
-        console.error('[dsh-talk-map] camera save failed:', error)
-      })
+      void persistGlobal(current, 'camera')
     }, CAMERA_DELAY_MS)
   },
 

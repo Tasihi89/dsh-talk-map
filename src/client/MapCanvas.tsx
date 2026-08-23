@@ -30,7 +30,7 @@ import { DraftCardNode, type DraftCardNodeType } from './DraftCard.tsx'
 import { SessionCardNode, type SessionCardData, type SessionCardNodeType } from './SessionCard.tsx'
 import { SpawnPreview, type PendingSpawn } from './SpawnPreview.tsx'
 import { WsFrameNode, type WsFrameNodeType } from './WsFrame.tsx'
-import { t } from './i18n.ts'
+import { activeLocale, subscribeLocale, t } from './i18n.ts'
 import { talkMapApi, type ApiError } from './api.ts'
 import { useDsDarkTheme } from './use-dark.ts'
 import styles from './talk-map.module.css'
@@ -140,6 +140,11 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   // "one small box selects everything / selects nothing" reports.
   const [isSelecting, setIsSelecting] = useState(false)
   const frozenRef = useRef<{ nodes: TalkMapNode[]; edges: Edge[] } | null>(null)
+
+  // Copy inside React Flow nodes is memoised by the flow itself, so a
+  // language switch has to invalidate the memos that build them — hence
+  // `locale` in their dependency lists below.
+  const locale = useSyncExternalStore(subscribeLocale, activeLocale, activeLocale)
 
   const sessionWs = useMemo(() => sessionWorkspaceIndex(workspaces), [workspaces])
   const wsTitles = useMemo(
@@ -396,7 +401,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           },
         }]
     return [...frameNodes, ...cardNodes, ...draftNodes]
-  }, [frameGeometry, membersByGroup, wsTitles, visibleCards, canvasState.digests, canvasState.global, sessions, liveSelectedIds, draft, workspaces.items])
+  }, [frameGeometry, membersByGroup, wsTitles, visibleCards, canvasState.digests, canvasState.global, sessions, liveSelectedIds, draft, workspaces.items, locale])
 
   const sessionIdToCardId = useMemo(() => {
     const index = new Map<string, string>()
@@ -463,7 +468,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       })
     }
     return out
-  }, [visibleCards, canvasState.edges, sessions, sessionIdToCardId, liveSelectedEdgeIds])
+  }, [visibleCards, canvasState.edges, sessions, sessionIdToCardId, liveSelectedEdgeIds, locale])
 
   const nodes = isSelecting && frozenRef.current !== null ? frozenRef.current.nodes : liveNodes
   const edges = isSelecting && frozenRef.current !== null ? frozenRef.current.edges : liveEdges
@@ -1074,7 +1079,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       items,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menu, workspaces.items, sessions, boardSessionIds, wsFrames, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests])
+  }, [menu, workspaces.items, sessions, boardSessionIds, wsFrames, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests, locale])
 
   const savedCamera = canvas.savedCamera(INBOX_BOARD_ID)
   const hasContent = Object.keys(visibleCards).length > 0 || Object.keys(wsFrames).length > 0

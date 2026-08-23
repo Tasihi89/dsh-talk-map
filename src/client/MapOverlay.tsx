@@ -122,10 +122,9 @@ function OpenMapOverlay(props: RootSlotStandardProps): React.JSX.Element {
 
 export function MapOverlay(props: RootSlotStandardProps): React.JSX.Element | null {
   const open = useSyncExternalStore(mapUi.subscribe, () => mapUi.get().open)
-  // Keyed on the language so a switch REMOUNTS the tree. A plain re-render
-  // is not enough: React Flow memoises node components, so cards, frames and
-  // menus would keep the copy they were first rendered with.
-  const locale = useSyncExternalStore(subscribeLocale, activeLocale, activeLocale)
+  // Subscribing here re-renders the whole overlay on a language switch;
+  // MapCanvas re-keys its own memos so the React-Flow nodes follow.
+  useSyncExternalStore(subscribeLocale, activeLocale, activeLocale)
   if (!open) return null
-  return <OpenMapOverlay key={locale} {...props} />
+  return <OpenMapOverlay {...props} />
 }
