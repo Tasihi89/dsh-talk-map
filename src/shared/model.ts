@@ -75,9 +75,14 @@ export interface MapGlobal {
   wsFrames?: Record<string, FrameGeometry>
   /** Map-toggle hotkey, e.g. "alt+KeyF" (modifiers + KeyboardEvent.code). */
   hotkey?: string
+  /** Interface language; absent = 'auto' (follow dsh's <html lang>). */
+  locale?: LocalePref
   /** Last known placement per session — re-imports restore the arrangement. */
   layoutMemory?: Record<string, LayoutMemoryEntry>
 }
+
+/** Language the map's own copy renders in; 'auto' defers to dsh. */
+export type LocalePref = 'auto' | 'zh' | 'en'
 
 export interface LayoutMemoryEntry {
   x: number

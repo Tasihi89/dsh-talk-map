@@ -110,6 +110,26 @@
   color: var(--dsw-alias-label-primary);
 }
 
+/* Same pill as the hotkey button; min-width keeps the header from jumping
+   as the label cycles 自动 / 中文 / English. */
+.langButton {
+  flex: none;
+  min-width: 58px;
+  padding: 3px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.langButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
 .zoomResetLabel {
   font-size: 9px;
   font-weight: 700;

@@ -112,6 +112,228 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			}
 		};
 		//#endregion
+		//#region src/client/i18n.ts
+		const zh = {
+			"map.title": "对话地图",
+			"map.close": "关闭地图（Esc）",
+			"map.toggle": "对话地图",
+			"map.empty": "地图是空的 —— 右键导入工作区或对话；双击空白直接开新对话",
+			"map.sessions": "个会话",
+			"map.loading": "正在加载地图……",
+			"map.loadError": "地图数据加载失败：",
+			"card.running": "正在运行",
+			"card.ghostTitle": "会话已不存在",
+			"card.remove": "移除卡片",
+			"card.next": "下一步",
+			"card.stale": "摘要已过期",
+			"time.now": "刚刚",
+			"time.m": " 分钟前",
+			"time.h": " 小时前",
+			"time.d": " 天前",
+			"card.refresh": "重新生成摘要",
+			"edge.injected": "注入",
+			"spawn.heading": "连线分叉：开一个带上下文的新对话",
+			"spawn.from": "来源",
+			"spawn.hint": "以下内容将注入新对话作为背景，可以编辑：",
+			"spawn.noDigest": "（这段对话还没有摘要——可以先点卡片右上角的 ⟳ 生成，或直接在这里手写要带过去的背景。）",
+			"spawn.confirm": "开新对话",
+			"spawn.busy": "创建中……",
+			"spawn.cancel": "取消",
+			"spawn.mode.none": "不继承",
+			"spawn.mode.digest": "摘要注入",
+			"spawn.mode.full": "完整对话",
+			"spawn.noneHint": "全新对话，只保留一条关联线。输入第一句话（回车发送）：",
+			"spawn.fullHint": "新对话将携带这段对话的完整历史继续（dsh 原生分叉）。",
+			"spawn.needText": "注入内容不能为空",
+			"spawn.needFirstMessage": "请输入第一句话",
+			"edge.none": "关联",
+			"edge.full": "完整分叉",
+			"inject.header": "【上下文注入 · 来自】",
+			"inject.summary": "摘要：",
+			"inject.findings": "关键结论：",
+			"inject.next": "下一步：",
+			"frame.ungrouped": "未分组",
+			"draft.heading": "新对话",
+			"draft.workspace": "工作区",
+			"draft.model": "模型",
+			"draft.preset": "模式",
+			"draft.default": "默认",
+			"draft.placeholder": "想聊什么？回车发送并进入对话，Shift+回车换行",
+			"draft.send": "发送",
+			"draft.sending": "发送中……",
+			"draft.newWorkspace": "＋ 新建工作区",
+			"draft.wsName": "名称",
+			"draft.wsNamePlaceholder": "新工作区文件夹名",
+			"draft.defaultSuffix": "（默认）",
+			"color.toolbar": "颜色",
+			"color.clear": "清除颜色",
+			"card.waiting": "等你回复",
+			"card.done": "已完成",
+			"frame.unknown": "分组",
+			"frame.hiddenTitle": "还有卡片被折叠在框外，放大分组框可见",
+			"menu.empty": "（没有可选项）",
+			"menu.search": "搜索…",
+			"menu.alreadyImported": "已在地图 · 点击同步新会话",
+			"menu.newWs": "＋ 新建工作区…",
+			"menu.createAndImport": "创建并导入",
+			"menu.working": "处理中……",
+			"map.zoom100": "恢复 100% 缩放",
+			"hotkey.title": "地图切换快捷键 · 点击后按新组合键修改",
+			"hotkey.capturing": "按下新组合键…",
+			"menu.newChat": "新对话",
+			"menu.importWs": "导入工作区",
+			"menu.importSession": "导入对话",
+			"menu.moveGroup": "移动到分组（仅地图）",
+			"menu.noGroup": "移出分组（自由卡片）",
+			"menu.open": "打开对话",
+			"menu.removeCard": "从地图移除",
+			"edge.push": "推送最新摘要",
+			"edge.pushNoDigest": "来源还没有摘要",
+			"edge.delete": "删除连线",
+			"toast.pushed": "已推送给「{to}」",
+			"toast.notLive": "目标对话未激活——先打开它一次再推送",
+			"toast.pushFailed": "推送失败：",
+			"push.header": "【来自「{from}」的更新 · {time}】",
+			"lang.hint": "界面语言：{current} · 点击切换到{next}",
+			"lang.auto": "自动",
+			"lang.zh": "中文",
+			"lang.en": "English",
+			"menu.syncGroup": "同步该工作区的新会话",
+			"menu.removeGroup": "移除分组（连同卡片）"
+		};
+		const en = {
+			"map.title": "Talk Map",
+			"map.close": "Close map (Esc)",
+			"map.toggle": "Talk Map",
+			"map.empty": "The map is empty — right-click to import a workspace or conversation; double-click to start a chat",
+			"map.sessions": "sessions",
+			"map.loading": "Loading map…",
+			"map.loadError": "Failed to load map data:",
+			"card.running": "running",
+			"card.ghostTitle": "Session no longer exists",
+			"card.remove": "Remove card",
+			"card.next": "Next",
+			"card.stale": "digest stale",
+			"time.now": "now",
+			"time.m": "m ago",
+			"time.h": "h ago",
+			"time.d": "d ago",
+			"card.refresh": "Regenerate digest",
+			"edge.injected": "injected",
+			"spawn.heading": "Fork with context",
+			"spawn.from": "From",
+			"spawn.hint": "This text will be injected into the new session as background — edit freely:",
+			"spawn.noDigest": "(No digest yet — hit ⟳ on the card first, or write the context to carry over by hand.)",
+			"spawn.confirm": "Start session",
+			"spawn.busy": "Creating…",
+			"spawn.cancel": "Cancel",
+			"spawn.mode.none": "No context",
+			"spawn.mode.digest": "Inject digest",
+			"spawn.mode.full": "Full history",
+			"spawn.noneHint": "A fresh conversation, linked visually only. Type the first message (Enter sends):",
+			"spawn.fullHint": "The new conversation continues with this one's FULL history (dsh-native fork).",
+			"spawn.needText": "Injection text must not be empty",
+			"spawn.needFirstMessage": "Type the first message",
+			"edge.none": "linked",
+			"edge.full": "full fork",
+			"inject.header": "[Context injected from] ",
+			"inject.summary": "Summary: ",
+			"inject.findings": "Key findings:",
+			"inject.next": "Next step: ",
+			"frame.ungrouped": "Ungrouped",
+			"draft.heading": "New conversation",
+			"draft.workspace": "Workspace",
+			"draft.model": "Model",
+			"draft.preset": "Preset",
+			"draft.default": "Default",
+			"draft.placeholder": "What is this about? Enter sends and opens the chat; Shift+Enter for a newline",
+			"draft.send": "Send",
+			"draft.sending": "Sending…",
+			"draft.newWorkspace": "＋ New workspace",
+			"draft.wsName": "Name",
+			"draft.wsNamePlaceholder": "New workspace folder name",
+			"draft.defaultSuffix": " (default)",
+			"color.toolbar": "Color",
+			"color.clear": "Clear color",
+			"card.waiting": "needs you",
+			"card.done": "done",
+			"frame.unknown": "Group",
+			"frame.hiddenTitle": "Some cards are folded outside the frame — enlarge it to see them",
+			"menu.empty": "(nothing to pick)",
+			"menu.search": "Search…",
+			"menu.alreadyImported": "on map · click to sync new sessions",
+			"menu.newWs": "＋ New workspace…",
+			"menu.createAndImport": "Create & import",
+			"menu.working": "Working…",
+			"map.zoom100": "Reset zoom to 100%",
+			"hotkey.title": "Map toggle hotkey · click, then press a new combo",
+			"hotkey.capturing": "Press a combo…",
+			"menu.newChat": "New conversation",
+			"menu.importWs": "Import workspace",
+			"menu.importSession": "Import conversation",
+			"menu.moveGroup": "Move to group (map only)",
+			"menu.noGroup": "Remove from group (free card)",
+			"menu.open": "Open conversation",
+			"menu.removeCard": "Remove from map",
+			"edge.push": "Push latest digest",
+			"edge.pushNoDigest": "source has no digest yet",
+			"edge.delete": "Delete edge",
+			"toast.pushed": "Pushed to \"{to}\"",
+			"toast.notLive": "Target conversation is not active — open it once, then push again",
+			"toast.pushFailed": "Push failed: ",
+			"push.header": "[Update from \"{from}\" · {time}]",
+			"lang.hint": "Interface language: {current} · click to switch to {next}",
+			"lang.auto": "Auto",
+			"lang.zh": "中文",
+			"lang.en": "English",
+			"menu.syncGroup": "Sync new sessions of this workspace",
+			"menu.removeGroup": "Remove group (with its cards)"
+		};
+		/** The order the header button cycles through. */
+		const LOCALE_CYCLE = [
+			"auto",
+			"zh",
+			"en"
+		];
+		let preference = "auto";
+		const localeListeners = /* @__PURE__ */ new Set();
+		function documentLocale() {
+			if (typeof document === "undefined") return "en";
+			return (document.documentElement.lang ?? "").toLowerCase().startsWith("zh") ? "zh" : "en";
+		}
+		/** The language actually rendered right now. */
+		function activeLocale() {
+			return preference === "auto" ? documentLocale() : preference;
+		}
+		/**
+		* Apply a preference. Notifying only on a real change matters: canvas-store
+		* calls this on EVERY state change (card drags included), and a notification
+		* remounts the whole overlay.
+		*/
+		function setLocalePref(next) {
+			if (next === preference) return;
+			preference = next;
+			for (const listener of localeListeners) listener();
+		}
+		function subscribeLocale(listener) {
+			localeListeners.add(listener);
+			return () => {
+				localeListeners.delete(listener);
+			};
+		}
+		/**
+		* Translate, optionally interpolating {name} placeholders. Single-pass
+		* regex interpolation is the ONLY sanctioned way to fill templates:
+		* chained String.replace at call sites both expands $-patterns lurking in
+		* real values (conversation titles) and re-scans earlier insertions (a
+		* title containing a literal "{time}" would swallow the next parameter).
+		*/
+		function t(key, params) {
+			const template = (activeLocale() === "zh" ? zh : en)[key] ?? en[key] ?? key;
+			if (params === void 0) return template;
+			return template.replace(/\{(\w+)\}/g, (match, name) => params[name] ?? match);
+		}
+		//#endregion
 		//#region src/shared/model.ts
 		const INBOX_BOARD_ID = "inbox";
 		//#endregion
@@ -138,6 +360,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				...state$1,
 				...next
 			};
+			setLocalePref(state$1.global?.locale ?? "auto");
 			for (const listener of listeners$1) listener();
 		}
 		const dirtyCards = /* @__PURE__ */ new Set();
@@ -588,197 +811,6 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		function getServices() {
 			return services;
-		}
-		//#endregion
-		//#region src/client/i18n.ts
-		/**
-		* Two-locale copy dictionary reading <html lang> directly (the pattern
-		* dsh-plugin-market uses), so no dependency on the locale service. dsh sets
-		* the document language; anything starting with "zh" renders Chinese.
-		*/
-		const zh = {
-			"map.title": "对话地图",
-			"map.close": "关闭地图（Esc）",
-			"map.toggle": "对话地图",
-			"map.empty": "地图是空的 —— 右键导入工作区或对话；双击空白直接开新对话",
-			"map.sessions": "个会话",
-			"map.loading": "正在加载地图……",
-			"map.loadError": "地图数据加载失败：",
-			"card.running": "正在运行",
-			"card.ghostTitle": "会话已不存在",
-			"card.remove": "移除卡片",
-			"card.next": "下一步",
-			"card.stale": "摘要已过期",
-			"time.now": "刚刚",
-			"time.m": " 分钟前",
-			"time.h": " 小时前",
-			"time.d": " 天前",
-			"card.refresh": "重新生成摘要",
-			"edge.injected": "注入",
-			"spawn.heading": "连线分叉：开一个带上下文的新对话",
-			"spawn.from": "来源",
-			"spawn.hint": "以下内容将注入新对话作为背景，可以编辑：",
-			"spawn.noDigest": "（这段对话还没有摘要——可以先点卡片右上角的 ⟳ 生成，或直接在这里手写要带过去的背景。）",
-			"spawn.confirm": "开新对话",
-			"spawn.busy": "创建中……",
-			"spawn.cancel": "取消",
-			"spawn.mode.none": "不继承",
-			"spawn.mode.digest": "摘要注入",
-			"spawn.mode.full": "完整对话",
-			"spawn.noneHint": "全新对话，只保留一条关联线。输入第一句话（回车发送）：",
-			"spawn.fullHint": "新对话将携带这段对话的完整历史继续（dsh 原生分叉）。",
-			"spawn.needText": "注入内容不能为空",
-			"spawn.needFirstMessage": "请输入第一句话",
-			"edge.none": "关联",
-			"edge.full": "完整分叉",
-			"inject.header": "【上下文注入 · 来自】",
-			"inject.summary": "摘要：",
-			"inject.findings": "关键结论：",
-			"inject.next": "下一步：",
-			"frame.ungrouped": "未分组",
-			"draft.heading": "新对话",
-			"draft.workspace": "工作区",
-			"draft.model": "模型",
-			"draft.preset": "模式",
-			"draft.default": "默认",
-			"draft.placeholder": "想聊什么？回车发送并进入对话，Shift+回车换行",
-			"draft.send": "发送",
-			"draft.sending": "发送中……",
-			"draft.newWorkspace": "＋ 新建工作区",
-			"draft.wsName": "名称",
-			"draft.wsNamePlaceholder": "新工作区文件夹名",
-			"draft.defaultSuffix": "（默认）",
-			"color.toolbar": "颜色",
-			"color.clear": "清除颜色",
-			"card.waiting": "等你回复",
-			"card.done": "已完成",
-			"frame.unknown": "分组",
-			"frame.hiddenTitle": "还有卡片被折叠在框外，放大分组框可见",
-			"menu.empty": "（没有可选项）",
-			"menu.search": "搜索…",
-			"menu.alreadyImported": "已在地图 · 点击同步新会话",
-			"menu.newWs": "＋ 新建工作区…",
-			"menu.createAndImport": "创建并导入",
-			"menu.working": "处理中……",
-			"map.zoom100": "恢复 100% 缩放",
-			"hotkey.title": "地图切换快捷键 · 点击后按新组合键修改",
-			"hotkey.capturing": "按下新组合键…",
-			"menu.newChat": "新对话",
-			"menu.importWs": "导入工作区",
-			"menu.importSession": "导入对话",
-			"menu.moveGroup": "移动到分组（仅地图）",
-			"menu.noGroup": "移出分组（自由卡片）",
-			"menu.open": "打开对话",
-			"menu.removeCard": "从地图移除",
-			"edge.push": "推送最新摘要",
-			"edge.pushNoDigest": "来源还没有摘要",
-			"edge.delete": "删除连线",
-			"toast.pushed": "已推送给「{to}」",
-			"toast.notLive": "目标对话未激活——先打开它一次再推送",
-			"toast.pushFailed": "推送失败：",
-			"push.header": "【来自「{from}」的更新 · {time}】",
-			"menu.syncGroup": "同步该工作区的新会话",
-			"menu.removeGroup": "移除分组（连同卡片）"
-		};
-		const en = {
-			"map.title": "Talk Map",
-			"map.close": "Close map (Esc)",
-			"map.toggle": "Talk Map",
-			"map.empty": "The map is empty — right-click to import a workspace or conversation; double-click to start a chat",
-			"map.sessions": "sessions",
-			"map.loading": "Loading map…",
-			"map.loadError": "Failed to load map data:",
-			"card.running": "running",
-			"card.ghostTitle": "Session no longer exists",
-			"card.remove": "Remove card",
-			"card.next": "Next",
-			"card.stale": "digest stale",
-			"time.now": "now",
-			"time.m": "m ago",
-			"time.h": "h ago",
-			"time.d": "d ago",
-			"card.refresh": "Regenerate digest",
-			"edge.injected": "injected",
-			"spawn.heading": "Fork with context",
-			"spawn.from": "From",
-			"spawn.hint": "This text will be injected into the new session as background — edit freely:",
-			"spawn.noDigest": "(No digest yet — hit ⟳ on the card first, or write the context to carry over by hand.)",
-			"spawn.confirm": "Start session",
-			"spawn.busy": "Creating…",
-			"spawn.cancel": "Cancel",
-			"spawn.mode.none": "No context",
-			"spawn.mode.digest": "Inject digest",
-			"spawn.mode.full": "Full history",
-			"spawn.noneHint": "A fresh conversation, linked visually only. Type the first message (Enter sends):",
-			"spawn.fullHint": "The new conversation continues with this one's FULL history (dsh-native fork).",
-			"spawn.needText": "Injection text must not be empty",
-			"spawn.needFirstMessage": "Type the first message",
-			"edge.none": "linked",
-			"edge.full": "full fork",
-			"inject.header": "[Context injected from] ",
-			"inject.summary": "Summary: ",
-			"inject.findings": "Key findings:",
-			"inject.next": "Next step: ",
-			"frame.ungrouped": "Ungrouped",
-			"draft.heading": "New conversation",
-			"draft.workspace": "Workspace",
-			"draft.model": "Model",
-			"draft.preset": "Preset",
-			"draft.default": "Default",
-			"draft.placeholder": "What is this about? Enter sends and opens the chat; Shift+Enter for a newline",
-			"draft.send": "Send",
-			"draft.sending": "Sending…",
-			"draft.newWorkspace": "＋ New workspace",
-			"draft.wsName": "Name",
-			"draft.wsNamePlaceholder": "New workspace folder name",
-			"draft.defaultSuffix": " (default)",
-			"color.toolbar": "Color",
-			"color.clear": "Clear color",
-			"card.waiting": "needs you",
-			"card.done": "done",
-			"frame.unknown": "Group",
-			"frame.hiddenTitle": "Some cards are folded outside the frame — enlarge it to see them",
-			"menu.empty": "(nothing to pick)",
-			"menu.search": "Search…",
-			"menu.alreadyImported": "on map · click to sync new sessions",
-			"menu.newWs": "＋ New workspace…",
-			"menu.createAndImport": "Create & import",
-			"menu.working": "Working…",
-			"map.zoom100": "Reset zoom to 100%",
-			"hotkey.title": "Map toggle hotkey · click, then press a new combo",
-			"hotkey.capturing": "Press a combo…",
-			"menu.newChat": "New conversation",
-			"menu.importWs": "Import workspace",
-			"menu.importSession": "Import conversation",
-			"menu.moveGroup": "Move to group (map only)",
-			"menu.noGroup": "Remove from group (free card)",
-			"menu.open": "Open conversation",
-			"menu.removeCard": "Remove from map",
-			"edge.push": "Push latest digest",
-			"edge.pushNoDigest": "source has no digest yet",
-			"edge.delete": "Delete edge",
-			"toast.pushed": "Pushed to \"{to}\"",
-			"toast.notLive": "Target conversation is not active — open it once, then push again",
-			"toast.pushFailed": "Push failed: ",
-			"push.header": "[Update from \"{from}\" · {time}]",
-			"menu.syncGroup": "Sync new sessions of this workspace",
-			"menu.removeGroup": "Remove group (with its cards)"
-		};
-		function isZh() {
-			if (typeof document === "undefined") return false;
-			return (document.documentElement.lang ?? "").toLowerCase().startsWith("zh");
-		}
-		/**
-		* Translate, optionally interpolating {name} placeholders. Single-pass
-		* regex interpolation is the ONLY sanctioned way to fill templates:
-		* chained String.replace at call sites both expands $-patterns lurking in
-		* real values (conversation titles) and re-scans earlier insertions (a
-		* title containing a literal "{time}" would swallow the next parameter).
-		*/
-		function t(key, params) {
-			const template = (isZh() ? zh : en)[key] ?? en[key] ?? key;
-			if (params === void 0) return template;
-			return template.replace(/\{(\w+)\}/g, (match, name) => params[name] ?? match);
 		}
 		//#endregion
 		//#region node_modules/.pnpm/classcat@5.0.5/node_modules/classcat/index.js
@@ -11465,7 +11497,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:module:src/client/talk-map.module.css.mjs
-		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleRow{width:100%;color:var(--dsw-alias-label-secondary);cursor:pointer;text-align:left;background:0 0;border:none;border-radius:8px;align-items:center;gap:8px;padding:6px 10px;font-size:13px;display:flex}._0iu0NW_toggleRow:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleLabel{white-space:nowrap}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_hotkeyButton{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;white-space:nowrap;background:0 0;border-radius:999px;flex:none;padding:3px 10px;font-size:12px}._0iu0NW_hotkeyButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_zoomResetLabel{letter-spacing:-.5px;font-size:9px;font-weight:700}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_canvas .react-flow__nodesselection{pointer-events:none!important;display:none!important}._0iu0NW_canvas .react-flow__nodesselection-rect{pointer-events:none!important;display:none!important}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:104px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardFooter{color:var(--dsw-alias-label-tertiary);justify-content:space-between;align-items:center;gap:8px;margin-top:auto;font-size:11px;display:flex}._0iu0NW_cardTime{flex:none}._0iu0NW_cardBadgeRunning{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;align-items:center;gap:5px;padding:1px 7px;font-size:10px;display:inline-flex}._0iu0NW_cardSummary{color:var(--dsw-alias-label-secondary);-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:12px;line-height:1.45;display:-webkit-box;overflow:hidden}._0iu0NW_cardBadgeWaiting{color:var(--dsw-alias-state-warn-label);background:var(--dsw-alias-state-warn-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardBadgeDone{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:2px solid var(--dsw-alias-bg-layer-1);opacity:0;width:10px;height:10px}._0iu0NW_card:hover ._0iu0NW_cardHandle,._0iu0NW_canvasConnecting ._0iu0NW_cardHandle{opacity:1}._0iu0NW_cardHandle:hover{background:var(--dsw-alias-brand-primary)}._0iu0NW_cardRefresh{width:22px;height:22px;color:var(--dsw-alias-label-tertiary);cursor:pointer;opacity:0;background:0 0;border:none;border-radius:6px;flex:none;margin-left:auto;padding:0;font-size:13px;line-height:1;transition:opacity .12s}._0iu0NW_card:hover ._0iu0NW_cardRefresh{opacity:1}._0iu0NW_cardRefresh:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_cardRefreshBusy{opacity:1;animation:1s linear infinite _0iu0NW_talkmap-spin}@keyframes _0iu0NW_talkmap-spin{to{transform:rotate(360deg)}}._0iu0NW_spawnPanel{z-index:6;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:420px;max-width:calc(100% - 48px);box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:16px;display:flex;position:absolute;top:24px;right:24px}._0iu0NW_spawnHeading{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_spawnFrom{color:var(--dsw-alias-label-secondary);font-size:12px}._0iu0NW_spawnModes{gap:6px;display:flex}._0iu0NW_spawnModeBtn{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;flex:1;padding:5px 0;font-size:12px}._0iu0NW_spawnModeBtn:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_spawnModeActive{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary);background:var(--dsw-alias-interactive-bg-active)}._0iu0NW_spawnHint{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_spawnTextarea{resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:140px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_spawnError{color:var(--dsw-alias-state-error-primary);word-break:break-all;font-size:12px}._0iu0NW_spawnActions{justify-content:flex-end;gap:8px;display:flex}._0iu0NW_spawnBtnPrimary{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground);cursor:pointer;border:none;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnPrimary:hover{background:var(--dsw-alias-button-primary-hover)}._0iu0NW_spawnBtnPrimary:disabled{background:var(--dsw-alias-button-primary-dimmed);cursor:default}._0iu0NW_spawnBtnGhost{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnGhost:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_wsFrame{border:1.5px dashed var(--dsw-alias-border-l2);background:0 0;border-radius:16px;position:relative}._0iu0NW_wsFrameSelected{border-style:solid;border-color:var(--dsw-alias-brand-primary)}._0iu0NW_wsFrameLabel{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:nowrap;pointer-events:auto;cursor:grab;border-radius:999px;align-items:center;gap:6px;padding:2px 10px;font-size:12px;font-weight:600;display:flex;position:absolute;top:-12px;left:14px}._0iu0NW_wsFrameLabel:active{cursor:grabbing}._0iu0NW_wsFrameEdge{pointer-events:auto;cursor:grab;position:absolute}._0iu0NW_wsFrameEdge:active{cursor:grabbing}._0iu0NW_wsFrameResize{pointer-events:auto;cursor:nwse-resize;border-right:3px solid var(--dsw-alias-border-l3);border-bottom:3px solid var(--dsw-alias-border-l3);opacity:.7;border-bottom-right-radius:14px;width:16px;height:16px;position:absolute;bottom:-2px;right:-2px}._0iu0NW_wsFrameResize:hover{border-color:var(--dsw-alias-brand-primary);opacity:1}._0iu0NW_wsFrameCount{color:var(--dsw-alias-label-tertiary);font-weight:400}._0iu0NW_draftCard{box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);width:360px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:14px;font-size:13px;display:flex}._0iu0NW_draftHeading{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}._0iu0NW_draftRow{align-items:center;gap:8px;display:flex}._0iu0NW_draftLabel{width:52px;color:var(--dsw-alias-label-tertiary);flex:none;font-size:12px}._0iu0NW_draftSelect{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);min-width:0;color:var(--dsw-alias-label-primary);border-radius:7px;flex:1;padding:5px 8px;font-size:12px}._0iu0NW_draftGrow{flex-direction:column;flex:1;gap:3px;min-width:0;display:flex}._0iu0NW_draftInput{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;color:var(--dsw-alias-label-primary);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_draftPathPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;font-size:11px}._0iu0NW_draftTextarea{box-sizing:border-box;resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:88px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:9px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_colorToolbar{z-index:7;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 2px 10px var(--dsw-alias-bg-mask-1);border-radius:10px;align-items:center;gap:6px;padding:6px 10px;display:flex;position:absolute;top:12px;left:12px}._0iu0NW_colorToolbarLabel{color:var(--dsw-alias-label-tertiary);margin-right:2px;font-size:12px}._0iu0NW_colorSwatch{border:1px solid var(--dsw-alias-border-l2);cursor:pointer;width:18px;height:18px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;padding:0;font-size:11px;line-height:1;display:flex}._0iu0NW_colorSwatch:hover{transform:scale(1.15)}._0iu0NW_colorSwatchClear{background:0 0}._0iu0NW_menu{z-index:9;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);min-width:200px;max-width:280px;max-height:380px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:10px;flex-direction:column;padding:6px;display:flex;position:absolute;overflow-y:auto}._0iu0NW_menuTitle{color:var(--dsw-alias-label-tertiary);flex:none;padding:4px 10px 6px;font-size:11px}._0iu0NW_menuSearch{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:calc(100% - 8px);color:var(--dsw-alias-label-primary);border-radius:7px;flex:none;margin:2px 4px 6px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_menuHint{color:var(--dsw-alias-label-dimmed);font-size:11px}._0iu0NW_menuPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;flex:none;padding:0 10px 4px;font-size:11px}._0iu0NW_menuError{color:var(--dsw-alias-state-error-primary);word-break:break-all;flex:none;padding:0 10px 4px;font-size:11px}._0iu0NW_menuEmpty{color:var(--dsw-alias-label-tertiary);padding:8px 10px;font-size:12px}._0iu0NW_menuItem{text-align:left;width:100%;color:var(--dsw-alias-label-primary);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:none;border-radius:7px;flex:none;padding:6px 10px;font-size:13px;display:block;overflow:hidden}._0iu0NW_menuItem:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_menuItem:disabled{color:var(--dsw-alias-label-dimmed);cursor:default}._0iu0NW_wsFrameHidden{color:var(--dsw-alias-state-warn-primary);font-weight:400}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}._0iu0NW_toast{z-index:8;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);max-width:70%;box-shadow:0 4px 16px var(--dsw-alias-bg-mask-2);color:var(--dsw-alias-label-primary);pointer-events:none;white-space:nowrap;text-overflow:ellipsis;border-radius:999px;padding:7px 16px;font-size:12px;position:absolute;bottom:28px;left:50%;overflow:hidden;transform:translate(-50%)}";
+		const css = "._0iu0NW_toggleButton{width:32px;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:0;display:flex}._0iu0NW_toggleButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleButtonActive{background:var(--dsw-alias-interactive-bg-active);color:var(--dsw-alias-brand-primary)}._0iu0NW_toggleRow{width:100%;color:var(--dsw-alias-label-secondary);cursor:pointer;text-align:left;background:0 0;border:none;border-radius:8px;align-items:center;gap:8px;padding:6px 10px;font-size:13px;display:flex}._0iu0NW_toggleRow:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_toggleLabel{white-space:nowrap}._0iu0NW_toggleIcon{flex:none;width:18px;height:18px}._0iu0NW_overlay{background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);pointer-events:auto;flex-direction:column;display:flex;position:absolute;top:0;bottom:0;left:0;right:0}._0iu0NW_header{border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);flex:none;align-items:center;gap:10px;padding:8px 14px;display:flex}._0iu0NW_headerTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_headerBadge{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_headerSpace{flex:1}._0iu0NW_hotkeyButton{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;white-space:nowrap;background:0 0;border-radius:999px;flex:none;padding:3px 10px;font-size:12px}._0iu0NW_hotkeyButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_langButton{border:1px solid var(--dsw-alias-border-l2);min-width:58px;color:var(--dsw-alias-label-secondary);cursor:pointer;white-space:nowrap;background:0 0;border-radius:999px;flex:none;padding:3px 10px;font-size:12px}._0iu0NW_langButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_zoomResetLabel{letter-spacing:-.5px;font-size:9px;font-weight:700}._0iu0NW_closeButton{width:28px;height:28px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:none;border-radius:6px;justify-content:center;align-items:center;padding:0;display:flex}._0iu0NW_closeButton:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_canvas{flex:1;min-height:0;position:relative}._0iu0NW_canvas .react-flow__nodesselection{pointer-events:none!important;display:none!important}._0iu0NW_canvas .react-flow__nodesselection-rect{pointer-events:none!important;display:none!important}._0iu0NW_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:224px;min-height:104px;color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px var(--dsw-alias-bg-mask-1);border-radius:10px;flex-direction:column;gap:6px;padding:10px 12px;font-size:13px;display:flex}._0iu0NW_cardSelected{border-color:var(--dsw-alias-brand-primary)}._0iu0NW_cardGhost{opacity:.55;border-style:dashed}._0iu0NW_cardTop{align-items:center;gap:6px;min-width:0;display:flex}._0iu0NW_cardTitle{-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;overflow:hidden}._0iu0NW_runningDot{background:var(--dsw-alias-state-success-primary);border-radius:50%;flex:none;width:8px;height:8px;animation:1.6s ease-in-out infinite _0iu0NW_talkmap-pulse}@keyframes _0iu0NW_talkmap-pulse{50%{opacity:.35}}._0iu0NW_cardNext{color:var(--dsw-alias-label-secondary);align-items:baseline;gap:6px;min-width:0;font-size:12px;display:flex}._0iu0NW_cardNextLabel{color:var(--dsw-alias-brand-primary);flex:none;font-size:11px;font-weight:600}._0iu0NW_cardNextText{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}._0iu0NW_cardStale{color:var(--dsw-alias-state-warn-primary);flex:none;font-size:12px}._0iu0NW_cardFooter{color:var(--dsw-alias-label-tertiary);justify-content:space-between;align-items:center;gap:8px;margin-top:auto;font-size:11px;display:flex}._0iu0NW_cardTime{flex:none}._0iu0NW_cardBadgeRunning{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;align-items:center;gap:5px;padding:1px 7px;font-size:10px;display:inline-flex}._0iu0NW_cardSummary{color:var(--dsw-alias-label-secondary);-webkit-line-clamp:2;word-break:break-word;-webkit-box-orient:vertical;font-size:12px;line-height:1.45;display:-webkit-box;overflow:hidden}._0iu0NW_cardBadgeWaiting{color:var(--dsw-alias-state-warn-label);background:var(--dsw-alias-state-warn-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardBadgeDone{color:var(--dsw-alias-state-success-primary);background:var(--dsw-alias-state-success-tertiary);border-radius:999px;padding:1px 7px;font-size:10px}._0iu0NW_cardRemove{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:6px;align-self:flex-start;padding:3px 8px;font-size:12px}._0iu0NW_cardRemove:hover{background:var(--dsw-alias-interactive-bg-hover-danger);color:var(--dsw-alias-state-error-primary)}._0iu0NW_cardHandle{background:var(--dsw-alias-border-l3);border:2px solid var(--dsw-alias-bg-layer-1);opacity:0;width:10px;height:10px}._0iu0NW_card:hover ._0iu0NW_cardHandle,._0iu0NW_canvasConnecting ._0iu0NW_cardHandle{opacity:1}._0iu0NW_cardHandle:hover{background:var(--dsw-alias-brand-primary)}._0iu0NW_cardRefresh{width:22px;height:22px;color:var(--dsw-alias-label-tertiary);cursor:pointer;opacity:0;background:0 0;border:none;border-radius:6px;flex:none;margin-left:auto;padding:0;font-size:13px;line-height:1;transition:opacity .12s}._0iu0NW_card:hover ._0iu0NW_cardRefresh{opacity:1}._0iu0NW_cardRefresh:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}._0iu0NW_cardRefreshBusy{opacity:1;animation:1s linear infinite _0iu0NW_talkmap-spin}@keyframes _0iu0NW_talkmap-spin{to{transform:rotate(360deg)}}._0iu0NW_spawnPanel{z-index:6;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);width:420px;max-width:calc(100% - 48px);box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:16px;display:flex;position:absolute;top:24px;right:24px}._0iu0NW_spawnHeading{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600}._0iu0NW_spawnFrom{color:var(--dsw-alias-label-secondary);font-size:12px}._0iu0NW_spawnModes{gap:6px;display:flex}._0iu0NW_spawnModeBtn{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;flex:1;padding:5px 0;font-size:12px}._0iu0NW_spawnModeBtn:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_spawnModeActive{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary);background:var(--dsw-alias-interactive-bg-active)}._0iu0NW_spawnHint{color:var(--dsw-alias-label-tertiary);font-size:12px}._0iu0NW_spawnTextarea{resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:140px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_spawnError{color:var(--dsw-alias-state-error-primary);word-break:break-all;font-size:12px}._0iu0NW_spawnActions{justify-content:flex-end;gap:8px;display:flex}._0iu0NW_spawnBtnPrimary{background:var(--dsw-alias-button-primary-fill);color:var(--dsw-alias-label-primary-foreground);cursor:pointer;border:none;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnPrimary:hover{background:var(--dsw-alias-button-primary-hover)}._0iu0NW_spawnBtnPrimary:disabled{background:var(--dsw-alias-button-primary-dimmed);cursor:default}._0iu0NW_spawnBtnGhost{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border-radius:8px;padding:6px 16px;font-size:13px}._0iu0NW_spawnBtnGhost:hover{background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_wsFrame{border:1.5px dashed var(--dsw-alias-border-l2);background:0 0;border-radius:16px;position:relative}._0iu0NW_wsFrameSelected{border-style:solid;border-color:var(--dsw-alias-brand-primary)}._0iu0NW_wsFrameLabel{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);white-space:nowrap;pointer-events:auto;cursor:grab;border-radius:999px;align-items:center;gap:6px;padding:2px 10px;font-size:12px;font-weight:600;display:flex;position:absolute;top:-12px;left:14px}._0iu0NW_wsFrameLabel:active{cursor:grabbing}._0iu0NW_wsFrameEdge{pointer-events:auto;cursor:grab;position:absolute}._0iu0NW_wsFrameEdge:active{cursor:grabbing}._0iu0NW_wsFrameResize{pointer-events:auto;cursor:nwse-resize;border-right:3px solid var(--dsw-alias-border-l3);border-bottom:3px solid var(--dsw-alias-border-l3);opacity:.7;border-bottom-right-radius:14px;width:16px;height:16px;position:absolute;bottom:-2px;right:-2px}._0iu0NW_wsFrameResize:hover{border-color:var(--dsw-alias-brand-primary);opacity:1}._0iu0NW_wsFrameCount{color:var(--dsw-alias-label-tertiary);font-weight:400}._0iu0NW_draftCard{box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);width:360px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:12px;flex-direction:column;gap:8px;padding:14px;font-size:13px;display:flex}._0iu0NW_draftHeading{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}._0iu0NW_draftRow{align-items:center;gap:8px;display:flex}._0iu0NW_draftLabel{width:52px;color:var(--dsw-alias-label-tertiary);flex:none;font-size:12px}._0iu0NW_draftSelect{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);min-width:0;color:var(--dsw-alias-label-primary);border-radius:7px;flex:1;padding:5px 8px;font-size:12px}._0iu0NW_draftGrow{flex-direction:column;flex:1;gap:3px;min-width:0;display:flex}._0iu0NW_draftInput{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;color:var(--dsw-alias-label-primary);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_draftPathPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;font-size:11px}._0iu0NW_draftTextarea{box-sizing:border-box;resize:vertical;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:100%;min-height:88px;color:var(--dsw-alias-label-primary);border-radius:8px;padding:9px;font-family:inherit;font-size:13px;line-height:1.5}._0iu0NW_colorToolbar{z-index:7;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 2px 10px var(--dsw-alias-bg-mask-1);border-radius:10px;align-items:center;gap:6px;padding:6px 10px;display:flex;position:absolute;top:12px;left:12px}._0iu0NW_colorToolbarLabel{color:var(--dsw-alias-label-tertiary);margin-right:2px;font-size:12px}._0iu0NW_colorSwatch{border:1px solid var(--dsw-alias-border-l2);cursor:pointer;width:18px;height:18px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;padding:0;font-size:11px;line-height:1;display:flex}._0iu0NW_colorSwatch:hover{transform:scale(1.15)}._0iu0NW_colorSwatchClear{background:0 0}._0iu0NW_menu{z-index:9;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);min-width:200px;max-width:280px;max-height:380px;box-shadow:0 8px 30px var(--dsw-alias-bg-mask-2);border-radius:10px;flex-direction:column;padding:6px;display:flex;position:absolute;overflow-y:auto}._0iu0NW_menuTitle{color:var(--dsw-alias-label-tertiary);flex:none;padding:4px 10px 6px;font-size:11px}._0iu0NW_menuSearch{box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-base);width:calc(100% - 8px);color:var(--dsw-alias-label-primary);border-radius:7px;flex:none;margin:2px 4px 6px;padding:5px 8px;font-family:inherit;font-size:12px}._0iu0NW_menuHint{color:var(--dsw-alias-label-dimmed);font-size:11px}._0iu0NW_menuPreview{color:var(--dsw-alias-label-tertiary);word-break:break-all;flex:none;padding:0 10px 4px;font-size:11px}._0iu0NW_menuError{color:var(--dsw-alias-state-error-primary);word-break:break-all;flex:none;padding:0 10px 4px;font-size:11px}._0iu0NW_menuEmpty{color:var(--dsw-alias-label-tertiary);padding:8px 10px;font-size:12px}._0iu0NW_menuItem{text-align:left;width:100%;color:var(--dsw-alias-label-primary);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:none;border-radius:7px;flex:none;padding:6px 10px;font-size:13px;display:block;overflow:hidden}._0iu0NW_menuItem:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}._0iu0NW_menuItem:disabled{color:var(--dsw-alias-label-dimmed);cursor:default}._0iu0NW_wsFrameHidden{color:var(--dsw-alias-state-warn-primary);font-weight:400}._0iu0NW_emptyHint{color:var(--dsw-alias-label-tertiary);pointer-events:none;z-index:4;font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}._0iu0NW_toast{z-index:8;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);max-width:70%;box-shadow:0 4px 16px var(--dsw-alias-bg-mask-2);color:var(--dsw-alias-label-primary);pointer-events:none;white-space:nowrap;text-overflow:ellipsis;border-radius:999px;padding:7px 16px;font-size:12px;position:absolute;bottom:28px;left:50%;overflow:hidden;transform:translate(-50%)}";
 		const tagId = "dsh-talk-map/talk-map.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");
@@ -11475,85 +11507,86 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var talk_map_module_css_default = {
-			"cardNextText": "_0iu0NW_cardNextText",
-			"toggleRow": "_0iu0NW_toggleRow",
-			"draftInput": "_0iu0NW_draftInput",
-			"draftPathPreview": "_0iu0NW_draftPathPreview",
-			"spawnModes": "_0iu0NW_spawnModes",
-			"toast": "_0iu0NW_toast",
-			"menuEmpty": "_0iu0NW_menuEmpty",
-			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
-			"cardGhost": "_0iu0NW_cardGhost",
-			"canvasConnecting": "_0iu0NW_canvasConnecting",
-			"draftHeading": "_0iu0NW_draftHeading",
-			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
-			"cardNext": "_0iu0NW_cardNext",
-			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
-			"cardRemove": "_0iu0NW_cardRemove",
-			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
-			"draftTextarea": "_0iu0NW_draftTextarea",
-			"cardRefresh": "_0iu0NW_cardRefresh",
-			"menuSearch": "_0iu0NW_menuSearch",
-			"spawnActions": "_0iu0NW_spawnActions",
-			"cardFooter": "_0iu0NW_cardFooter",
-			"menuError": "_0iu0NW_menuError",
-			"spawnModeActive": "_0iu0NW_spawnModeActive",
-			"colorToolbar": "_0iu0NW_colorToolbar",
-			"menuItem": "_0iu0NW_menuItem",
-			"menuTitle": "_0iu0NW_menuTitle",
-			"toggleIcon": "_0iu0NW_toggleIcon",
-			"talkmap-spin": "_0iu0NW_talkmap-spin",
-			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
-			"headerSpace": "_0iu0NW_headerSpace",
-			"cardStale": "_0iu0NW_cardStale",
-			"closeButton": "_0iu0NW_closeButton",
-			"wsFrameResize": "_0iu0NW_wsFrameResize",
-			"draftSelect": "_0iu0NW_draftSelect",
-			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
-			"colorSwatch": "_0iu0NW_colorSwatch",
-			"draftGrow": "_0iu0NW_draftGrow",
-			"menuHint": "_0iu0NW_menuHint",
-			"runningDot": "_0iu0NW_runningDot",
-			"cardSummary": "_0iu0NW_cardSummary",
-			"spawnPanel": "_0iu0NW_spawnPanel",
-			"spawnHeading": "_0iu0NW_spawnHeading",
-			"header": "_0iu0NW_header",
-			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
-			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
-			"hotkeyButton": "_0iu0NW_hotkeyButton",
-			"cardTime": "_0iu0NW_cardTime",
-			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
-			"card": "_0iu0NW_card",
-			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
-			"cardTop": "_0iu0NW_cardTop",
-			"cardSelected": "_0iu0NW_cardSelected",
-			"toggleLabel": "_0iu0NW_toggleLabel",
-			"wsFrame": "_0iu0NW_wsFrame",
-			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
-			"menuPreview": "_0iu0NW_menuPreview",
-			"spawnTextarea": "_0iu0NW_spawnTextarea",
-			"cardNextLabel": "_0iu0NW_cardNextLabel",
-			"menu": "_0iu0NW_menu",
-			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
-			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
-			"headerTitle": "_0iu0NW_headerTitle",
-			"overlay": "_0iu0NW_overlay",
-			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
-			"wsFrameCount": "_0iu0NW_wsFrameCount",
-			"headerBadge": "_0iu0NW_headerBadge",
-			"draftCard": "_0iu0NW_draftCard",
-			"spawnFrom": "_0iu0NW_spawnFrom",
-			"toggleButton": "_0iu0NW_toggleButton",
-			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
-			"canvas": "_0iu0NW_canvas",
-			"draftRow": "_0iu0NW_draftRow",
 			"draftLabel": "_0iu0NW_draftLabel",
-			"cardTitle": "_0iu0NW_cardTitle",
-			"cardHandle": "_0iu0NW_cardHandle",
-			"spawnHint": "_0iu0NW_spawnHint",
-			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"headerBadge": "_0iu0NW_headerBadge",
+			"spawnBtnPrimary": "_0iu0NW_spawnBtnPrimary",
+			"draftGrow": "_0iu0NW_draftGrow",
+			"cardTop": "_0iu0NW_cardTop",
+			"spawnModes": "_0iu0NW_spawnModes",
+			"talkmap-spin": "_0iu0NW_talkmap-spin",
+			"overlay": "_0iu0NW_overlay",
+			"card": "_0iu0NW_card",
+			"toggleIcon": "_0iu0NW_toggleIcon",
+			"spawnModeBtn": "_0iu0NW_spawnModeBtn",
+			"spawnError": "_0iu0NW_spawnError",
+			"menuPreview": "_0iu0NW_menuPreview",
+			"cardFooter": "_0iu0NW_cardFooter",
+			"canvasConnecting": "_0iu0NW_canvasConnecting",
+			"hotkeyButton": "_0iu0NW_hotkeyButton",
+			"spawnPanel": "_0iu0NW_spawnPanel",
 			"emptyHint": "_0iu0NW_emptyHint",
-			"spawnError": "_0iu0NW_spawnError"
+			"menuHint": "_0iu0NW_menuHint",
+			"colorToolbar": "_0iu0NW_colorToolbar",
+			"cardRefreshBusy": "_0iu0NW_cardRefreshBusy",
+			"toggleButtonActive": "_0iu0NW_toggleButtonActive",
+			"wsFrame": "_0iu0NW_wsFrame",
+			"menuSearch": "_0iu0NW_menuSearch",
+			"headerTitle": "_0iu0NW_headerTitle",
+			"langButton": "_0iu0NW_langButton",
+			"cardSummary": "_0iu0NW_cardSummary",
+			"cardTime": "_0iu0NW_cardTime",
+			"cardRemove": "_0iu0NW_cardRemove",
+			"wsFrameSelected": "_0iu0NW_wsFrameSelected",
+			"draftInput": "_0iu0NW_draftInput",
+			"cardNextText": "_0iu0NW_cardNextText",
+			"cardBadgeDone": "_0iu0NW_cardBadgeDone",
+			"toggleLabel": "_0iu0NW_toggleLabel",
+			"headerSpace": "_0iu0NW_headerSpace",
+			"zoomResetLabel": "_0iu0NW_zoomResetLabel",
+			"wsFrameHidden": "_0iu0NW_wsFrameHidden",
+			"draftRow": "_0iu0NW_draftRow",
+			"spawnHint": "_0iu0NW_spawnHint",
+			"wsFrameCount": "_0iu0NW_wsFrameCount",
+			"talkmap-pulse": "_0iu0NW_talkmap-pulse",
+			"draftTextarea": "_0iu0NW_draftTextarea",
+			"draftPathPreview": "_0iu0NW_draftPathPreview",
+			"spawnActions": "_0iu0NW_spawnActions",
+			"cardNext": "_0iu0NW_cardNext",
+			"menuError": "_0iu0NW_menuError",
+			"header": "_0iu0NW_header",
+			"cardBadgeRunning": "_0iu0NW_cardBadgeRunning",
+			"cardSelected": "_0iu0NW_cardSelected",
+			"cardRefresh": "_0iu0NW_cardRefresh",
+			"draftSelect": "_0iu0NW_draftSelect",
+			"draftHeading": "_0iu0NW_draftHeading",
+			"toast": "_0iu0NW_toast",
+			"closeButton": "_0iu0NW_closeButton",
+			"spawnModeActive": "_0iu0NW_spawnModeActive",
+			"draftCard": "_0iu0NW_draftCard",
+			"colorToolbarLabel": "_0iu0NW_colorToolbarLabel",
+			"spawnBtnGhost": "_0iu0NW_spawnBtnGhost",
+			"cardBadgeWaiting": "_0iu0NW_cardBadgeWaiting",
+			"spawnTextarea": "_0iu0NW_spawnTextarea",
+			"toggleButton": "_0iu0NW_toggleButton",
+			"cardGhost": "_0iu0NW_cardGhost",
+			"canvas": "_0iu0NW_canvas",
+			"cardTitle": "_0iu0NW_cardTitle",
+			"menu": "_0iu0NW_menu",
+			"toggleRow": "_0iu0NW_toggleRow",
+			"spawnHeading": "_0iu0NW_spawnHeading",
+			"runningDot": "_0iu0NW_runningDot",
+			"menuEmpty": "_0iu0NW_menuEmpty",
+			"wsFrameResize": "_0iu0NW_wsFrameResize",
+			"colorSwatch": "_0iu0NW_colorSwatch",
+			"cardHandle": "_0iu0NW_cardHandle",
+			"cardNextLabel": "_0iu0NW_cardNextLabel",
+			"colorSwatchClear": "_0iu0NW_colorSwatchClear",
+			"wsFrameEdge": "_0iu0NW_wsFrameEdge",
+			"menuItem": "_0iu0NW_menuItem",
+			"wsFrameLabel": "_0iu0NW_wsFrameLabel",
+			"cardStale": "_0iu0NW_cardStale",
+			"spawnFrom": "_0iu0NW_spawnFrom",
+			"menuTitle": "_0iu0NW_menuTitle"
 		};
 		//#endregion
 		//#region src/client/ContextMenu.tsx
@@ -13571,6 +13604,27 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 				children: capturing ? t("hotkey.capturing") : hotkeyLabel(hotkey)
 			});
 		}
+		/**
+		* Interface language: cycles auto → 中文 → English. 'auto' follows dsh's
+		* own <html lang>, which is what every install had before this setting.
+		*/
+		function LanguageButton() {
+			const pref = (0, react.useSyncExternalStore)(canvas.subscribe, () => canvas.get().global?.locale ?? "auto");
+			const index = LOCALE_CYCLE.indexOf(pref);
+			const next = LOCALE_CYCLE[(index + 1) % LOCALE_CYCLE.length] ?? "auto";
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+				type: "button",
+				className: talk_map_module_css_default["langButton"],
+				title: t("lang.hint", {
+					current: t(`lang.${pref}`),
+					next: t(`lang.${next}`)
+				}),
+				onClick: () => {
+					canvas.patchGlobalNow({ locale: next });
+				},
+				children: t(`lang.${pref}`)
+			});
+		}
 		function CloseIcon() {
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("svg", {
 				width: "16",
@@ -13601,6 +13655,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			}, []);
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 				className: talk_map_module_css_default["overlay"],
+				lang: activeLocale(),
 				role: "dialog",
 				"aria-label": t("map.title"),
 				children: [/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
@@ -13619,6 +13674,7 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 							]
 						}),
 						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { className: talk_map_module_css_default["headerSpace"] }),
+						/* @__PURE__ */ (0, react_jsx_runtime.jsx)(LanguageButton, {}),
 						/* @__PURE__ */ (0, react_jsx_runtime.jsx)(HotkeyButton, {}),
 						/* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
 							type: "button",
@@ -13635,8 +13691,10 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 			});
 		}
 		function MapOverlay(props) {
-			if (!(0, react.useSyncExternalStore)(mapUi.subscribe, () => mapUi.get().open)) return null;
-			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(OpenMapOverlay, { ...props });
+			const open = (0, react.useSyncExternalStore)(mapUi.subscribe, () => mapUi.get().open);
+			const locale = (0, react.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
+			if (!open) return null;
+			return /* @__PURE__ */ (0, react_jsx_runtime.jsx)(OpenMapOverlay, { ...props }, locale);
 		}
 		//#endregion
 		//#region src/client/MapToggleButton.tsx
@@ -13664,12 +13722,14 @@ window.__ModuleLoader__.load({ id: "dsh-talk-map", factory: (require) => {
 		}
 		function MapToggleButton(props) {
 			const open = (0, react.useSyncExternalStore)(mapUi.subscribe, () => mapUi.get().open);
+			const locale = (0, react.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
 			const wide = props.wide;
 			const classNames = [wide ? talk_map_module_css_default["toggleRow"] : talk_map_module_css_default["toggleButton"]];
 			if (open) classNames.push(talk_map_module_css_default["toggleButtonActive"]);
 			return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("button", {
 				type: "button",
 				className: classNames.filter(Boolean).join(" "),
+				lang: locale,
 				title: t("map.toggle"),
 				"aria-label": t("map.toggle"),
 				"aria-pressed": open,

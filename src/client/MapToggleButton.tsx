@@ -5,7 +5,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import type { SidebarFooterActionOwnerProps } from './dsh.ts'
-import { t } from './i18n.ts'
+import { activeLocale, subscribeLocale, t } from './i18n.ts'
 import { mapUi } from './map-state.ts'
 import styles from './talk-map.module.css'
 
@@ -21,6 +21,9 @@ function MapIcon(): React.JSX.Element {
 
 export function MapToggleButton(props: SidebarFooterActionOwnerProps): React.JSX.Element {
   const open = useSyncExternalStore(mapUi.subscribe, () => mapUi.get().open)
+  // This button lives outside the overlay, so it needs its own subscription
+  // to re-render when the language changes.
+  const locale = useSyncExternalStore(subscribeLocale, activeLocale, activeLocale)
   const wide = props.wide
   const classNames = [wide ? styles['toggleRow'] : styles['toggleButton']]
   if (open) classNames.push(styles['toggleButtonActive'])
@@ -28,6 +31,7 @@ export function MapToggleButton(props: SidebarFooterActionOwnerProps): React.JSX
     <button
       type="button"
       className={classNames.filter(Boolean).join(' ')}
+      lang={locale}
       title={t('map.toggle')}
       aria-label={t('map.toggle')}
       aria-pressed={open}

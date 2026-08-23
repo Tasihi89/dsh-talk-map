@@ -6,6 +6,7 @@
  * user drag or the one-time auto-placement of a session that has no card yet.
  */
 import { talkMapApi } from './api.ts'
+import { setLocalePref } from './i18n.ts'
 import type { Card, Digest, FrameGeometry, MapEdgeData, MapGlobal, Camera } from '../shared/model.ts'
 import { INBOX_BOARD_ID } from '../shared/model.ts'
 
@@ -28,6 +29,9 @@ const listeners = new Set<Listener>()
 
 function setState(next: Partial<CanvasState>): void {
   state = { ...state, ...next }
+  // The interface language lives in the canvas global, so every path that
+  // can change it (load, SSE, local patch, undo) funnels through here.
+  setLocalePref(state.global?.locale ?? 'auto')
   for (const listener of listeners) listener()
 }
 

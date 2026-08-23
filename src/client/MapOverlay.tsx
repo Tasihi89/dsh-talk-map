@@ -5,10 +5,11 @@
  * stays fully interactive.
  */
 import { useEffect, useState, useSyncExternalStore } from 'react'
+import type { LocalePref } from '../shared/model.ts'
 import type { RootSlotStandardProps } from './dsh.ts'
 import { canvas } from './canvas-store.ts'
 import { DEFAULT_HOTKEY, hotkeyFromEvent, hotkeyLabel } from './hotkey.ts'
-import { t } from './i18n.ts'
+import { activeLocale, LOCALE_CYCLE, subscribeLocale, t } from './i18n.ts'
 import { mapUi } from './map-state.ts'
 import { MapCanvas } from './MapCanvas.tsx'
 import styles from './talk-map.module.css'
@@ -52,6 +53,26 @@ function HotkeyButton(): React.JSX.Element {
   )
 }
 
+/**
+ * Interface language: cycles auto → 中文 → English. 'auto' follows dsh's
+ * own <html lang>, which is what every install had before this setting.
+ */
+function LanguageButton(): React.JSX.Element {
+  const pref = useSyncExternalStore(canvas.subscribe, () => canvas.get().global?.locale ?? 'auto')
+  const index = LOCALE_CYCLE.indexOf(pref)
+  const next: LocalePref = LOCALE_CYCLE[(index + 1) % LOCALE_CYCLE.length] ?? 'auto'
+  return (
+    <button
+      type="button"
+      className={styles['langButton']}
+      title={t('lang.hint', { current: t(`lang.${pref}`), next: t(`lang.${next}`) })}
+      onClick={() => { canvas.patchGlobalNow({ locale: next }) }}
+    >
+      {t(`lang.${pref}`)}
+    </button>
+  )
+}
+
 function CloseIcon(): React.JSX.Element {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -77,11 +98,12 @@ function OpenMapOverlay(props: RootSlotStandardProps): React.JSX.Element {
   }, [])
 
   return (
-    <div className={styles['overlay']} role="dialog" aria-label={t('map.title')}>
+    <div className={styles['overlay']} lang={activeLocale()} role="dialog" aria-label={t('map.title')}>
       <div className={styles['header']}>
         <span className={styles['headerTitle']}>{t('map.title')}</span>
         <span className={styles['headerBadge']}>{sessionCount} {t('map.sessions')}</span>
         <span className={styles['headerSpace']} />
+        <LanguageButton />
         <HotkeyButton />
         <button
           type="button"
@@ -100,6 +122,10 @@ function OpenMapOverlay(props: RootSlotStandardProps): React.JSX.Element {
 
 export function MapOverlay(props: RootSlotStandardProps): React.JSX.Element | null {
   const open = useSyncExternalStore(mapUi.subscribe, () => mapUi.get().open)
+  // Keyed on the language so a switch REMOUNTS the tree. A plain re-render
+  // is not enough: React Flow memoises node components, so cards, frames and
+  // menus would keep the copy they were first rendered with.
+  const locale = useSyncExternalStore(subscribeLocale, activeLocale, activeLocale)
   if (!open) return null
-  return <OpenMapOverlay {...props} />
+  return <OpenMapOverlay key={locale} {...props} />
 }

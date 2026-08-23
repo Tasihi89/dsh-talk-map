@@ -1,8 +1,16 @@
 /**
- * Two-locale copy dictionary reading <html lang> directly (the pattern
- * dsh-plugin-market uses), so no dependency on the locale service. dsh sets
- * the document language; anything starting with "zh" renders Chinese.
+ * Two-locale copy dictionary. The default ('auto') reads <html lang>
+ * directly — the pattern dsh-plugin-market uses, so no dependency on the
+ * locale service; dsh sets the document language and anything starting with
+ * "zh" renders Chinese. A user who picks a language in the map header
+ * overrides that, and the choice is persisted in the canvas global
+ * (canvas-store pushes it back here on every state change).
  */
+import type { LocalePref } from '../shared/model.ts'
+
+export type { LocalePref }
+export type Locale = 'zh' | 'en'
+
 const zh: Record<string, string> = {
   'map.title': '对话地图',
   'map.close': '关闭地图（Esc）',
@@ -84,6 +92,10 @@ const zh: Record<string, string> = {
   'toast.notLive': '目标对话未激活——先打开它一次再推送',
   'toast.pushFailed': '推送失败：',
   'push.header': '【来自「{from}」的更新 · {time}】',
+  'lang.hint': '界面语言：{current} · 点击切换到{next}',
+  'lang.auto': '自动',
+  'lang.zh': '中文',
+  'lang.en': 'English',
   'menu.syncGroup': '同步该工作区的新会话',
   'menu.removeGroup': '移除分组（连同卡片）',
 }
@@ -169,13 +181,49 @@ const en: Record<string, string> = {
   'toast.notLive': 'Target conversation is not active — open it once, then push again',
   'toast.pushFailed': 'Push failed: ',
   'push.header': '[Update from "{from}" · {time}]',
+  'lang.hint': 'Interface language: {current} · click to switch to {next}',
+  'lang.auto': 'Auto',
+  'lang.zh': '中文',
+  'lang.en': 'English',
   'menu.syncGroup': 'Sync new sessions of this workspace',
   'menu.removeGroup': 'Remove group (with its cards)',
 }
 
-function isZh(): boolean {
-  if (typeof document === 'undefined') return false
-  return (document.documentElement.lang ?? '').toLowerCase().startsWith('zh')
+/** The order the header button cycles through. */
+export const LOCALE_CYCLE: readonly LocalePref[] = ['auto', 'zh', 'en']
+
+let preference: LocalePref = 'auto'
+const localeListeners = new Set<() => void>()
+
+function documentLocale(): Locale {
+  if (typeof document === 'undefined') return 'en'
+  return (document.documentElement.lang ?? '').toLowerCase().startsWith('zh') ? 'zh' : 'en'
+}
+
+/** What the stored setting says; 'auto' when the user never picked one. */
+export function localePref(): LocalePref {
+  return preference
+}
+
+/** The language actually rendered right now. */
+export function activeLocale(): Locale {
+  return preference === 'auto' ? documentLocale() : preference
+}
+
+/**
+ * Apply a preference. Notifying only on a real change matters: canvas-store
+ * calls this on EVERY state change (card drags included), and a notification
+ * remounts the whole overlay.
+ */
+export function setLocalePref(next: LocalePref): void {
+  if (next === preference) return
+  preference = next
+  for (const listener of localeListeners) listener()
+}
+
+export function subscribeLocale(listener: () => void): () => void {
+  localeListeners.add(listener)
+  return () => { localeListeners.delete(listener) }
 }
 
 /**
@@ -186,7 +234,7 @@ function isZh(): boolean {
  * title containing a literal "{time}" would swallow the next parameter).
  */
 export function t(key: string, params?: Record<string, string>): string {
-  const dict = isZh() ? zh : en
+  const dict = activeLocale() === 'zh' ? zh : en
   const template = dict[key] ?? en[key] ?? key
   if (params === undefined) return template
   return template.replace(/\{(\w+)\}/g, (match, name: string) => params[name] ?? match)
