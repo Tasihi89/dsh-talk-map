@@ -184,6 +184,12 @@
   color: var(--dsw-alias-label-primary);
   box-shadow: 0 1px 3px var(--dsw-alias-bg-mask-1);
   font-size: 13px;
+  cursor: pointer;
+  transition: box-shadow 0.12s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px var(--dsw-alias-bg-mask-2);
 }
 
 .cardSelected {
@@ -193,6 +199,7 @@
 .cardGhost {
   opacity: 0.55;
   border-style: dashed;
+  cursor: default;
 }
 
 .cardTop {
