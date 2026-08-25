@@ -148,6 +148,7 @@
   background: transparent;
   color: var(--dsw-alias-label-secondary);
   cursor: pointer;
+  flex: none;
 }
 
 .closeButton:hover {
