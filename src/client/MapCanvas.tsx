@@ -1115,6 +1115,13 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         onSelectionStart={onSelectionStart}
         onSelectionEnd={onSelectionEnd}
         onNodeClick={(event, node) => {
+          if (node.type === 'sessionCard') {
+            const cardData = (node as SessionCardNodeType).data
+            if (!cardData.ghost) {
+              openSession(cardData.sessionId)
+            }
+            return
+          }
           if (node.type !== 'wsFrame') return
           // Click-only frame selection (React Flow never selects frames).
           const frameId = node.id
