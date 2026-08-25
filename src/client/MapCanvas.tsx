@@ -1090,7 +1090,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       className={`${styles['canvas']}${connecting ? ` ${styles['canvasConnecting']}` : ''}`}
       onDoubleClick={(event) => {
         const target = event.target as HTMLElement
-        if (target.closest('.react-flow__pane') === null) return
+        if (target.closest('.react-flow__pane') === null && target.closest('[data-talkmap-frame]') === null) return
         const position = screenToFlowPosition({ x: event.clientX, y: event.clientY })
         openDraftAt(position.x, position.y)
       }}

@@ -503,7 +503,13 @@
   position: relative;
   border: 1.5px dashed var(--dsw-alias-border-l2);
   border-radius: 16px;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.001);
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.wsFrame:active {
+  cursor: grabbing;
 }
 
 .wsFrameSelected {
